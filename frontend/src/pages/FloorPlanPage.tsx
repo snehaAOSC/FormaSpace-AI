@@ -22,11 +22,30 @@ export const FloorPlanPage: React.FC = () => {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const normalizePlanUrl = (url?: string): string => {
+    if (!url) return "";
+    const clean = url.split("?")[0].trim();
+    if (clean.includes("supabase.co")) {
+      const match = clean.match(/\/(uploads|designs)\/([a-zA-Z0-9._-]+)/);
+      if (match) {
+        return `/storage/${match[1]}/${match[2]}`;
+      }
+    }
+    return clean;
+  };
+
   useEffect(() => {
     if (!user) return;
     api
       .get<{ floor_plans: FloorPlanResult[] }>("/api/modules/floor-plans")
-      .then((res) => setHistory(res.floor_plans))
+      .then((res) => {
+        const normalized = (res.floor_plans || []).map((fp) => ({
+          ...fp,
+          source_plan_url: normalizePlanUrl(fp.source_plan_url),
+          render_3d_url: normalizePlanUrl(fp.render_3d_url),
+        }));
+        setHistory(normalized);
+      })
       .catch(() => { });
   }, [user]);
 
@@ -38,7 +57,8 @@ export const FloorPlanPage: React.FC = () => {
     setError("");
     try {
       const res = await api.uploadFile(file);
-      setSourcePlanUrl(res.url);
+      const cleanUrl = normalizePlanUrl(res.url);
+      setSourcePlanUrl(cleanUrl);
       if (!title) {
         const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
         setTitle(`${cleanName.charAt(0).toUpperCase() + cleanName.slice(1)} Cutaway`);
@@ -61,19 +81,25 @@ export const FloorPlanPage: React.FC = () => {
     setError("");
     setLoading(true);
     try {
+      const cleanSource = normalizePlanUrl(sourcePlanUrl);
       const res = await api.post<{ floor_plan: FloorPlanResult; remaining_credits: number }>(
         "/api/modules/floor-plans/generate",
         {
           title: title || "Two-Bedroom Residence Cutaway",
-          source_plan_url: sourcePlanUrl,
+          source_plan_url: cleanSource,
           layout_style: layoutStyle,
           furniture_arrangement: arrangement,
           lighting_mood: lightingMood,
           perspective,
         }
       );
-      setResult(res.floor_plan);
-      setHistory((prev) => [res.floor_plan, ...prev]);
+      const normalizedPlan = {
+        ...res.floor_plan,
+        source_plan_url: normalizePlanUrl(res.floor_plan.source_plan_url),
+        render_3d_url: normalizePlanUrl(res.floor_plan.render_3d_url),
+      };
+      setResult(normalizedPlan);
+      setHistory((prev) => [normalizedPlan, ...prev]);
       updateLocalCredits(res.remaining_credits);
     } catch (err: any) {
       setError(err.message);
@@ -181,7 +207,14 @@ export const FloorPlanPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="relative group">
-                    <img src={sourcePlanUrl} alt="2D Blueprint" className="h-44 w-full rounded-xl object-cover" />
+                    <img
+                      src={normalizePlanUrl(sourcePlanUrl)}
+                      alt="2D Blueprint"
+                      className="h-44 w-full rounded-xl object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/images/floorplan-2d.jpg";
+                      }}
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#172B3A] shadow">
                         <UploadCloud className="h-3.5 w-3.5 text-[#C87960]" /> Change Blueprint
@@ -340,9 +373,12 @@ export const FloorPlanPage: React.FC = () => {
                       Source 2D Blueprint
                     </div>
                     <img
-                      src={result?.source_plan_url || sourcePlanUrl}
+                      src={normalizePlanUrl(result?.source_plan_url || sourcePlanUrl)}
                       alt="2D Plan"
                       className="aspect-[4/3] w-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/images/floorplan-2d.jpg";
+                      }}
                     />
                   </div>
                   <div className="overflow-hidden rounded-2xl border border-[#DCCBB5]">
@@ -350,9 +386,12 @@ export const FloorPlanPage: React.FC = () => {
                       3D Furnished Visualization
                     </div>
                     <img
-                      src={result?.render_3d_url || default3dPreview}
+                      src={normalizePlanUrl(result?.render_3d_url || default3dPreview)}
                       alt="3D Plan"
                       className="aspect-[4/3] w-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/images/floorplan-3d-sample.jpg";
+                      }}
                     />
                   </div>
                 </div>
@@ -371,10 +410,15 @@ export const FloorPlanPage: React.FC = () => {
                       <div
                         key={fp.id}
                         onClick={() => {
-                          setResult(fp);
-                          setSourcePlanUrl(fp.source_plan_url);
-                          setTitle(fp.title);
-                          setLayoutStyle(fp.layout_style);
+                          const normalizedFp = {
+                            ...fp,
+                            source_plan_url: normalizePlanUrl(fp.source_plan_url),
+                            render_3d_url: normalizePlanUrl(fp.render_3d_url),
+                          };
+                          setResult(normalizedFp);
+                          setSourcePlanUrl(normalizedFp.source_plan_url);
+                          setTitle(normalizedFp.title);
+                          setLayoutStyle(normalizedFp.layout_style);
                         }}
                         className={`group relative cursor-pointer rounded-2xl border p-2.5 transition text-left ${isSelected
                             ? "border-[#172B3A] bg-white ring-2 ring-[#172B3A] shadow-md"
@@ -383,9 +427,12 @@ export const FloorPlanPage: React.FC = () => {
                       >
                         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#252B2E]/5">
                           <img
-                            src={fp.render_3d_url}
+                            src={normalizePlanUrl(fp.render_3d_url)}
                             alt={fp.title}
                             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "/images/floorplan-3d-sample.jpg";
+                            }}
                           />
                           <button
                             type="button"

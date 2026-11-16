@@ -27,6 +27,18 @@ from ..services.smart_cost_estimator import (
 router = APIRouter(prefix="/api/modules", tags=["Specialized Modules"])
 
 
+def _normalize_storage_url(url: str | None) -> str:
+    if not url:
+        return ""
+    clean = url.split("?")[0].strip()
+    if "supabase.co" in clean:
+        import re
+        match = re.search(r"/(uploads|designs)/([a-zA-Z0-9._-]+)", clean)
+        if match:
+            return f"/storage/{match.group(1)}/{match.group(2)}"
+    return clean
+
+
 # --- 1. Floor Plan Generator ---
 @router.post("/floor-plans/generate")
 def generate_floor_plan(
@@ -35,7 +47,8 @@ def generate_floor_plan(
 ):
     # Produce authentic 3D isometric cutaway visualization matching blueprint geometry & style
     style_lower = req.layout_style.lower()
-    is_sample = "floorplan-2d" in req.source_plan_url.lower()
+    clean_source = _normalize_storage_url(req.source_plan_url)
+    is_sample = "floorplan-2d" in clean_source.lower()
 
     if "industrial" in style_lower or "loft" in style_lower:
         base_3d = "/images/floorplan-3d-industrial.jpg"
@@ -98,7 +111,8 @@ def generate_floor_plan(
     except Exception:
         render_3d = base_3d
 
-    furnished_2d = "/images/floorplan-2d.jpg" if is_sample else req.source_plan_url
+    furnished_2d = "/images/floorplan-2d.jpg" if is_sample else clean_source
+    render_3d = _normalize_storage_url(render_3d)
 
     fp_id = str(uuid.uuid4())
     created = now_iso()
@@ -110,7 +124,7 @@ def generate_floor_plan(
                 fp_id,
                 current_user["id"],
                 req.title,
-                req.source_plan_url,
+                clean_source,
                 furnished_2d,
                 render_3d,
                 req.layout_style,
@@ -125,7 +139,7 @@ def generate_floor_plan(
         "floor_plan": {
             "id": fp_id,
             "title": req.title,
-            "source_plan_url": req.source_plan_url,
+            "source_plan_url": clean_source,
             "furnished_2d_url": furnished_2d,
             "render_3d_url": render_3d,
             "layout_style": req.layout_style,
@@ -152,9 +166,9 @@ def list_floor_plans(current_user: dict = Depends(get_current_user)):
             {
                 "id": r["id"],
                 "title": r["title"],
-                "source_plan_url": r["source_plan_url"],
-                "furnished_2d_url": r["furnished_2d_url"],
-                "render_3d_url": r["render_3d_url"],
+                "source_plan_url": _normalize_storage_url(r["source_plan_url"]),
+                "furnished_2d_url": _normalize_storage_url(r["furnished_2d_url"]),
+                "render_3d_url": _normalize_storage_url(r["render_3d_url"]),
                 "layout_style": r["layout_style"],
                 "furniture_arrangement": r["furniture_arrangement"],
                 "rooms": json.loads(r["rooms_json"] or "[]"),

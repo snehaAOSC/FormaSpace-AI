@@ -14,30 +14,34 @@ def save_image_bytes(content: bytes, folder: str, filename: str) -> Tuple[str, P
         ext = ".png"
     unique_name = f"{uuid.uuid4().hex}{ext}"
 
-    # Local persistent disk storage (always kept so PIL image processing has fast access)
+    # Local persistent disk storage (always kept so PIL image processing and static server have direct instant access)
     target_dir = settings.STORAGE_DIR / folder
     target_dir.mkdir(parents=True, exist_ok=True)
     local_path = target_dir / unique_name
     local_path.write_bytes(content)
 
-    # Upload to Supabase Storage if configured
-    sb = get_supabase_client()
-    if sb is not None:
-        try:
-            storage_path = f"{folder}/{unique_name}"
-            mime = "image/png" if ext == ".png" else ("image/webp" if ext == ".webp" else "image/jpeg")
-            sb.storage.from_(settings.SUPABASE_STORAGE_BUCKET).upload(
-                path=storage_path,
-                file=content,
-                file_options={"content-type": mime},
-            )
-            public_url = sb.storage.from_(settings.SUPABASE_STORAGE_BUCKET).get_public_url(storage_path)
-            if public_url:
-                return public_url, local_path
-        except Exception:
-            pass
+    # In local development or default mode, always return local /storage URL for 100% reliable image loading
+    local_url = f"/storage/{folder}/{unique_name}"
 
-    return f"/storage/{folder}/{unique_name}", local_path
+    # Only upload to Supabase if explicitly in production with active Supabase bucket
+    if settings.APP_ENV == "production":
+        sb = get_supabase_client()
+        if sb is not None:
+            try:
+                storage_path = f"{folder}/{unique_name}"
+                mime = "image/png" if ext == ".png" else ("image/webp" if ext == ".webp" else "image/jpeg")
+                sb.storage.from_(settings.SUPABASE_STORAGE_BUCKET).upload(
+                    path=storage_path,
+                    file=content,
+                    file_options={"content-type": mime},
+                )
+                public_url = sb.storage.from_(settings.SUPABASE_STORAGE_BUCKET).get_public_url(storage_path)
+                if public_url and "supabase.co" in public_url:
+                    return public_url, local_path
+            except Exception:
+                pass
+
+    return local_url, local_path
 
 
 def resolve_local_image_path(image_url: str) -> Path:
