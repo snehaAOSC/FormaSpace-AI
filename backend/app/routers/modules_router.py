@@ -33,9 +33,59 @@ def generate_floor_plan(
     req: FloorPlanGenerateRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    # Produce authentic 3D isometric cutaway visualization matching blueprint geometry
+    # Produce authentic 3D isometric cutaway visualization matching blueprint geometry & style
+    style_lower = req.layout_style.lower()
     is_sample = "floorplan-2d" in req.source_plan_url.lower()
-    base_3d = "/images/floorplan-3d-sample.jpg" if is_sample else "/images/floorplan-3d-rendered.jpg"
+
+    if "industrial" in style_lower or "loft" in style_lower:
+        base_3d = "/images/floorplan-3d-industrial.jpg"
+        rooms = [
+            {"name": "Industrial Great Room", "area_sqft": 420, "zone": "Social", "suggested_pieces": ["Cognac Leather Chesterfield Sofa", "Reclaimed Timber Table", "Crittall Steel Glass Wall"]},
+            {"name": "Stainless Chef's Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Stainless Waterfall Island", "Matte Black Barstools", "Linear Fluted Pendant"]},
+            {"name": "Mezzanine Primary Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Low Oak Platform Bed", "Walk-in Dressing Closet", "Subway Tile Ensuite"]},
+            {"name": "Creative Studio / Library", "area_sqft": 180, "zone": "Work", "suggested_pieces": ["Steel Frame Desk", "Eames Aluminum Chair", "Floor-to-Ceiling Iron Shelving"]},
+        ]
+    elif "japandi" in style_lower or "scandi" in style_lower or "zen" in style_lower:
+        base_3d = "/images/floorplan-3d-japandi.jpg"
+        rooms = [
+            {"name": "Zen Living Salon", "area_sqft": 350, "zone": "Social", "suggested_pieces": ["Curved Cream Bouclé Sofa", "Organic Pebble Table", "Washi Paper Floor Lamp"]},
+            {"name": "Slatted Oak Kitchen & Dining", "area_sqft": 230, "zone": "Culinary", "suggested_pieces": ["Blonde Oak Waterfall Counter", "Wishbone Dining Chairs", "Ceramic Pendant"]},
+            {"name": "Tatami Primary Bedroom", "area_sqft": 250, "zone": "Private", "suggested_pieces": ["Low Wood Platform Bed", "Beige Linen Bedding", "Shoji Sliding Screen"]},
+            {"name": "Indoor Bonsai Courtyard", "area_sqft": 140, "zone": "Wellness", "suggested_pieces": ["River Stone Bed", "Miniature Sculptural Pine", "Bespoke Bench"]},
+        ]
+    elif "mid-century" in style_lower or "palm springs" in style_lower or "vintage" in style_lower:
+        base_3d = "/images/floorplan-3d-midcentury.jpg"
+        rooms = [
+            {"name": "Sunken Conversation Pit Salon", "area_sqft": 380, "zone": "Social", "suggested_pieces": ["Burnt Orange Velvet Pit Sofa", "Brass Cantilever Table", "Eames Lounge & Ottoman"]},
+            {"name": "Walnut & Terrazzo Kitchen", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Honed Terrazzo Island", "Saarinen Tulip Chairs", "Walnut Credenza"]},
+            {"name": "Poolside Primary Suite", "area_sqft": 270, "zone": "Private", "suggested_pieces": ["Walnut Spindle Bed", "Slatted Wood Bench", "Terrazzo Shower Suite"]},
+            {"name": "Guest Pavilion Room", "area_sqft": 170, "zone": "Flexible", "suggested_pieces": ["Nelson Daybed", "Noguchi Sculptural Lamp", "Travertine Side Table"]},
+        ]
+    elif "mediterranean" in style_lower or "coastal" in style_lower or "terracotta" in style_lower:
+        base_3d = "/images/floorplan-3d-mediterranean.jpg"
+        rooms = [
+            {"name": "Arched Living Salon", "area_sqft": 360, "zone": "Social", "suggested_pieces": ["Off-White Linen Sofas", "Limestone Coffee Table", "Wrought Iron Chandelier"]},
+            {"name": "Rustic Zellige Tile Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Rustic Farmhouse Table", "Woven Rattan Barstools", "Zellige Backsplash Island"]},
+            {"name": "Canopy Master Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Four-Poster Canopy Bed", "Terracotta Floor Tiles", "Tadelakt Ensuite Bath"]},
+            {"name": "Bougainvillea Loggia / Terrace", "area_sqft": 200, "zone": "Outdoor", "suggested_pieces": ["Teak Sun Loungers", "Pergola Dining Set", "Terracotta Olive Urns"]},
+        ]
+    elif is_sample:
+        base_3d = "/images/floorplan-3d-sample.jpg"
+        rooms = [
+            {"name": "Living & Entertainment Salon (Center)", "area_sqft": 320, "zone": "Social", "suggested_pieces": ["Curved Sectional Sofa", "Travertine Coffee Table", "Fluted Media Console"]},
+            {"name": "Open Dining & Waterfall Kitchen (Left)", "area_sqft": 240, "zone": "Culinary", "suggested_pieces": ["Marble Waterfall Island", "Oak Barstools", "Round Oak Dining Table"]},
+            {"name": "Primary Suite & Ensuite Bath (Right)", "area_sqft": 260, "zone": "Private", "suggested_pieces": ["King Upholstered Bed", "Fluted Oak Wardrobe", "Freestanding Soaking Tub"]},
+            {"name": "Secondary Bedroom & Bath (Far Right)", "area_sqft": 190, "zone": "Flexible", "suggested_pieces": ["Queen Platform Bed", "Floating Desk", "Frameless Glass Shower"]},
+        ]
+    else:
+        base_3d = "/images/floorplan-3d-rendered.jpg"
+        rooms = [
+            {"name": "Living & Reception Salon", "area_sqft": 340, "zone": "Social", "suggested_pieces": ["Curved Bouclé Sofa", "Travertine Coffee Table", "Wool Rug"]},
+            {"name": "Open Architectural Kitchen & Dining", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Waterfall Marble Island", "Oak Barstools", "Brass Pendant"]},
+            {"name": "Primary Suite (Northwest)", "area_sqft": 265, "zone": "Private", "suggested_pieces": ["Platform Bed", "Fluted Nightstands", "Linen Drapery"]},
+            {"name": "Secondary Bedroom (Northeast)", "area_sqft": 165, "zone": "Flexible", "suggested_pieces": ["Architectural Desk", "Daybed", "Built-in Shelving"]},
+        ]
+
     try:
         render_3d, _ = _apply_demo_pil_transform(
             base_3d,
@@ -49,21 +99,6 @@ def generate_floor_plan(
         render_3d = base_3d
 
     furnished_2d = "/images/floorplan-2d.jpg" if is_sample else req.source_plan_url
-
-    if is_sample:
-        rooms = [
-            {"name": "Living & Entertainment Salon (Center)", "area_sqft": 320, "zone": "Social", "suggested_pieces": ["Curved Sectional Sofa", "Travertine Coffee Table", "Fluted Media Console"]},
-            {"name": "Open Dining & Waterfall Kitchen (Left)", "area_sqft": 240, "zone": "Culinary", "suggested_pieces": ["Marble Waterfall Island", "Oak Barstools", "Round Oak Dining Table"]},
-            {"name": "Primary Suite & Ensuite Bath (Right)", "area_sqft": 260, "zone": "Private", "suggested_pieces": ["King Upholstered Bed", "Fluted Oak Wardrobe", "Freestanding Soaking Tub"]},
-            {"name": "Secondary Bedroom & Bath (Far Right)", "area_sqft": 190, "zone": "Flexible", "suggested_pieces": ["Queen Platform Bed", "Floating Desk", "Frameless Glass Shower"]},
-        ]
-    else:
-        rooms = [
-            {"name": "Living & Reception Salon", "area_sqft": 340, "zone": "Social", "suggested_pieces": ["Curved Bouclé Sofa", "Travertine Coffee Table", "Wool Rug"]},
-            {"name": "Open Architectural Kitchen & Dining", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Waterfall Marble Island", "Oak Barstools", "Brass Pendant"]},
-            {"name": "Primary Suite (Northwest)", "area_sqft": 265, "zone": "Private", "suggested_pieces": ["Platform Bed", "Fluted Nightstands", "Linen Drapery"]},
-            {"name": "Secondary Bedroom (Northeast)", "area_sqft": 165, "zone": "Flexible", "suggested_pieces": ["Architectural Desk", "Daybed", "Built-in Shelving"]},
-        ]
 
     fp_id = str(uuid.uuid4())
     created = now_iso()
@@ -129,6 +164,16 @@ def list_floor_plans(current_user: dict = Depends(get_current_user)):
             for r in rows
         ]
     }
+
+
+@router.delete("/floor-plans/{plan_id}")
+def delete_floor_plan(plan_id: str, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        conn.execute(
+            "DELETE FROM floor_plans WHERE id = ? AND user_id = ?",
+            (plan_id, current_user["id"]),
+        )
+    return {"message": "Floor plan study deleted successfully."}
 
 
 # --- 2. AI Video Walkthrough ---

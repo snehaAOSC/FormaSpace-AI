@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Download, Layers, Loader2, LogIn, Sparkles, UploadCloud } from "lucide-react";
+import { ArrowLeft, Download, Layers, Loader2, LogIn, Sparkles, Trash2, UploadCloud } from "lucide-react";
 import { DemoModeBanner } from "../components/DemoModeBanner";
 import { useAuth } from "../context/AuthContext";
 import { DESIGN_STYLES } from "../data/catalog";
@@ -71,6 +71,19 @@ export const FloorPlanPage: React.FC = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, planId: string) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/api/modules/floor-plans/${planId}`);
+      setHistory((prev) => prev.filter((p) => p.id !== planId));
+      if (result?.id === planId) {
+        setResult(null);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to delete floor plan study.");
     }
   };
 
@@ -311,18 +324,49 @@ export const FloorPlanPage: React.FC = () => {
                   Saved Floor Plan Studies
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {history.map((fp) => (
-                    <button
-                      key={fp.id}
-                      type="button"
-                      onClick={() => setResult(fp)}
-                      className="rounded-xl border border-[#DCCBB5] bg-[#F7F4ED]/50 p-2.5 text-left hover:border-[#C87960]"
-                    >
-                      <img src={fp.render_3d_url} alt={fp.title} className="h-24 w-full rounded-lg object-cover" />
-                      <div className="mt-2 truncate text-xs font-semibold text-[#172B3A]">{fp.title}</div>
-                      <div className="text-[11px] text-[#252B2E]/65">{fp.layout_style}</div>
-                    </button>
-                  ))}
+                  {history.map((fp) => {
+                    const isSelected = result?.id === fp.id;
+                    return (
+                      <div
+                        key={fp.id}
+                        onClick={() => {
+                          setResult(fp);
+                          setSourcePlanUrl(fp.source_plan_url);
+                          setTitle(fp.title);
+                          setLayoutStyle(fp.layout_style);
+                        }}
+                        className={`group relative cursor-pointer rounded-2xl border p-2.5 transition text-left ${isSelected
+                            ? "border-[#172B3A] bg-white ring-2 ring-[#172B3A] shadow-md"
+                            : "border-[#DCCBB5] bg-[#F7F4ED]/50 hover:border-[#C87960] hover:bg-white shadow-sm"
+                          }`}
+                      >
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#252B2E]/5">
+                          <img
+                            src={fp.render_3d_url}
+                            alt={fp.title}
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => handleDelete(e, fp.id)}
+                            className="absolute top-2 right-2 rounded-full bg-white/95 p-1.5 text-[#252B2E]/60 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 shadow-md"
+                            title="Delete this study"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                          {isSelected && (
+                            <span className="absolute bottom-2 left-2 rounded-full bg-[#172B3A] px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                              Active View
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2.5">
+                          <div className="truncate text-xs font-semibold text-[#172B3A]">{fp.title}</div>
+                          <div className="text-[11px] font-medium text-[#C87960]">{fp.layout_style}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
