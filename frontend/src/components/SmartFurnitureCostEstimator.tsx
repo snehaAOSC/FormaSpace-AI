@@ -124,7 +124,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
         }
       }
     } catch (err: any) {
-      setError(err.message || "Failed to analyze AI-generated room. Please try again.");
+      setError(err.message || "Failed to analyze generated room. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -189,7 +189,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
               Smart Furniture Cost Estimator
             </h2>
             <p className="text-xs text-[#252B2E]/65">
-              Analyzes the active AI-generated room, identifies furniture, and finds real matching retailer products.
+              Analyzes the active generated room, identifies furniture, and finds real matching retailer products.
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
         <div className="editorial-card flex flex-col items-center justify-center p-14 text-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#C87960]" />
           <h3 className="mt-4 font-editorial text-xl font-semibold text-[#172B3A]">
-            Analyzing AI Designed Room...
+            Analyzing Designed Room...
           </h3>
           <p className="mt-1 text-xs text-[#252B2E]/65 max-w-md">
             Scanning visual geometry, segmenting furniture silhouettes, and querying authorized retailer product catalogs for real matches.
@@ -254,7 +254,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-[#172B3A] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                      AI Designed Room
+                      Designed Room
                     </span>
                     <span className="text-xs text-[#252B2E]/65">
                       {roomType} · {designStyle}
@@ -268,7 +268,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                 <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-[#252B2E] border border-[#DCCBB5] group">
                   <img
                     src={generatedImageUrl || "/images/bedroom-after.jpg"}
-                    alt="AI Designed Room"
+                    alt="Designed Room"
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-102"
                   />
                   {/* Bounding box overlay for selected detected item */}
@@ -292,7 +292,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
 
               <div className="rounded-xl bg-[#F7F4ED] p-3 text-xs text-[#252B2E]/75 flex items-center justify-between">
                 <div>
-                  <strong className="text-[#172B3A]">AI Visual Analysis Complete:</strong>{" "}
+                  <strong className="text-[#172B3A]">Visual Analysis Complete:</strong>{" "}
                   {detectedItems.length} individual interior pieces identified in this perspective.
                 </div>
               </div>
@@ -307,7 +307,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                       Detected Furniture
                     </h3>
                     <p className="text-xs text-[#252B2E]/65">
-                      {detectedItems.length} items detected. Click any item to inspect its AI extracted specs.
+                      {detectedItems.length} items detected. Click any item to inspect its extracted specs.
                     </p>
                   </div>
                   <span className="rounded-full bg-[#C87960]/15 px-3 py-1 text-xs font-bold text-[#C87960]">
@@ -350,7 +350,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                         {activeDetectedItem.category} · Detected Spec
                       </span>
                       <span className="text-xs font-medium text-[#252B2E]/60">
-                        AI Verified Match
+                        Verified Match
                       </span>
                     </div>
 
@@ -385,7 +385,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
               </div>
 
               <div className="text-[11px] text-[#252B2E]/60">
-                * AI detects silhouettes and aesthetic finishes from the rendered room image. Matching products from real furniture retailers are queried below.
+                * Detects silhouettes and aesthetic finishes from the rendered room image. Matching products from real furniture retailers are queried below.
               </div>
             </div>
           </div>
@@ -443,11 +443,10 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
               <button
                 type="button"
                 onClick={() => setSelectedItemId("all")}
-                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
-                  selectedItemId === "all"
-                    ? "bg-[#172B3A] text-white shadow-sm"
-                    : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
-                }`}
+                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${selectedItemId === "all"
+                  ? "bg-[#172B3A] text-white shadow-sm"
+                  : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
+                  }`}
               >
                 All Detected Items ({detectedItems.length})
               </button>
@@ -461,11 +460,10 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                       setSelectedItemId(item.id);
                       setActiveDetectedItem(item);
                     }}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition border ${
-                      isSelected
-                        ? "border-[#C87960] bg-[#C87960] text-white shadow-sm ring-2 ring-[#C87960]/30"
-                        : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
-                    }`}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition border ${isSelected
+                      ? "border-[#C87960] bg-[#C87960] text-white shadow-sm ring-2 ring-[#C87960]/30"
+                      : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
+                      }`}
                   >
                     <span>{item.label}</span>
                   </button>
@@ -666,7 +664,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                   Room Furniture Cost Summary
                 </h3>
                 <p className="text-xs text-[#252B2E]/65">
-                  Itemized pricing of all selected products matching your AI designed room.
+                  Itemized pricing of all selected products matching your designed room.
                 </p>
               </div>
 

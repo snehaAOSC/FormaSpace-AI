@@ -252,22 +252,20 @@ export const VideoWalkthroughPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedSpaceTab("redesigns")}
-                  className={`rounded-lg py-1.5 transition text-center ${
-                    selectedSpaceTab === "redesigns"
+                  className={`rounded-lg py-1.5 transition text-center ${selectedSpaceTab === "redesigns"
                       ? "bg-white font-semibold text-[#172B3A] shadow-sm"
                       : "text-[#252B2E]/70 hover:text-[#172B3A]"
-                  }`}
+                    }`}
                 >
                   My AI Designs {userRedesigns.length > 0 ? `(${userRedesigns.length})` : ""}
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedSpaceTab("showrooms")}
-                  className={`rounded-lg py-1.5 transition text-center ${
-                    selectedSpaceTab === "showrooms"
+                  className={`rounded-lg py-1.5 transition text-center ${selectedSpaceTab === "showrooms"
                       ? "bg-white font-semibold text-[#172B3A] shadow-sm"
                       : "text-[#252B2E]/70 hover:text-[#172B3A]"
-                  }`}
+                    }`}
                 >
                   Showrooms
                 </button>
@@ -288,11 +286,10 @@ export const VideoWalkthroughPage: React.FC = () => {
                               setSourceImage(ur.url);
                               setTitle(`${ur.roomType} Spatial Walkthrough`);
                             }}
-                            className={`group relative overflow-hidden rounded-xl border-2 text-left transition ${
-                              isSelected
+                            className={`group relative overflow-hidden rounded-xl border-2 text-left transition ${isSelected
                                 ? "border-[#C87960] ring-2 ring-[#C87960]/30 shadow"
                                 : "border-[#DCCBB5] hover:border-[#C87960]"
-                            }`}
+                              }`}
                           >
                             <img
                               src={ur.url}
@@ -358,11 +355,10 @@ export const VideoWalkthroughPage: React.FC = () => {
                           setSourceImage(sr.url);
                           setTitle(`${sr.label} Spatial Walkthrough`);
                         }}
-                        className={`group relative overflow-hidden rounded-xl border-2 text-left transition ${
-                          isSelected
+                        className={`group relative overflow-hidden rounded-xl border-2 text-left transition ${isSelected
                             ? "border-[#C87960] ring-2 ring-[#C87960]/30 shadow"
                             : "border-[#DCCBB5] hover:border-[#C87960]"
-                        }`}
+                          }`}
                       >
                         <img
                           src={sr.url}
@@ -450,11 +446,10 @@ export const VideoWalkthroughPage: React.FC = () => {
                           active ? prev.filter((x) => x !== ang) : [...prev, ang]
                         )
                       }
-                      className={`rounded-full px-2.5 py-1 text-[11px] border transition ${
-                        active
+                      className={`rounded-full px-2.5 py-1 text-[11px] border transition ${active
                           ? "border-[#172B3A] bg-[#172B3A] text-white"
                           : "border-[#DCCBB5] bg-white text-[#252B2E] hover:border-[#C87960]"
-                      }`}
+                        }`}
                     >
                       {ang}
                     </button>
@@ -655,11 +650,10 @@ export const VideoWalkthroughPage: React.FC = () => {
                         setSourceImage(d.imageUrl);
                         setTitle(`${d.style} Spatial Walkthrough`);
                       }}
-                      className={`group relative overflow-hidden rounded-xl border text-left p-3 transition ${
-                        isActive
+                      className={`group relative overflow-hidden rounded-xl border text-left p-3 transition ${isActive
                           ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
                           : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
-                      }`}
+                        }`}
                     >
                       <div className="aspect-[16/10] overflow-hidden rounded-lg mb-2.5 bg-[#252B2E] relative">
                         <img

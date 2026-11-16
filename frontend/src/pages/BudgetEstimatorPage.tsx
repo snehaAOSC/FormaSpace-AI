@@ -397,7 +397,7 @@ export const BudgetEstimatorPage: React.FC = () => {
           <h1 className="font-editorial text-3xl font-semibold text-[#172B3A] sm:text-4xl">
             {activeTab === "smart_furniture"
               ? "Smart Furniture Cost Estimator"
-              : "AI Renovation Budget Estimator"}
+              : "Renovation Budget Estimator"}
           </h1>
         </div>
 
@@ -408,8 +408,8 @@ export const BudgetEstimatorPage: React.FC = () => {
               type="button"
               onClick={() => setActiveTab("smart_furniture")}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold transition shadow-sm ${activeTab === "smart_furniture"
-                  ? "bg-[#172B3A] text-white"
-                  : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
+                ? "bg-[#172B3A] text-white"
+                : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
                 }`}
             >
               <Sparkles className="h-4 w-4 text-[#C87960]" />
@@ -419,8 +419,8 @@ export const BudgetEstimatorPage: React.FC = () => {
               type="button"
               onClick={() => setActiveTab("renovation_planner")}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold transition shadow-sm ${activeTab === "renovation_planner"
-                  ? "bg-[#172B3A] text-white"
-                  : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
+                ? "bg-[#172B3A] text-white"
+                : "bg-white text-[#172B3A] border border-[#DCCBB5] hover:border-[#C87960]"
                 }`}
             >
               <Calculator className="h-4 w-4 text-[#9BAE9A]" />
@@ -429,7 +429,7 @@ export const BudgetEstimatorPage: React.FC = () => {
           </div>
           <div className="text-xs text-[#252B2E]/65">
             {activeTab === "smart_furniture"
-              ? "Analyzing AI Designed Room & real retailer product matches"
+              ? "Analyzing Designed Room & real retailer product matches"
               : "Modeling materials, wall plaster, contractor labour & logistics"}
           </div>
         </div>
@@ -713,8 +713,8 @@ export const BudgetEstimatorPage: React.FC = () => {
                             <div
                               key={item.id}
                               className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 rounded-2xl border p-4 transition ${isSelected
-                                  ? "border-[#172B3A] bg-white shadow-sm ring-1 ring-[#172B3A]/10"
-                                  : "border-[#DCCBB5]/80 bg-[#F7F4ED]/50 opacity-75 hover:opacity-100"
+                                ? "border-[#172B3A] bg-white shadow-sm ring-1 ring-[#172B3A]/10"
+                                : "border-[#DCCBB5]/80 bg-[#F7F4ED]/50 opacity-75 hover:opacity-100"
                                 }`}
                             >
                               <div className="flex items-start gap-3.5">
@@ -801,13 +801,13 @@ export const BudgetEstimatorPage: React.FC = () => {
               </div>
             </div>
 
-            {/* AI Recommended Design & Finish Tiers */}
+            {/* Recommended Design & Finish Tiers */}
             <div className="mt-8 editorial-card p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#C87960]" />
                   <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#172B3A]">
-                    AI Recommended Design Options & Finish Tiers
+                    Recommended Design Options & Finish Tiers
                   </h3>
                 </div>
                 <span className="text-xs text-[#252B2E]/65">
@@ -851,8 +851,8 @@ export const BudgetEstimatorPage: React.FC = () => {
                   <div
                     key={t.tier}
                     className={`rounded-2xl border p-4 transition flex flex-col justify-between ${quality === t.qualityName
-                        ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
-                        : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
+                      ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
+                      : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
                       }`}
                   >
                     <div>
