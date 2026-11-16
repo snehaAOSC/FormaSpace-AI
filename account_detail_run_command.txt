@@ -4,7 +4,7 @@ Admin :
 
 User: 
     Email: studio@formaspace.ai
-    Password:   
+    Password: FormaSpace2026!
 
 Backend:
   
