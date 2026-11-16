@@ -1,0 +1,17 @@
+Admin : 
+    Email: admin@formaspace.ai
+    Password: AdminForma2026!
+
+User: 
+    Email: studio@formaspace.ai
+    Password:   
+
+Backend:
+  
+   cd backend
+   python -m uvicorn app.main:app --port 8000 --host 127.0.0.1 --reload
+
+Frontend:
+
+      cd frontend
+      npm run dev

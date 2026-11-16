@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: "DM Sans", system-ui, sans-serif;
+    background-color: #F7F4ED;
+    color: #252B2E;
+  }
+
+  h1, h2, h3, h4, .font-editorial {
+    font-family: "Playfair Display", Georgia, serif;
+  }
+}
+
+.editorial-card {
+  @apply bg-white rounded-2xl border border-[#DCCBB5]/60 shadow-card transition-all duration-300;
+}
+
+.editorial-card:hover {
+  @apply shadow-editorial border-[#C87960]/40;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#172B3A] px-6 py-3 text-sm font-medium text-[#F7F4ED] transition-all duration-300 hover:bg-[#C87960] hover:text-white active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-[#172B3A]/20 bg-white/80 px-6 py-3 text-sm font-medium text-[#172B3A] transition-all duration-300 hover:border-[#172B3A] hover:bg-[#172B3A] hover:text-[#F7F4ED] active:scale-[0.98];
+}
+
+.btn-terracotta {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#C87960] px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-[#172B3A] active:scale-[0.98];
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F4ED;
+}
+::-webkit-scrollbar-thumb {
+  background: #DCCBB5;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C87960;
+}
+
