@@ -192,7 +192,7 @@ export const VideoWalkthroughPage: React.FC = () => {
             to={`/studio?sample=${encodeURIComponent(searchParams.get("sample") || "")}&style=${encodeURIComponent(searchParams.get("style") || "")}&category=${encodeURIComponent(searchParams.get("room") || "")}`}
             className="inline-flex items-center gap-2 rounded-full border border-[#DCCBB5] bg-white px-4 py-2 text-xs font-semibold text-[#172B3A] shadow-sm hover:border-[#C87960] hover:text-[#C87960] transition"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to AI Studio
+            <ArrowLeft className="h-4 w-4" /> Back to Design Studio
           </Link>
           <div className="text-xs text-[#252B2E]/60">
             Active Space: <strong className="text-[#172B3A]">{initialRoom}</strong> · Style:{" "}
@@ -203,7 +203,7 @@ export const VideoWalkthroughPage: React.FC = () => {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <h1 className="font-editorial text-3xl font-semibold text-[#172B3A] sm:text-4xl">
-              AI Video Walkthrough
+              Architectural Video Walkthrough
             </h1>
             <p className="mt-1 text-xs text-[#252B2E]/70 max-w-xl">
               Select any redesigned space, switch camera perspectives (left side, right side, ceiling crane, or 360° orbit), and export a smooth 60FPS architectural walkthrough.
@@ -257,7 +257,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                       : "text-[#252B2E]/70 hover:text-[#172B3A]"
                     }`}
                 >
-                  My AI Designs {userRedesigns.length > 0 ? `(${userRedesigns.length})` : ""}
+                  My Designs {userRedesigns.length > 0 ? `(${userRedesigns.length})` : ""}
                 </button>
                 <button
                   type="button"
@@ -327,7 +327,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                           to="/studio"
                           className="rounded-lg bg-[#172B3A] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#C87960] transition"
                         >
-                          Go to AI Studio
+                          Go to Studio
                         </Link>
                         <button
                           type="button"

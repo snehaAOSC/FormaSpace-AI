@@ -74,6 +74,10 @@ export const FloorPlanPage: React.FC = () => {
     }
   };
 
+  const default3dPreview = sourcePlanUrl.includes("floorplan-2d")
+    ? "/images/floorplan-3d-sample.jpg"
+    : "/images/floorplan-3d-rendered.jpg";
+
   return (
     <div className="min-h-screen bg-[#F7F4ED] py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -83,7 +87,7 @@ export const FloorPlanPage: React.FC = () => {
             to="/studio"
             className="inline-flex items-center gap-2 rounded-full border border-[#DCCBB5] bg-white px-4 py-2 text-xs font-semibold text-[#172B3A] shadow-sm hover:border-[#C87960] hover:text-[#C87960] transition"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to AI Studio
+            <ArrowLeft className="h-4 w-4" /> Back to Design Studio
           </Link>
         </div>
 
@@ -236,7 +240,7 @@ export const FloorPlanPage: React.FC = () => {
                   </p>
                 </div>
                 <a
-                  href={result?.render_3d_url || "/images/floorplan-3d-rendered.jpg"}
+                  href={result?.render_3d_url || default3dPreview}
                   download="formaspace-3d-floorplan.jpg"
                   className="btn-secondary py-2 px-4 text-xs"
                 >
@@ -260,7 +264,7 @@ export const FloorPlanPage: React.FC = () => {
                     3D Furnished Visualization
                   </div>
                   <img
-                    src={result?.render_3d_url || "/images/floorplan-3d-rendered.jpg"}
+                    src={result?.render_3d_url || default3dPreview}
                     alt="3D Plan"
                     className="aspect-[4/3] w-full object-cover"
                   />

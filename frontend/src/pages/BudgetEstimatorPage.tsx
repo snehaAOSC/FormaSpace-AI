@@ -386,7 +386,7 @@ export const BudgetEstimatorPage: React.FC = () => {
             to={`/studio?sample=${encodeURIComponent(searchParams.get("sample") || "")}&style=${encodeURIComponent(initialStyle)}&category=${encodeURIComponent(roomType)}`}
             className="inline-flex items-center gap-2 rounded-full border border-[#DCCBB5] bg-white px-4 py-2 text-xs font-semibold text-[#172B3A] shadow-sm hover:border-[#C87960] hover:text-[#C87960] transition"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to AI Studio
+            <ArrowLeft className="h-4 w-4" /> Back to Design Studio
           </Link>
           <div className="text-xs text-[#252B2E]/60">
             Active Space: <strong className="text-[#172B3A]">{roomType}</strong> · Target Style: <strong className="text-[#C87960]">{initialStyle}</strong>

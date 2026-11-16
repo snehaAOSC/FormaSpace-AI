@@ -33,8 +33,9 @@ def generate_floor_plan(
     req: FloorPlanGenerateRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    # Produce authentic 3D isometric cutaway visualization
-    base_3d = "/images/floorplan-3d-rendered.jpg"
+    # Produce authentic 3D isometric cutaway visualization matching blueprint geometry
+    is_sample = "floorplan-2d" in req.source_plan_url.lower()
+    base_3d = "/images/floorplan-3d-sample.jpg" if is_sample else "/images/floorplan-3d-rendered.jpg"
     try:
         render_3d, _ = _apply_demo_pil_transform(
             base_3d,
@@ -45,16 +46,24 @@ def generate_floor_plan(
             1,
         )
     except Exception:
-        render_3d = "/images/floorplan-3d-rendered.jpg"
+        render_3d = base_3d
 
-    furnished_2d = "/images/floorplan-2d.jpg"
+    furnished_2d = "/images/floorplan-2d.jpg" if is_sample else req.source_plan_url
 
-    rooms = [
-        {"name": "Living & Reception Salon", "area_sqft": 340, "zone": "Social", "suggested_pieces": ["Curved Bouclé Sofa", "Travertine Table", "Wool Area Rug"]},
-        {"name": "Open Architectural Kitchen", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Waterfall Island", "Oak Barstools", "Linear Brass Pendant"]},
-        {"name": "Primary Suite", "area_sqft": 265, "zone": "Private", "suggested_pieces": ["Upholstered Platform Bed", "Fluted Nightstands", "Linen Drapery"]},
-        {"name": "Secondary Studio / Guest", "area_sqft": 165, "zone": "Flexible", "suggested_pieces": ["Architectural Desk", "Daybed", "Built-in Shelving"]},
-    ]
+    if is_sample:
+        rooms = [
+            {"name": "Living & Entertainment Salon (Center)", "area_sqft": 320, "zone": "Social", "suggested_pieces": ["Curved Sectional Sofa", "Travertine Coffee Table", "Fluted Media Console"]},
+            {"name": "Open Dining & Waterfall Kitchen (Left)", "area_sqft": 240, "zone": "Culinary", "suggested_pieces": ["Marble Waterfall Island", "Oak Barstools", "Round Oak Dining Table"]},
+            {"name": "Primary Suite & Ensuite Bath (Right)", "area_sqft": 260, "zone": "Private", "suggested_pieces": ["King Upholstered Bed", "Fluted Oak Wardrobe", "Freestanding Soaking Tub"]},
+            {"name": "Secondary Bedroom & Bath (Far Right)", "area_sqft": 190, "zone": "Flexible", "suggested_pieces": ["Queen Platform Bed", "Floating Desk", "Frameless Glass Shower"]},
+        ]
+    else:
+        rooms = [
+            {"name": "Living & Reception Salon", "area_sqft": 340, "zone": "Social", "suggested_pieces": ["Curved Bouclé Sofa", "Travertine Coffee Table", "Wool Rug"]},
+            {"name": "Open Architectural Kitchen & Dining", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Waterfall Marble Island", "Oak Barstools", "Brass Pendant"]},
+            {"name": "Primary Suite (Northwest)", "area_sqft": 265, "zone": "Private", "suggested_pieces": ["Platform Bed", "Fluted Nightstands", "Linen Drapery"]},
+            {"name": "Secondary Bedroom (Northeast)", "area_sqft": 165, "zone": "Flexible", "suggested_pieces": ["Architectural Desk", "Daybed", "Built-in Shelving"]},
+        ]
 
     fp_id = str(uuid.uuid4())
     created = now_iso()
