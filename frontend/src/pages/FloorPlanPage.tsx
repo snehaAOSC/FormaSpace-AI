@@ -39,6 +39,7 @@ export const FloorPlanPage: React.FC = () => {
     try {
       const res = await api.uploadFile(file);
       setSourcePlanUrl(res.url);
+      setResult(null);
     } catch (err: any) {
       setError(err.message);
     }
@@ -235,7 +236,7 @@ export const FloorPlanPage: React.FC = () => {
                   </p>
                 </div>
                 <a
-                  href={result?.render_3d_url || "/images/floorplan-3d.jpg"}
+                  href={result?.render_3d_url || "/images/floorplan-3d-rendered.jpg"}
                   download="formaspace-3d-floorplan.jpg"
                   className="btn-secondary py-2 px-4 text-xs"
                 >
@@ -259,7 +260,7 @@ export const FloorPlanPage: React.FC = () => {
                     3D Furnished Visualization
                   </div>
                   <img
-                    src={result?.render_3d_url || "/images/floorplan-3d.jpg"}
+                    src={result?.render_3d_url || "/images/floorplan-3d-rendered.jpg"}
                     alt="3D Plan"
                     className="aspect-[4/3] w-full object-cover"
                   />
