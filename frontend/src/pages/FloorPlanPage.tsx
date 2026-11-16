@@ -9,8 +9,8 @@ import type { FloorPlanResult } from "../types";
 
 export const FloorPlanPage: React.FC = () => {
   const { user, login, updateLocalCredits } = useAuth();
-  const [title, setTitle] = useState("Two-Bedroom Residence Cutaway");
-  const [sourcePlanUrl, setSourcePlanUrl] = useState("/images/floorplan-2d.jpg");
+  const [title, setTitle] = useState("");
+  const [sourcePlanUrl, setSourcePlanUrl] = useState("");
   const [layoutStyle, setLayoutStyle] = useState("Modern Luxury");
   const [arrangement, setArrangement] = useState("Open Concept Entertaining");
   const [lightingMood, setLightingMood] = useState("Natural Morning Daylight");
@@ -39,6 +39,10 @@ export const FloorPlanPage: React.FC = () => {
     try {
       const res = await api.uploadFile(file);
       setSourcePlanUrl(res.url);
+      if (!title) {
+        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        setTitle(`${cleanName.charAt(0).toUpperCase() + cleanName.slice(1)} Cutaway`);
+      }
       setResult(null);
     } catch (err: any) {
       setError(err.message);
@@ -50,13 +54,17 @@ export const FloorPlanPage: React.FC = () => {
       setError("Sign in required (or click Quick Demo Login below) to generate 3D floor plan studies.");
       return;
     }
+    if (!sourcePlanUrl) {
+      setError("Please upload a 2D blueprint or click 'Use Sample Blueprint' first.");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
       const res = await api.post<{ floor_plan: FloorPlanResult; remaining_credits: number }>(
         "/api/modules/floor-plans/generate",
         {
-          title,
+          title: title || "Two-Bedroom Residence Cutaway",
           source_plan_url: sourcePlanUrl,
           layout_style: layoutStyle,
           furniture_arrangement: arrangement,
@@ -135,7 +143,7 @@ export const FloorPlanPage: React.FC = () => {
               </label>
               <div
                 onClick={() => fileRef.current?.click()}
-                className="mt-2 cursor-pointer rounded-2xl border-2 border-dashed border-[#DCCBB5] bg-[#F7F4ED]/60 p-3 text-center hover:border-[#C87960]"
+                className="mt-2 cursor-pointer rounded-2xl border-2 border-dashed border-[#DCCBB5] bg-[#F7F4ED]/60 p-3 text-center hover:border-[#C87960] transition"
               >
                 <input
                   ref={fileRef}
@@ -147,10 +155,40 @@ export const FloorPlanPage: React.FC = () => {
                     if (f) handleUpload(f);
                   }}
                 />
-                <img src={sourcePlanUrl} alt="2D Blueprint" className="h-40 w-full rounded-xl object-cover" />
-                <div className="mt-2 flex items-center justify-center gap-1.5 text-xs font-medium text-[#172B3A]">
-                  <UploadCloud className="h-4 w-4 text-[#C87960]" /> Upload blueprint or use sample
-                </div>
+                {!sourcePlanUrl ? (
+                  <div className="py-7 px-3 flex flex-col items-center justify-center text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C87960]/10 text-[#C87960] mb-2.5">
+                      <UploadCloud className="h-6 w-6" />
+                    </div>
+                    <p className="text-xs font-semibold text-[#172B3A]">
+                      Click to upload 2D blueprint or CAD plan
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#252B2E]/60">
+                      Supports PNG, JPG, or WEBP up to 25MB
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSourcePlanUrl("/images/floorplan-2d.jpg");
+                        setTitle("Two-Bedroom Residence Cutaway");
+                        setResult(null);
+                      }}
+                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-[#C87960] hover:underline"
+                    >
+                      <span>Or try with sample architectural blueprint</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative group">
+                    <img src={sourcePlanUrl} alt="2D Blueprint" className="h-44 w-full rounded-xl object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#172B3A] shadow">
+                        <UploadCloud className="h-3.5 w-3.5 text-[#C87960]" /> Change Blueprint
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -246,43 +284,79 @@ export const FloorPlanPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="font-editorial text-2xl font-semibold text-[#172B3A]">
-                    {result ? result.title : "Architectural 3D Cutaway Preview"}
+                    {result ? result.title : (sourcePlanUrl ? (title || "Custom Blueprint") : "Architectural 3D Cutaway Preview")}
                   </h2>
                   <p className="text-xs text-[#252B2E]/65">
-                    {result ? `${result.layout_style} · ${result.furniture_arrangement}` : "Sample architectural blueprint conversion"}
+                    {result ? `${result.layout_style} · ${result.furniture_arrangement}` : (sourcePlanUrl ? `${layoutStyle} · ${arrangement}` : "Upload a 2D floor plan or choose a saved study to view 3D visualization")}
                   </p>
                 </div>
-                <a
-                  href={result?.render_3d_url || default3dPreview}
-                  download="formaspace-3d-floorplan.jpg"
-                  className="btn-secondary py-2 px-4 text-xs"
-                >
-                  <Download className="h-3.5 w-3.5" /> Download 3D Render
-                </a>
+                {(result?.render_3d_url || (sourcePlanUrl && default3dPreview)) && (
+                  <a
+                    href={result?.render_3d_url || default3dPreview}
+                    download="formaspace-3d-floorplan.jpg"
+                    className="btn-secondary py-2 px-4 text-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download 3D Render
+                  </a>
+                )}
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="overflow-hidden rounded-2xl border border-[#DCCBB5]">
-                  <div className="bg-[#172B3A] px-3 py-1.5 text-[11px] font-medium text-[#F7F4ED]">
-                    Source 2D Blueprint
+              {!result && !sourcePlanUrl ? (
+                <div className="rounded-2xl border-2 border-dashed border-[#DCCBB5] bg-[#F7F4ED]/40 py-16 px-6 text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C87960]/10 text-[#C87960] mb-3">
+                    <Layers className="h-7 w-7 text-[#C87960]" />
                   </div>
-                  <img
-                    src={result?.source_plan_url || sourcePlanUrl}
-                    alt="2D Plan"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                </div>
-                <div className="overflow-hidden rounded-2xl border border-[#DCCBB5]">
-                  <div className="bg-[#C87960] px-3 py-1.5 text-[11px] font-medium text-white">
-                    3D Furnished Visualization
+                  <h3 className="font-editorial text-xl font-semibold text-[#172B3A]">
+                    No Blueprint Uploaded Yet
+                  </h3>
+                  <p className="mx-auto mt-1 max-w-md text-xs text-[#252B2E]/70 leading-relaxed">
+                    Upload your 2D CAD drawing or architectural blueprint on the left, or select any study from the gallery below to inspect its 3D visualization.
+                  </p>
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="btn-primary py-2.5 px-5 text-xs font-semibold"
+                    >
+                      <UploadCloud className="h-4 w-4" /> Upload 2D Blueprint
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSourcePlanUrl("/images/floorplan-2d.jpg");
+                        setTitle("Two-Bedroom Residence Cutaway");
+                        setResult(null);
+                      }}
+                      className="btn-secondary py-2.5 px-4 text-xs font-medium"
+                    >
+                      Use Sample Blueprint
+                    </button>
                   </div>
-                  <img
-                    src={result?.render_3d_url || default3dPreview}
-                    alt="3D Plan"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
                 </div>
-              </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="overflow-hidden rounded-2xl border border-[#DCCBB5]">
+                    <div className="bg-[#172B3A] px-3 py-1.5 text-[11px] font-medium text-[#F7F4ED]">
+                      Source 2D Blueprint
+                    </div>
+                    <img
+                      src={result?.source_plan_url || sourcePlanUrl}
+                      alt="2D Plan"
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                  <div className="overflow-hidden rounded-2xl border border-[#DCCBB5]">
+                    <div className="bg-[#C87960] px-3 py-1.5 text-[11px] font-medium text-white">
+                      3D Furnished Visualization
+                    </div>
+                    <img
+                      src={result?.render_3d_url || default3dPreview}
+                      alt="3D Plan"
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {history.length > 0 && (
