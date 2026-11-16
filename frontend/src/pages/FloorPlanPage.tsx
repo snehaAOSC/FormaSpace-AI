@@ -283,39 +283,6 @@ export const FloorPlanPage: React.FC = () => {
                   />
                 </div>
               </div>
-
-              {/* Room Breakdown */}
-              <div className="mt-6">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#172B3A] mb-3">
-                  Explored Room Zones & Suggested Furnishings
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {(
-                    result?.rooms || [
-                      { name: "Living & Reception Salon", area_sqft: 340, zone: "Social", suggested_pieces: ["Curved Bouclé Sofa", "Travertine Coffee Table", "Wool Rug"] },
-                      { name: "Open Architectural Kitchen", area_sqft: 210, zone: "Culinary", suggested_pieces: ["Waterfall Marble Island", "Oak Barstools", "Brass Pendant"] },
-                      { name: "Primary Suite", area_sqft: 265, zone: "Private", suggested_pieces: ["Platform Bed", "Fluted Nightstands", "Linen Drapery"] },
-                      { name: "Secondary Studio", area_sqft: 165, zone: "Flexible", suggested_pieces: ["Architectural Desk", "Daybed", "Built-in Shelving"] },
-                    ]
-                  ).map((rm) => (
-                    <div key={rm.name} className="rounded-2xl border border-[#DCCBB5]/70 bg-[#F7F4ED]/60 p-4">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm text-[#172B3A]">{rm.name}</span>
-                        <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#C87960]">
-                          {rm.area_sqft} sq ft
-                        </span>
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {rm.suggested_pieces.map((p) => (
-                          <span key={p} className="rounded-lg bg-white px-2 py-0.5 text-[11px] text-[#252B2E]/80">
-                            {p}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {history.length > 0 && (
