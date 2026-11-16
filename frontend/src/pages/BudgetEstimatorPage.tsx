@@ -5,7 +5,6 @@ import {
   Calculator,
   Check,
   CheckCircle2,
-  Copy,
   CreditCard,
   ExternalLink,
   GitCompare,
@@ -14,7 +13,6 @@ import {
   QrCode,
   ShieldCheck,
   ShoppingBag,
-  Smartphone,
   Sparkles,
   Truck,
   X,
@@ -62,8 +60,6 @@ export const BudgetEstimatorPage: React.FC = () => {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any | null>(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [qrModalItem, setQrModalItem] = useState<ItemizedBudgetItem | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
 
   const [shippingName, setShippingName] = useState(user?.full_name || "Valued Client");
   const [shippingAddress, setShippingAddress] = useState("742 Evergreen Terrace, San Francisco, CA 94102");
@@ -128,7 +124,7 @@ export const BudgetEstimatorPage: React.FC = () => {
           type: "Furniture",
           material: "Vertically Fluted Solid White Oak with Soft-Close Joinery",
           price: Math.round(3200 * qm),
-          image_url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+          image_url: "/images/mori-fluted-wardrobe.jpg",
           is_purchasable: true,
         },
         {
@@ -728,22 +724,13 @@ export const BudgetEstimatorPage: React.FC = () => {
                                   onChange={() => toggleItemSelection(item.id)}
                                   className="mt-1 h-4 w-4 rounded border-[#DCCBB5] accent-[#172B3A] cursor-pointer"
                                 />
-                                {/* Isolated Product Photography Thumbnail with Scan QR Quick-Trigger */}
-                                <div className="relative group/thumb h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl bg-white border border-[#DCCBB5] p-1 flex items-center justify-center shadow-xs">
+                                {/* Isolated Product Photography Thumbnail */}
+                                <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl bg-white border border-[#DCCBB5] p-1 flex items-center justify-center shadow-xs">
                                   <img
                                     src={item.image_url}
                                     alt={item.name}
-                                    className="h-full w-full object-contain transition duration-300 group-hover/thumb:scale-105"
+                                    className="h-full w-full object-contain"
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={() => setQrModalItem(item)}
-                                    className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 flex flex-col items-center justify-center text-[10px] text-white font-medium transition backdrop-blur-[1px] cursor-pointer"
-                                    title="Scan QR Code to Buy on Mobile Phone"
-                                  >
-                                    <QrCode className="h-4 w-4 text-white mb-0.5" />
-                                    <span>Scan QR</span>
-                                  </button>
                                 </div>
                                 <div>
                                   <div className="flex flex-wrap items-center gap-1.5">
@@ -780,15 +767,6 @@ export const BudgetEstimatorPage: React.FC = () => {
                                   >
                                     <ShoppingBag className="h-3.5 w-3.5" />
                                     Buy Product
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setQrModalItem(item)}
-                                    className="inline-flex items-center gap-1 rounded-full border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-medium text-[#172B3A] shadow-sm hover:border-[#C87960] hover:text-[#C87960] transition"
-                                    title="Scan QR Code to Buy on Smartphone"
-                                  >
-                                    <QrCode className="h-3.5 w-3.5 text-[#C87960]" />
-                                    <span className="text-[11px] font-semibold">QR</span>
                                   </button>
                                 </div>
                               </div>
@@ -1132,145 +1110,6 @@ export const BudgetEstimatorPage: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* --- STANDALONE PRODUCT QR CODE MODAL --- */}
-      {qrModalItem && (() => {
-        const directUrl = getDirectRetailerUrl({
-          product_name: qrModalItem.name,
-          brand: qrModalItem.brand,
-          product_url: qrModalItem.product_url,
-        });
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(directUrl)}`;
-
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
-            <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-[#F7F4ED] border border-[#DCCBB5] shadow-2xl">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-[#DCCBB5]/70 bg-white px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <QrCode className="h-5 w-5 text-[#C87960]" />
-                  <h3 className="font-editorial text-lg font-semibold text-[#172B3A]">
-                    Scan QR Code to Buy on Phone
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQrModalItem(null);
-                    setCopiedLink(false);
-                  }}
-                  className="rounded-full p-1.5 text-[#252B2E]/60 hover:bg-[#F7F4ED] hover:text-[#172B3A] transition"
-                  title="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-5">
-                {/* Product Summary Header with Isolated Photography */}
-                <div className="flex items-center gap-3.5 rounded-2xl bg-white border border-[#DCCBB5]/70 p-3 shadow-xs">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[#DCCBB5] bg-[#FAF7F2] p-1 flex items-center justify-center">
-                    <img
-                      src={qrModalItem.image_url}
-                      alt={qrModalItem.name}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="rounded-full bg-[#172B3A] px-2 py-0.5 text-[10px] font-semibold text-white">
-                        {qrModalItem.brand || "Retail Partner"}
-                      </span>
-                      <span className="rounded-full bg-[#C87960]/15 px-2 py-0.5 text-[10px] font-semibold text-[#C87960]">
-                        {qrModalItem.category}
-                      </span>
-                    </div>
-                    <h4 className="mt-1 text-sm font-bold text-[#172B3A] truncate">
-                      {qrModalItem.name}
-                    </h4>
-                    <div className="font-editorial text-base font-bold text-[#C87960]">
-                      {fmt(qrModalItem.price)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Scannable QR Code */}
-                <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-[#DCCBB5]/70 p-5 text-center shadow-xs">
-                  <div className="relative rounded-2xl border-2 border-dashed border-[#C87960]/40 p-2.5 bg-[#FAF7F2]">
-                    <img
-                      src={qrCodeUrl}
-                      alt={`QR Code for ${qrModalItem.name}`}
-                      className="h-48 w-48 rounded-xl object-contain shadow-xs"
-                    />
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#172B3A] px-3 py-0.5 text-[9px] font-bold text-white shadow tracking-wide uppercase">
-                      Point Phone Camera Here
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#172B3A]">
-                    <Smartphone className="h-4 w-4 text-[#C87960]" />
-                    <span>Instant Mobile Buying</span>
-                  </div>
-                  <p className="mt-1 text-xs text-[#252B2E]/70 max-w-xs leading-relaxed">
-                    Scan with your smartphone camera to immediately open and purchase this exact piece on {qrModalItem.brand || "the official retailer store"}.
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-2">
-                  <a
-                    href={directUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary w-full justify-center py-2.5 text-xs font-semibold shadow flex items-center gap-2"
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                    <span>Open Exact Product Link in Browser</span>
-                    <ExternalLink className="h-3.5 w-3.5 opacity-80" />
-                  </a>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(directUrl);
-                        setCopiedLink(true);
-                        setTimeout(() => setCopiedLink(false), 2500);
-                      }}
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[#DCCBB5] bg-white py-2 text-xs font-medium text-[#172B3A] hover:border-[#C87960] hover:text-[#C87960] transition"
-                    >
-                      {copiedLink ? (
-                        <>
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
-                          <span className="text-emerald-700 font-semibold">Link Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-3.5 w-3.5 text-[#252B2E]/60" />
-                          <span>Copy Product Link</span>
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const itm = qrModalItem;
-                        setQrModalItem(null);
-                        handleBuySingleItem(itm);
-                      }}
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#C87960] py-2 text-xs font-semibold text-white hover:bg-[#b06750] shadow-sm transition"
-                    >
-                      <Truck className="h-3.5 w-3.5" />
-                      <span>Buy with In-App Delivery</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 };

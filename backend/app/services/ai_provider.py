@@ -1216,7 +1216,7 @@ def calculate_renovation_budget(
                 "type": "Furniture",
                 "material": "Vertically Fluted Solid White Oak with Soft-Close Joinery",
                 "price": round(3200.0 * quality_mult, 2),
-                "image_url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+                "image_url": "/images/mori-fluted-wardrobe.jpg",
                 "is_purchasable": True,
             },
             {

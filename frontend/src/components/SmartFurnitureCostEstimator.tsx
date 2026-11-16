@@ -8,7 +8,6 @@ import {
   Info,
   Layers,
   Loader2,
-  QrCode,
   RefreshCw,
   Search,
   ShoppingBag,
@@ -626,7 +625,7 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                                 </div>
 
                                 {/* Dual Actions: Quick View on Website + Direct Retailer Store Deep-Link */}
-                                <div className="grid grid-cols-3 gap-1.5">
+                                <div className="grid grid-cols-2 gap-2">
                                   <button
                                     type="button"
                                     onClick={() => setQuickViewProduct(product)}
@@ -635,15 +634,6 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                                   >
                                     <Eye className="h-3.5 w-3.5 text-[#C87960]" />
                                     <span>Details</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setQuickViewProduct(product)}
-                                    className="inline-flex items-center justify-center gap-1 rounded-full border border-[#DCCBB5] bg-white py-2 text-xs font-medium text-[#172B3A] hover:border-[#C87960] hover:text-[#C87960] transition"
-                                    title="Scan QR Code to Buy on Smartphone"
-                                  >
-                                    <QrCode className="h-3.5 w-3.5 text-[#C87960]" />
-                                    <span>QR</span>
                                   </button>
                                   <a
                                     href={getDirectRetailerUrl(product)}
@@ -761,16 +751,6 @@ export const SmartFurnitureCostEstimator: React.FC<SmartFurnitureCostEstimatorPr
                                 >
                                   <Eye className="h-3 w-3 text-[#C87960]" />
                                   <span>View</span>
-                                </button>
-                                {/* QR Code: opens quick view with mobile QR code */}
-                                <button
-                                  type="button"
-                                  onClick={() => setQuickViewProduct(selected)}
-                                  className="inline-flex items-center gap-1 rounded-full border border-[#DCCBB5] bg-white px-2 py-1 text-[11px] font-medium text-[#172B3A] hover:border-[#C87960] hover:text-[#C87960] transition"
-                                  title="Scan QR Code to Buy on Smartphone"
-                                >
-                                  <QrCode className="h-3 w-3 text-[#C87960]" />
-                                  <span>QR</span>
                                 </button>
                                 {/* Store button: opens EXACT product on retailer's official website */}
                                 <a

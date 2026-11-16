@@ -258,7 +258,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                       : "text-[#252B2E]/70 hover:text-[#172B3A]"
                   }`}
                 >
-                  My AI Redesigns {userRedesigns.length > 0 ? `(${userRedesigns.length})` : ""}
+                  My AI Designs {userRedesigns.length > 0 ? `(${userRedesigns.length})` : ""}
                 </button>
                 <button
                   type="button"
@@ -269,7 +269,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                       : "text-[#252B2E]/70 hover:text-[#172B3A]"
                   }`}
                 >
-                  Curated Showrooms
+                  Showrooms
                 </button>
               </div>
 
@@ -323,7 +323,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                         No Redesigned Rooms Yet
                       </p>
                       <p className="mt-0.5 text-[11px] text-[#252B2E]/65">
-                        Generate a redesign in Studio or select one of our curated showrooms.
+                        Generate a redesign in Studio or select one of the showrooms.
                       </p>
                       <div className="mt-2.5 flex items-center justify-center gap-2">
                         <Link

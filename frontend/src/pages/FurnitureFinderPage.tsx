@@ -314,11 +314,6 @@ export const FurnitureFinderPage: React.FC = () => {
                     <span className="absolute left-3 top-3 rounded-full bg-[#172B3A]/90 px-2.5 py-0.5 text-[10px] font-semibold text-white">
                       {p.category}
                     </span>
-                    {p.match_score && (
-                      <span className="absolute right-3 top-3 rounded-full bg-[#9BAE9A] px-2.5 py-0.5 text-[10px] font-semibold text-[#172B3A]">
-                        {p.match_score} Match
-                      </span>
-                    )}
                   </div>
                   <div className="p-4">
                     <div className="text-[11px] font-medium text-[#C87960]">{p.style}</div>

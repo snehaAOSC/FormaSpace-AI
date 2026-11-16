@@ -4,7 +4,6 @@ import {
   Info,
   Maximize2,
   Package,
-  QrCode,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
@@ -102,25 +101,7 @@ export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({
               </div>
             </div>
 
-            {/* Mobile Scan QR Code */}
-            <div className="flex items-center gap-3 rounded-2xl border border-[#DCCBB5]/80 bg-white p-2.5 shadow-xs">
-              <div className="h-16 w-16 shrink-0 rounded-xl border border-[#DCCBB5] bg-[#FAF7F2] p-1 flex items-center justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=4&data=${encodeURIComponent(directRetailerUrl)}`}
-                  alt={`QR Code for ${product.product_name}`}
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              <div className="min-w-0 flex-1 text-xs">
-                <div className="font-semibold text-[#172B3A] flex items-center gap-1.5">
-                  <QrCode className="h-3.5 w-3.5 text-[#C87960]" />
-                  <span>Scan QR with Smartphone</span>
-                </div>
-                <div className="text-[11px] text-[#252B2E]/70 mt-0.5 leading-relaxed">
-                  Scan to instantly open & purchase this exact piece on {product.brand}.
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Right Column: Details & Actions */}

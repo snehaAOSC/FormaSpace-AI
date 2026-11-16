@@ -14,7 +14,6 @@ import {
   KeyRound,
   Layers,
   Loader2,
-  Paintbrush,
   RefreshCw,
   RotateCcw,
   ScanEye,
@@ -29,13 +28,11 @@ import {
 } from "lucide-react";
 import { BeforeAfterSlider } from "../components/BeforeAfterSlider";
 import { DemoModeBanner } from "../components/DemoModeBanner";
-import { PrecisionMaskCanvas } from "../components/PrecisionMaskCanvas";
 import { useAuth } from "../context/AuthContext";
 import {
   DESIGN_CATEGORIES,
   DESIGN_STYLES,
   MATERIAL_SWATCHES,
-  SAMPLE_IMAGES,
   STUDIO_FEATURES,
   WEATHER_PRESETS,
 } from "../data/catalog";
@@ -234,7 +231,7 @@ export const StudioPage: React.FC = () => {
   ]);
 
   // Center & Right Panel State
-  const [viewMode, setViewMode] = useState<"slider" | "side" | "after" | "before" | "mask">("slider");
+  const [viewMode, setViewMode] = useState<"slider" | "side" | "after" | "before">("slider");
   const [zoom, setZoom] = useState<number>(100);
   const [showObjectsOverlay, setShowObjectsOverlay] = useState<boolean>(false);
   const [inspectSide, setInspectSide] = useState<"before" | "after">("after");
@@ -575,7 +572,6 @@ export const StudioPage: React.FC = () => {
       setActiveVariationIdx(0);
       setDetectedAfterObjects(res.design.detected_objects || []);
       setInspectSide("after");
-      if (viewMode === "mask") setViewMode("slider");
       updateLocalCredits(res.remaining_credits);
       await loadWorkspaceData();
     } catch (err: any) {
@@ -760,35 +756,6 @@ export const StudioPage: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Test Samples */}
-            <div>
-              <div className="text-[11px] font-medium text-[#252B2E]/65 mb-1.5">
-                Or select an architectural sample space:
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {SAMPLE_IMAGES.map((s) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    onClick={() => {
-                      setOriginalUrl(s.url);
-                      setRoomType(s.roomType);
-                      setCategory(s.roomType);
-                      setFeatureType(s.feature);
-                      setCurrentDesign(null);
-                      setMaskDataUrl(null);
-                    }}
-                    className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition ${originalUrl === s.url
-                        ? "border-[#172B3A] bg-[#172B3A] text-white shadow-sm"
-                        : "border-[#DCCBB5] bg-white text-[#252B2E] hover:border-[#C87960]"
-                      }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Inspiration Reference Photo (if Inspiration tool selected) */}
             {featureType === "inspiration_transfer" && (
               <div className="border-t border-[#DCCBB5] pt-3">
@@ -885,13 +852,6 @@ export const StudioPage: React.FC = () => {
                 value={featureType}
                 onChange={(e) => {
                   setFeatureType(e.target.value);
-                  if (
-                    ["furniture_replacement", "room_declutter", "material_replacement"].includes(
-                      e.target.value
-                    )
-                  ) {
-                    setViewMode("mask");
-                  }
                 }}
                 className="mt-1.5 w-full rounded-xl border border-[#DCCBB5] bg-white px-3.5 py-2.5 text-sm font-medium text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
               >
@@ -943,7 +903,6 @@ export const StudioPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setShowObjectsOverlay(!showObjectsOverlay);
-                      if (viewMode === "mask") setViewMode("slider");
                     }}
                     className={`text-[10px] font-semibold transition ${showObjectsOverlay ? "text-[#C87960] underline" : "text-[#172B3A] hover:underline"}`}
                   >
@@ -1154,7 +1113,6 @@ export const StudioPage: React.FC = () => {
                 { id: "side", label: "Side-by-Side (Before & After)" },
                 { id: "after", label: "Generated View" },
                 { id: "before", label: "Original Space" },
-                { id: "mask", label: "Precision Mask" },
               ].map((m) => (
                 <button
                   key={m.id}
@@ -1162,7 +1120,7 @@ export const StudioPage: React.FC = () => {
                   disabled={!originalUrl}
                   onClick={() => {
                     setViewMode(m.id as any);
-                    if (m.id === "before" || m.id === "mask") {
+                    if (m.id === "before") {
                       setInspectSide("before");
                       setSelectedObjectId(null);
                     } else if (m.id === "after") {
@@ -1171,13 +1129,10 @@ export const StudioPage: React.FC = () => {
                     }
                   }}
                   className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === m.id
-                      ? m.id === "mask"
-                        ? "bg-[#C87960] text-white shadow-sm"
-                        : "bg-[#172B3A] text-white shadow-sm"
+                      ? "bg-[#172B3A] text-white shadow-sm"
                       : "bg-[#F7F4ED] text-[#252B2E] border border-[#DCCBB5]/70 hover:bg-[#DCCBB5]/40"
                     }`}
                 >
-                  {m.id === "mask" && <Paintbrush className="h-3 w-3" />}
                   {m.label}
                 </button>
               ))}
@@ -1280,16 +1235,7 @@ export const StudioPage: React.FC = () => {
                     <span>Upload Space Photograph</span>
                   </button>
                 </div>
-                <div className="mt-5 text-xs text-[#252B2E]/60">
-                  Or select an architectural sample space from the left panel to test instantly
-                </div>
               </div>
-            ) : viewMode === "mask" ? (
-              <PrecisionMaskCanvas
-                imageUrl={originalUrl}
-                onMaskChange={setMaskDataUrl}
-                selectedObject={detectedObjects.find((o) => o.id === selectedObjectId) || null}
-              />
             ) : (
               <div className="overflow-auto rounded-2xl bg-[#252B2E]/5">
                 <div

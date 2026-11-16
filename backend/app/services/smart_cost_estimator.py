@@ -122,7 +122,7 @@ REAL_RETAILER_CATALOG: list[dict[str, Any]] = [
         "price_display_inr": "₹22,000",
         "price_display_usd": "$270",
         "currency": "INR",
-        "image_url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+        "image_url": "/images/mori-fluted-wardrobe.jpg",
         "product_url": "https://www.pepperfry.com/product/modern-fluted-3-door-wardrobe-in-oak-finish-2039182.html",
         "description": "Contemporary floor-to-ceiling wardrobe with vertical fluted facade and soft-closing concealed German hinges.",
         "dimensions": "48\"W x 22\"D x 84\"H",
