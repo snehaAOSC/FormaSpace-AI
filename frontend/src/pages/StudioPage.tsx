@@ -415,46 +415,59 @@ export const StudioPage: React.FC = () => {
 
   const handleFileUpload = async (file: File, isInspiration = false) => {
     setErrorMsg("");
-    const ok = await ensureAuthenticated();
-    if (!ok) return;
+    if (!file) return;
+
+    // 1. Immediately create local URL so user sees their photo loaded instantly without delay
+    const localUrl = URL.createObjectURL(file);
+
+    if (isInspiration) {
+      setInspirationUrl(localUrl);
+    } else {
+      setOriginalUrl(localUrl);
+      setCurrentDesign(null);
+      setMaskDataUrl(null);
+
+      // Smart room type recognition from filename, preserving active selection if ambiguous
+      const lowerName = file.name.toLowerCase();
+      let detected = roomType || "Living Room";
+      if (
+        lowerName.includes("bed") ||
+        lowerName.includes("bedroom") ||
+        lowerName.includes("58a50328")
+      ) {
+        detected = "Bedroom";
+      } else if (lowerName.includes("kitchen") || lowerName.includes("cook")) {
+        detected = "Kitchen";
+      } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
+        detected = "Bathroom";
+      } else if (lowerName.includes("dining")) {
+        detected = "Dining Room";
+      } else if (lowerName.includes("exterior") || lowerName.includes("facade") || lowerName.includes("house")) {
+        detected = "House Exterior";
+        setFeatureType("exterior_design");
+      } else if (lowerName.includes("garden") || lowerName.includes("yard") || lowerName.includes("patio")) {
+        detected = "Garden";
+        setFeatureType("garden_landscape");
+      } else if (lowerName.includes("office") || lowerName.includes("study") || lowerName.includes("desk")) {
+        detected = "Office";
+      }
+      setRoomType(detected);
+      setCategory(detected);
+    }
+
+    // 2. Concurrently attempt server storage upload
     setUploading(true);
     try {
       const res = await api.uploadFile(file);
-      if (isInspiration) {
-        setInspirationUrl(res.url);
-      } else {
-        setOriginalUrl(res.url);
-        setCurrentDesign(null);
-        setMaskDataUrl(null);
-        // Smart room type recognition from filename, preserving active selection if ambiguous
-        const lowerName = file.name.toLowerCase();
-        let detected = roomType || "Kitchen";
-        if (
-          lowerName.includes("bed") ||
-          lowerName.includes("bedroom") ||
-          lowerName.includes("58a50328")
-        ) {
-          detected = "Bedroom";
-        } else if (lowerName.includes("kitchen") || lowerName.includes("cook")) {
-          detected = "Kitchen";
-        } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
-          detected = "Bathroom";
-        } else if (lowerName.includes("dining")) {
-          detected = "Dining Room";
-        } else if (lowerName.includes("exterior") || lowerName.includes("facade") || lowerName.includes("house")) {
-          detected = "House Exterior";
-          setFeatureType("exterior_design");
-        } else if (lowerName.includes("garden") || lowerName.includes("yard") || lowerName.includes("patio")) {
-          detected = "Garden";
-          setFeatureType("garden_landscape");
-        } else if (lowerName.includes("office") || lowerName.includes("study") || lowerName.includes("desk")) {
-          detected = "Office";
+      if (res && res.url) {
+        if (isInspiration) {
+          setInspirationUrl(res.url);
+        } else {
+          setOriginalUrl(res.url);
         }
-        setRoomType(detected);
-        setCategory(detected);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Upload failed. Supported formats: JPG, JPEG, PNG, WebP.");
+      console.warn("Backend image upload notice (using local preview):", err?.message || err);
     } finally {
       setUploading(false);
     }
@@ -691,11 +704,12 @@ export const StudioPage: React.FC = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".jpg,.jpeg,.png,.webp"
+                accept="image/*,.jpg,.jpeg,.png,.webp"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) handleFileUpload(f);
+                  e.target.value = "";
                 }}
               />
               {originalUrl ? (
@@ -792,11 +806,12 @@ export const StudioPage: React.FC = () => {
                 <input
                   ref={inspInputRef}
                   type="file"
-                  accept=".jpg,.jpeg,.png,.webp"
+                  accept="image/*,.jpg,.jpeg,.png,.webp"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleFileUpload(f, true);
+                    e.target.value = "";
                   }}
                 />
                 {inspirationUrl && (
@@ -1227,7 +1242,22 @@ export const StudioPage: React.FC = () => {
             )}
 
             {!originalUrl ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#DCCBB5] bg-[#F7F4ED]/40 py-28 px-6 text-center">
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) handleFileUpload(f);
+                }}
+                className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed py-28 px-6 text-center transition ${
+                  dragOver ? "border-[#C87960] bg-[#C87960]/10" : "border-[#DCCBB5] bg-[#F7F4ED]/40"
+                }`}
+              >
                 <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#172B3A] text-white shadow-lg">
                   <UploadCloud className="h-9 w-9 text-[#C87960]" />
                   <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#C87960] text-white text-xs">

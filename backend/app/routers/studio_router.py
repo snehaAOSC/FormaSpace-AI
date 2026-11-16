@@ -1,5 +1,6 @@
 import json
 import uuid
+from typing import Optional
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from ..auth import get_current_user, get_optional_user
@@ -58,7 +59,7 @@ def configure_ai_provider(
 @router.post("/upload")
 async def upload_image(
     file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_user),
 ):
     filename = file.filename or "upload.png"
     ext = "." + filename.split(".")[-1].lower() if "." in filename else ""
@@ -73,7 +74,8 @@ async def upload_image(
         raise HTTPException(status_code=400, detail="File size exceeds 15MB limit.")
 
     url, _ = save_image_bytes(content, "uploads", filename)
-    return {"url": url, "filename": filename, "user_id": current_user["id"]}
+    user_id = current_user["id"] if current_user else None
+    return {"url": url, "filename": filename, "user_id": user_id}
 
 
 @router.post("/detect-objects")
