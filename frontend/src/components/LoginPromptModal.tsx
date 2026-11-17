@@ -43,7 +43,7 @@ export const LoginPromptModal: React.FC = () => {
           </div>
           <div>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C87960]">
-              Access Guard · FormaSpace AI
+              Access Guard · FormaSpace Studio
             </span>
             <h3 className="font-editorial text-xl font-semibold text-[#172B3A]">
               Please Log In First
@@ -53,7 +53,7 @@ export const LoginPromptModal: React.FC = () => {
 
         {/* Message */}
         <p className="mt-4 text-sm leading-relaxed text-[#252B2E]/80">
-          To {loginModalAction || "use the AI Design Studio and generate architectural transformations"}, please log in to your account.
+          To {loginModalAction || "use the Design Studio and generate architectural transformations"}, please log in to your account.
         </p>
 
         <div className="mt-2 text-xs text-[#252B2E]/60">

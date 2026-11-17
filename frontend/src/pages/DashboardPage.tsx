@@ -242,7 +242,7 @@ export const DashboardPage: React.FC = () => {
                 className="btn-primary w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Start New AI Redesign</span>
+                <span>Start New Redesign</span>
               </Link>
             </div>
           </div>
@@ -292,12 +292,12 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Section 1: Recent AI Generated Designs */}
+              {/* Section 1: Recent Generated Designs */}
               <div className="editorial-card p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="font-editorial text-xl font-semibold text-[#172B3A]">
-                      Recent AI Room Redesigns
+                      Recent Room Redesigns
                     </h2>
                     <p className="text-xs text-[#252B2E]/65 mt-0.5">
                       Your latest generated architectural spaces ({designs.length} total)
@@ -312,7 +312,7 @@ export const DashboardPage: React.FC = () => {
                       View All ({designs.length})
                     </button>
                     <Link to="/studio" className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5" /> New AI Design
+                      <Sparkles className="h-3.5 w-3.5" /> New Design
                     </Link>
                   </div>
                 </div>
@@ -322,10 +322,10 @@ export const DashboardPage: React.FC = () => {
                     <Sparkles className="mx-auto h-8 w-8 text-[#C87960]/60 mb-2" />
                     <p className="text-sm font-medium text-[#172B3A]">No designs generated yet</p>
                     <p className="text-xs text-[#252B2E]/65 mt-1">
-                      Upload an interior or exterior room photo in the AI Studio to start.
+                      Upload an interior or exterior room photo in the Studio to start.
                     </p>
                     <Link to="/studio" className="btn-primary mt-4 py-2 px-5 text-xs inline-flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5" /> Open AI Design Studio
+                      <Sparkles className="h-3.5 w-3.5" /> Open Design Studio
                     </Link>
                   </div>
                 ) : (
@@ -454,7 +454,7 @@ export const DashboardPage: React.FC = () => {
                     <ArrowRight className="h-4 w-4 text-[#252B2E]/40 transition group-hover:translate-x-1 group-hover:text-[#C87960]" />
                   </div>
                   <h3 className="mt-3 font-editorial text-base font-semibold text-[#172B3A]">
-                    AI Room Redesign Studio
+                    Room Redesign Studio
                   </h3>
                   <p className="mt-1 text-xs text-[#252B2E]/65">
                     Generate instant architectural interiors, exteriors & gardens.
@@ -509,11 +509,11 @@ export const DashboardPage: React.FC = () => {
                     My Redesign Projects
                   </h2>
                   <p className="text-xs text-[#252B2E]/65 mt-0.5">
-                    All AI room redesigns generated in the studio are automatically stored here ({projects.length} project{projects.length !== 1 ? "s" : ""})
+                    All room redesigns generated in the studio are automatically stored here ({projects.length} project{projects.length !== 1 ? "s" : ""})
                   </p>
                 </div>
                 <Link to="/studio" className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5" /> Start New AI Redesign
+                  <Sparkles className="h-3.5 w-3.5" /> Start New Redesign
                 </Link>
               </div>
 
@@ -552,7 +552,7 @@ export const DashboardPage: React.FC = () => {
                     Whenever you generate an interior or exterior room redesign in the studio, it automatically appears here.
                   </p>
                   <Link to="/studio" className="btn-primary mt-4 py-2 px-5 text-xs inline-flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5" /> Open AI Design Studio
+                    <Sparkles className="h-3.5 w-3.5" /> Open Design Studio
                   </Link>
                 </div>
               ) : (
@@ -588,7 +588,7 @@ export const DashboardPage: React.FC = () => {
                           <Link
                             to={`/studio?room=${encodeURIComponent(p.category)}&title=${encodeURIComponent(p.title)}`}
                             className="inline-flex items-center gap-1 rounded-lg border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] hover:bg-[#F7F4ED] hover:text-[#C87960] transition"
-                            title="Open in AI Design Studio"
+                            title="Open in Design Studio"
                           >
                             <span>Open in Studio</span>
                             <ArrowRight className="h-3 w-3" />
@@ -667,7 +667,7 @@ export const DashboardPage: React.FC = () => {
                   <p className="text-xs text-[#252B2E]/65 mt-1">
                     {tab === "saved"
                       ? "Click the bookmark icon on any design card to pin it here."
-                      : "Start designing in the AI Studio to create your first space."}
+                      : "Start designing in the Studio to create your first space."}
                   </p>
                   <Link to="/studio" className="btn-primary mt-4 py-2 px-5 text-xs inline-flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" /> Start Designing

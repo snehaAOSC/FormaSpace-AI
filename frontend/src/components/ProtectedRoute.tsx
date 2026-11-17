@@ -36,7 +36,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
           </div>
 
           <span className="mt-6 inline-block text-[11px] font-semibold uppercase tracking-[0.25em] text-[#C87960]">
-            Access Protected · FormaSpace AI
+            Access Protected · FormaSpace Studio
           </span>
 
           <h2 className="mt-2 font-editorial text-3xl font-semibold text-[#172B3A]">
@@ -87,7 +87,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
             Your current account does not have administrator clearance to access this control surface.
           </p>
           <Link to="/studio" className="btn-primary mt-6 w-full justify-center text-xs">
-            Return to AI Studio
+            Return to Studio
           </Link>
         </div>
       </div>

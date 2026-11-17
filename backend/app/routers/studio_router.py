@@ -38,7 +38,7 @@ def configure_ai_provider(
 ):
     """Allow authenticated workspace users/admins to connect a live image-editing API key."""
     if req.provider != "demo" and not req.api_key.strip():
-        raise HTTPException(status_code=400, detail="API key is required for live AI providers.")
+        raise HTTPException(status_code=400, detail="API key is required for live rendering providers.")
 
     settings.configure_ai(req.provider, req.api_key, req.model)
     ts = now_iso()
@@ -136,7 +136,7 @@ async def generate_design(
         )
         conn.execute(
             "INSERT INTO credit_transactions (id, user_id, delta, reason, created_at) VALUES (?, ?, ?, ?, ?)",
-            (str(uuid.uuid4()), current_user["id"], -credit_cost, f"AI Studio: {req.feature_type} ({req.style})", created),
+            (str(uuid.uuid4()), current_user["id"], -credit_cost, f"Studio: {req.feature_type} ({req.style})", created),
         )
         # Ensure an active project is automatically created/stored for this redesign
         auto_project_id = req.project_id or str(uuid.uuid4())

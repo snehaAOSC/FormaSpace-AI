@@ -33,11 +33,11 @@ export const DESIGN_STYLES = [
 ];
 
 export const STUDIO_FEATURES = [
-  { id: "interior_redesign", label: "AI Interior Redesign", short: "Interior", desc: "Reimagine rooms while preserving walls & window architecture" },
-  { id: "exterior_design", label: "AI Exterior Design", short: "Exterior", desc: "Transform facades, cladding, roof, windows & entryways" },
+  { id: "interior_redesign", label: "Interior Redesign", short: "Interior", desc: "Reimagine rooms while preserving walls & window architecture" },
+  { id: "exterior_design", label: "Exterior Design", short: "Exterior", desc: "Transform facades, cladding, roof, windows & entryways" },
   { id: "garden_landscape", label: "Garden & Landscape", short: "Garden", desc: "Pools, travertine patios, outdoor seating & architectural lighting" },
   { id: "virtual_staging", label: "Virtual Staging", short: "Staging", desc: "Furnish empty rooms with sofas, rugs, curtains, lamps & plants" },
-  { id: "room_declutter", label: "AI Room Decluttering", short: "Declutter", desc: "Remove clutter or clear all furniture while keeping room shell" },
+  { id: "room_declutter", label: "Room Decluttering", short: "Declutter", desc: "Remove clutter or clear all furniture while keeping room shell" },
   { id: "furniture_replacement", label: "Furniture Replacement", short: "Replace Item", desc: "Select a detected object and swap it with a bespoke piece" },
   { id: "material_replacement", label: "Material & Color", short: "Materials", desc: "Swap wall paint, oak/marble floors, countertops & roof finishes" },
   { id: "sky_weather", label: "Sky & Weather", short: "Atmosphere", desc: "Shift exterior light from Sunny to Golden Hour, Rainy, or Night" },
@@ -100,7 +100,7 @@ export const WEATHER_PRESETS = [
 export const BEFORE_AFTER_SHOWCASE = [
   {
     title: "Pacific Heights Salon",
-    category: "AI Interior Redesign",
+    category: "Interior Redesign",
     style: "Modern Luxury",
     before: "/images/hero-before.jpg",
     after: "/images/hero-after.jpg",
@@ -108,7 +108,7 @@ export const BEFORE_AFTER_SHOWCASE = [
   },
   {
     title: "Montecito Timber Villa",
-    category: "AI Exterior Architecture",
+    category: "Exterior Architecture",
     style: "Contemporary",
     before: "/images/exterior-before.jpg",
     after: "/images/exterior-after.jpg",
@@ -134,7 +134,7 @@ export const BEFORE_AFTER_SHOWCASE = [
 
 export const TESTIMONIALS = [
   {
-    quote: "FormaSpace AI cut our schematic client presentation cycle from ten days to an afternoon. Clients immediately grasp material warmth and spatial flow.",
+    quote: "FormaSpace cut our schematic client presentation cycle from ten days to an afternoon. Clients immediately grasp material warmth and spatial flow.",
     author: "Clara Lindqvist",
     role: "Principal Architect, Studio Nord",
   },
@@ -152,16 +152,16 @@ export const TESTIMONIALS = [
 
 export const FAQS = [
   {
-    q: "Does FormaSpace AI preserve my room's existing walls, windows, and layout?",
-    a: "Yes. With our four AI Intervention Levels (Very Low, Low, Medium, High), you control exactly how strictly the engine preserves structural geometry, window openings, and ceiling lines versus reimagining furnishings and finishes.",
+    q: "Does FormaSpace preserve my room's existing walls, windows, and layout?",
+    a: "Yes. With our four Intervention Levels (Very Low, Low, Medium, High), you control exactly how strictly the engine preserves structural geometry, window openings, and ceiling lines versus reimagining furnishings and finishes.",
   },
   {
-    q: "What file formats can I upload to the AI Design Studio?",
+    q: "What file formats can I upload to the Design Studio?",
     a: "You can drag and drop JPG, JPEG, PNG, and WebP photographs of interiors, building exteriors, gardens, hand-drawn architectural sketches, and 2D floor plans up to 15MB.",
   },
   {
-    q: "How does Demo Simulation Mode differ from a connected AI image-editing key?",
-    a: "When no external image-editing API key (such as OpenAI gpt-image-1 or Gemini Image Editing) is configured on the server, FormaSpace AI transparently runs in Demo Simulation Mode using deterministic image tone-mapping and curated architectural pairs—and always displays a clear Demo badge so simulated previews are never misrepresented as live generative AI outputs.",
+    q: "How does Demo Simulation Mode differ from a connected rendering engine key?",
+    a: "When no external rendering API key (such as OpenAI or Gemini Image Editing) is configured on the server, FormaSpace transparently runs in Demo Simulation Mode using deterministic image tone-mapping and curated architectural pairs—and always displays a clear Demo badge so simulated previews are never misrepresented as live engine outputs.",
   },
   {
     q: "Are the Renovation Budget Estimates guaranteed contractor quotes?",

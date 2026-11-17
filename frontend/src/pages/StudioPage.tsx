@@ -259,7 +259,7 @@ export const StudioPage: React.FC = () => {
     masked_api_key?: string;
   }>({ live_ai_configured: false, ai_provider: "demo" });
 
-  // Live AI Key Modal
+  // Live Rendering Key Modal
   const [showAiModal, setShowAiModal] = useState(false);
   const [cfgProvider, setCfgProvider] = useState<"openai" | "gemini" | "stability" | "fal" | "demo">("openai");
   const [cfgKey, setCfgKey] = useState("");
@@ -626,7 +626,7 @@ export const StudioPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-editorial text-xl font-semibold text-[#172B3A]">
-                AI Architectural Studio
+                Architectural Design Studio
               </span>
               {maskDataUrl && (
                 <span className="rounded-full bg-[#C87960] px-2.5 py-0.5 text-[11px] font-medium text-white">
@@ -652,8 +652,8 @@ export const StudioPage: React.FC = () => {
               type="button"
               onClick={() => setShowHistoryDrawer(!showHistoryDrawer)}
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition ${showHistoryDrawer
-                  ? "border-[#172B3A] bg-[#172B3A] text-white"
-                  : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
+                ? "border-[#172B3A] bg-[#172B3A] text-white"
+                : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
                 }`}
             >
               <History className="h-3.5 w-3.5" />
@@ -692,8 +692,8 @@ export const StudioPage: React.FC = () => {
               }}
               onClick={() => fileInputRef.current?.click()}
               className={`group relative cursor-pointer overflow-hidden rounded-xl border-2 border-dashed p-3 text-center transition ${dragOver
-                  ? "border-[#C87960] bg-[#C87960]/10"
-                  : "border-[#DCCBB5] bg-[#F7F4ED]/60 hover:border-[#C87960]"
+                ? "border-[#C87960] bg-[#C87960]/10"
+                : "border-[#DCCBB5] bg-[#F7F4ED]/60 hover:border-[#C87960]"
                 }`}
             >
               <input
@@ -907,11 +907,10 @@ export const StudioPage: React.FC = () => {
                         setSelectedObjectId(null);
                         setShowObjectsOverlay(true);
                       }}
-                      className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${
-                        inspectSide === "before"
+                      className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${inspectSide === "before"
                           ? "bg-[#172B3A] text-white shadow-sm"
                           : "text-[#252B2E]/70 hover:text-[#172B3A]"
-                      }`}
+                        }`}
                     >
                       Original Space ({detectedBeforeObjects.length})
                     </button>
@@ -922,11 +921,10 @@ export const StudioPage: React.FC = () => {
                         setSelectedObjectId(null);
                         setShowObjectsOverlay(true);
                       }}
-                      className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${
-                        inspectSide === "after"
+                      className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${inspectSide === "after"
                           ? "bg-[#C87960] text-white shadow-sm"
                           : "text-[#252B2E]/70 hover:text-[#172B3A]"
-                      }`}
+                        }`}
                     >
                       Modern Side ({detectedAfterObjects.length})
                     </button>
@@ -939,8 +937,8 @@ export const StudioPage: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedObjectId(selectedObjectId === obj.id ? null : obj.id)}
                         className={`rounded-full px-2 py-0.5 text-[10px] font-medium border transition ${selectedObjectId === obj.id
-                            ? "border-[#C87960] bg-[#C87960] text-white"
-                            : "border-[#DCCBB5] bg-white text-[#172B3A]"
+                          ? "border-[#C87960] bg-[#C87960] text-white"
+                          : "border-[#DCCBB5] bg-white text-[#172B3A]"
                           }`}
                       >
                         {obj.label}
@@ -964,7 +962,7 @@ export const StudioPage: React.FC = () => {
 
               {showAdvanced && (
                 <div className="mt-3 space-y-3 pt-2">
-                  {/* AI Intervention Level */}
+                  {/* Intervention Level */}
                   <div>
                     <div className="flex items-center justify-between text-xs font-medium text-[#252B2E]/75">
                       <span>Intervention Level</span>
@@ -977,8 +975,8 @@ export const StudioPage: React.FC = () => {
                           type="button"
                           onClick={() => setInterventionLevel(lvl)}
                           className={`rounded-lg border py-1.5 text-[11px] font-medium transition ${interventionLevel === lvl
-                              ? "border-[#172B3A] bg-[#172B3A] text-white"
-                              : "border-[#DCCBB5] bg-white text-[#252B2E]"
+                            ? "border-[#172B3A] bg-[#172B3A] text-white"
+                            : "border-[#DCCBB5] bg-white text-[#252B2E]"
                             }`}
                         >
                           {lvl}
@@ -1105,8 +1103,8 @@ export const StudioPage: React.FC = () => {
                     }
                   }}
                   className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === m.id
-                      ? "bg-[#172B3A] text-white shadow-sm"
-                      : "bg-[#F7F4ED] text-[#252B2E] border border-[#DCCBB5]/70 hover:bg-[#DCCBB5]/40"
+                    ? "bg-[#172B3A] text-white shadow-sm"
+                    : "bg-[#F7F4ED] text-[#252B2E] border border-[#DCCBB5]/70 hover:bg-[#DCCBB5]/40"
                     }`}
                 >
                   {m.label}
@@ -1120,8 +1118,8 @@ export const StudioPage: React.FC = () => {
                 disabled={!originalUrl}
                 onClick={() => setShowObjectsOverlay(!showObjectsOverlay)}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${showObjectsOverlay
-                    ? "border-[#C87960] bg-[#C87960] text-white"
-                    : "border-[#DCCBB5] bg-white text-[#172B3A]"
+                  ? "border-[#C87960] bg-[#C87960] text-white"
+                  : "border-[#DCCBB5] bg-white text-[#172B3A]"
                   }`}
               >
                 <ScanEye className="h-3.5 w-3.5" />
@@ -1185,9 +1183,8 @@ export const StudioPage: React.FC = () => {
                   const f = e.dataTransfer.files?.[0];
                   if (f) handleFileUpload(f);
                 }}
-                className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed py-28 px-6 text-center transition ${
-                  dragOver ? "border-[#C87960] bg-[#C87960]/10" : "border-[#DCCBB5] bg-[#F7F4ED]/40"
-                }`}
+                className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed py-28 px-6 text-center transition ${dragOver ? "border-[#C87960] bg-[#C87960]/10" : "border-[#DCCBB5] bg-[#F7F4ED]/40"
+                  }`}
               >
                 <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#172B3A] text-white shadow-lg">
                   <UploadCloud className="h-9 w-9 text-[#C87960]" />
@@ -1199,7 +1196,7 @@ export const StudioPage: React.FC = () => {
                   Upload Your Space to Begin
                 </h3>
                 <p className="mt-2 max-w-md text-sm text-[#252B2E]/75 leading-relaxed">
-                  Upload a photo of your living room, bedroom, kitchen, exterior, or backyard to generate AI architectural redesigns, precision object detection, and cost estimation.
+                  Upload a photo of your living room, bedroom, kitchen, exterior, or backyard to generate architectural redesigns, precision object detection, and cost estimation.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                   <button
@@ -1319,7 +1316,7 @@ export const StudioPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* AI Object Detection Overlay */}
+                  {/* Object Detection Overlay */}
                   {showObjectsOverlay && (
                     <div className="pointer-events-none absolute inset-0">
                       {/* Floating pill toggle on top of image */}
@@ -1330,11 +1327,10 @@ export const StudioPage: React.FC = () => {
                             setInspectSide("before");
                             setSelectedObjectId(null);
                           }}
-                          className={`rounded-full px-2.5 py-0.5 font-medium transition ${
-                            inspectSide === "before"
+                          className={`rounded-full px-2.5 py-0.5 font-medium transition ${inspectSide === "before"
                               ? "bg-white text-[#172B3A] shadow-sm font-semibold"
                               : "text-white/80 hover:text-white"
-                          }`}
+                            }`}
                         >
                           Old Space Objects
                         </button>
@@ -1344,11 +1340,10 @@ export const StudioPage: React.FC = () => {
                             setInspectSide("after");
                             setSelectedObjectId(null);
                           }}
-                          className={`rounded-full px-2.5 py-0.5 font-medium transition ${
-                            inspectSide === "after"
+                          className={`rounded-full px-2.5 py-0.5 font-medium transition ${inspectSide === "after"
                               ? "bg-[#C87960] text-white shadow-sm font-semibold"
                               : "text-white/80 hover:text-white"
-                          }`}
+                            }`}
                         >
                           Modern Objects
                         </button>
@@ -1364,8 +1359,8 @@ export const StudioPage: React.FC = () => {
                             onClick={() => setSelectedObjectId(isSelected ? null : obj.id)}
                             style={{ left: `${left}%`, top: `${top}%`, width: `${w}%`, height: `${h}%` }}
                             className={`pointer-events-auto absolute rounded-lg border-2 transition ${isSelected
-                                ? "border-[#C87960] bg-[#C87960]/20"
-                                : "border-white/80 bg-[#172B3A]/15 hover:border-[#C87960]"
+                              ? "border-[#C87960] bg-[#C87960]/20"
+                              : "border-white/80 bg-[#172B3A]/15 hover:border-[#C87960]"
                               }`}
                           >
                             <span className="absolute -top-6 left-0 rounded-md bg-[#172B3A] px-2 py-0.5 text-[10px] font-semibold text-white whitespace-nowrap shadow">
@@ -1398,8 +1393,8 @@ export const StudioPage: React.FC = () => {
                       type="button"
                       onClick={() => setActiveVariationIdx(idx)}
                       className={`group relative overflow-hidden rounded-xl border-2 transition ${activeVariationIdx === idx
-                          ? "border-[#C87960] shadow-md"
-                          : "border-[#DCCBB5] opacity-80 hover:opacity-100"
+                        ? "border-[#C87960] shadow-md"
+                        : "border-[#DCCBB5] opacity-80 hover:opacity-100"
                         }`}
                     >
                       <img src={vUrl} alt={`Variation ${idx + 1}`} className="aspect-[4/3] w-full object-cover" />
@@ -1437,8 +1432,8 @@ export const StudioPage: React.FC = () => {
                   disabled={!currentDesign}
                   onClick={handleSaveToggle}
                   className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-xs font-medium transition disabled:opacity-40 ${currentDesign?.is_saved
-                      ? "border-[#9BAE9A] bg-[#9BAE9A]/25 text-[#172B3A]"
-                      : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
+                    ? "border-[#9BAE9A] bg-[#9BAE9A]/25 text-[#172B3A]"
+                    : "border-[#DCCBB5] bg-white text-[#172B3A] hover:border-[#C87960]"
                     }`}
                 >
                   {currentDesign?.is_saved ? <Check className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
@@ -1510,14 +1505,14 @@ export const StudioPage: React.FC = () => {
             </div>
           )}
 
-          {/* AI Recommended Design Options for this Space */}
+          {/* Recommended Design Options for this Space */}
           {originalUrl && (
             <div className="editorial-card p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#C87960]" />
                   <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#172B3A]">
-                    AI Recommended Design Options
+                    Recommended Design Options
                   </h3>
                 </div>
                 <span className="text-[11px] text-[#252B2E]/60">
@@ -1571,11 +1566,10 @@ export const StudioPage: React.FC = () => {
                           setActiveVariationIdx(0);
                         }
                       }}
-                      className={`group relative overflow-hidden rounded-xl border text-left transition p-2.5 ${
-                        isSelected
+                      className={`group relative overflow-hidden rounded-xl border text-left transition p-2.5 ${isSelected
                           ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
                           : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
-                      }`}
+                        }`}
                     >
                       <div className="aspect-[16/10] w-full overflow-hidden rounded-lg mb-2 bg-[#252B2E]">
                         <img
@@ -1609,13 +1603,13 @@ export const StudioPage: React.FC = () => {
         </main>
       </div>
 
-      {/* Connect Live AI Engine Modal */}
+      {/* Connect Live Engine Modal */}
       {showAiModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#172B3A]/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl border border-[#DCCBB5] bg-white p-6 shadow-editorial">
             <div className="flex items-center justify-between">
               <h3 className="font-editorial text-2xl font-semibold text-[#172B3A]">
-                Connect Live AI Image Engine
+                Connect Live Rendering Engine
               </h3>
               <button
                 type="button"
@@ -1631,7 +1625,7 @@ export const StudioPage: React.FC = () => {
 
             <form onSubmit={handleSaveAiConfig} className="mt-4 space-y-3">
               <div>
-                <label className="text-xs font-medium text-[#172B3A]">AI Provider</label>
+                <label className="text-xs font-medium text-[#172B3A]">Rendering Engine</label>
                 <select
                   value={cfgProvider}
                   onChange={(e) => setCfgProvider(e.target.value as any)}
@@ -1639,7 +1633,7 @@ export const StudioPage: React.FC = () => {
                 >
                   <option value="openai">OpenAI (dall-e-2 · Image Edits & Inpaint)</option>
                   <option value="gemini">Google Gemini (gemini-2.5-flash-image)</option>
-                  <option value="stability">Stability AI (Structure & Inpaint)</option>
+                  <option value="stability">Stability (Structure & Inpaint)</option>
                   <option value="fal">Fal.ai (Flux Pro Kontext)</option>
                   <option value="demo">Demo Simulation Mode (Curated Pairs)</option>
                 </select>
@@ -1677,7 +1671,7 @@ export const StudioPage: React.FC = () => {
                   disabled={cfgSaving}
                   className="btn-primary flex-1 justify-center py-2.5 text-xs"
                 >
-                  {cfgSaving ? "Saving..." : "Save AI Configuration"}
+                  {cfgSaving ? "Saving..." : "Save Engine Configuration"}
                 </button>
                 <button
                   type="button"

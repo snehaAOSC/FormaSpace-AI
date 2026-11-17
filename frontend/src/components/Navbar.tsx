@@ -22,9 +22,9 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const featureLinks = [
-    { to: "/studio", label: "AI Design Studio", desc: "10 interior, exterior, staging & material tools" },
+    { to: "/studio", label: "Design Studio", desc: "10 interior, exterior, staging & material tools" },
     { to: "/floor-plans", label: "Floor Plan Generator", desc: "2D architectural plans to 3D furnished layouts" },
-    { to: "/video-walkthrough", label: "AI Video Walkthrough", desc: "Cinematic camera motion & orbit exports" },
+    { to: "/video-walkthrough", label: "Video Walkthrough", desc: "Cinematic camera motion & orbit exports" },
     { to: "/furniture-finder", label: "Furniture Finder", desc: "Discover curated furnishings from renders" },
     { to: "/budget-estimator", label: "Renovation Budget Estimator", desc: "Compare material, labour & finish costs" },
   ];
@@ -48,7 +48,7 @@ export const Navbar: React.FC = () => {
           </div>
           <div className="leading-tight">
             <span className="font-editorial text-xl font-semibold tracking-tight text-[#172B3A]">
-              FormaSpace <span className="text-[#C87960]">AI</span>
+              FormaSpace <span className="text-[#C87960]">Studio</span>
             </span>
             <span className="block text-[10px] uppercase tracking-[0.2em] text-[#252B2E]/60">
               Architectural Studio
@@ -67,11 +67,11 @@ export const Navbar: React.FC = () => {
           </Link>
           <button
             type="button"
-            onClick={() => handleProtectedNavigation("/studio", "access the AI Design Studio")}
+            onClick={() => handleProtectedNavigation("/studio", "access the Design Studio")}
             className={`text-sm font-medium transition-colors hover:text-[#C87960] ${isActive("/studio") ? "text-[#172B3A] underline decoration-[#C87960] underline-offset-8" : "text-[#252B2E]/80"
               }`}
           >
-            AI Studio
+            Studio
           </button>
           <Link
             to="/explore"
@@ -197,11 +197,11 @@ export const Navbar: React.FC = () => {
               type="button"
               onClick={() => {
                 setMobileOpen(false);
-                handleProtectedNavigation("/studio", "access the AI Design Studio");
+                handleProtectedNavigation("/studio", "access the Design Studio");
               }}
               className="text-left text-sm font-medium text-[#172B3A]"
             >
-              AI Design Studio
+              Design Studio
             </button>
             <Link to="/explore" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-[#172B3A]">
               Explore Designs

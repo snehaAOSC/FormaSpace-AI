@@ -34,7 +34,7 @@ export const ExploreDesignsPage: React.FC = () => {
               Explore Designs & Spatial Movements
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-[#252B2E]/75">
-              Browse all 15 architectural style directions and 13 interior, exterior, and landscape typologies. Launch any aesthetic straight inside AI Studio.
+              Browse all 15 architectural style directions and 13 interior, exterior, and landscape typologies. Launch any aesthetic straight inside Design Studio.
             </p>
           </div>
           <div className="relative w-full md:w-80">
@@ -84,7 +84,7 @@ export const ExploreDesignsPage: React.FC = () => {
                     }}
                     className="btn-secondary w-full justify-center py-2 text-xs"
                   >
-                    Open in AI Studio <ArrowRight className="h-3.5 w-3.5" />
+                    Open in Studio <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>

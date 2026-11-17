@@ -33,7 +33,7 @@ export const Footer: React.FC = () => {
               The FormaSpace Journal
             </span>
             <h3 className="font-editorial text-lg font-medium text-white sm:text-xl">
-              Architectural studies & AI spatial releases
+              Architectural studies & spatial design releases
             </h3>
           </div>
           <form onSubmit={handleSubscribe} className="w-full sm:w-auto">
@@ -68,7 +68,7 @@ export const Footer: React.FC = () => {
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <Link to="/" className="inline-block font-editorial text-xl font-semibold text-white hover:text-[#C87960] transition">
-              FormaSpace <span className="text-[#C87960]">AI</span>
+              FormaSpace <span className="text-[#C87960]">Studio</span>
             </Link>
             <p className="mt-2 text-xs leading-relaxed text-[#F7F4ED]/70">
               Editorial architectural visualization, room transformation, and intelligent spatial design.
@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#DCCBB5]">Design Studio</h4>
             <ul className="mt-2.5 space-y-1.5 text-xs text-[#F7F4ED]/75">
-              <li><Link to="/studio" className="transition hover:text-[#C87960] hover:underline underline-offset-2">AI Studio</Link></li>
+              <li><Link to="/studio" className="transition hover:text-[#C87960] hover:underline underline-offset-2">Design Studio</Link></li>
               <li><Link to="/studio?feature=virtual_staging" className="transition hover:text-[#C87960] hover:underline underline-offset-2">Virtual Staging</Link></li>
               <li><Link to="/studio?feature=room_declutter" className="transition hover:text-[#C87960] hover:underline underline-offset-2">Room Declutter</Link></li>
               <li><Link to="/studio?feature=sketch_to_render" className="transition hover:text-[#C87960] hover:underline underline-offset-2">Sketch to Render</Link></li>
@@ -108,7 +108,7 @@ export const Footer: React.FC = () => {
 
         {/* Clean Bottom Copyright Bar */}
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-[#F7F4ED]/15 pt-6 text-xs text-[#F7F4ED]/55 sm:flex-row">
-          <p>© {new Date().getFullYear()} FormaSpace AI Architecture Studio. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FormaSpace Architecture Studio. All rights reserved.</p>
           <div className="flex gap-4">
             <Link to="/about" className="hover:text-[#F7F4ED] transition">About</Link>
             <Link to="/studio" className="hover:text-[#F7F4ED] transition">Design Studio</Link>

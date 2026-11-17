@@ -79,7 +79,7 @@ export const FurnitureFinderPage: React.FC = () => {
             to={`/studio?sample=${encodeURIComponent(searchParams.get("sample") || "")}&style=${encodeURIComponent(style || "")}&category=${encodeURIComponent(searchParams.get("room") || "")}`}
             className="inline-flex items-center gap-2 rounded-full border border-[#DCCBB5] bg-white px-4 py-2 text-xs font-semibold text-[#172B3A] shadow-sm hover:border-[#C87960] hover:text-[#C87960] transition"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to AI Studio
+            <ArrowLeft className="h-4 w-4" /> Back to Design Studio
           </Link>
           <div className="text-xs text-[#252B2E]/60">
             Active Space: <strong className="text-[#172B3A]">{searchParams.get("room") || "Room"}</strong> · Style: <strong className="text-[#C87960]">{style || "Modern Luxury"}</strong>
@@ -112,7 +112,7 @@ export const FurnitureFinderPage: React.FC = () => {
           </div>
           <div className="lg:col-span-8 space-y-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-[#C87960]">
-              AI Identified Pieces in This Space
+              Identified Pieces in This Space
             </div>
             <div className="flex flex-wrap gap-2">
               {detected.map((d) => (
@@ -121,8 +121,8 @@ export const FurnitureFinderPage: React.FC = () => {
                   type="button"
                   onClick={() => setCategory(d.label)}
                   className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${category === d.label
-                      ? "border-[#172B3A] bg-[#172B3A] text-white"
-                      : "border-[#DCCBB5] bg-[#F7F4ED] text-[#172B3A] hover:border-[#C87960]"
+                    ? "border-[#172B3A] bg-[#172B3A] text-white"
+                    : "border-[#DCCBB5] bg-[#F7F4ED] text-[#172B3A] hover:border-[#C87960]"
                     }`}
                 >
                   {d.label}
@@ -164,7 +164,7 @@ export const FurnitureFinderPage: React.FC = () => {
           </div>
         </div>
 
-        {/* AI Recommended Design Options for this Space */}
+        {/* Recommended Design Options for this Space */}
         {(() => {
           const room = searchParams.get("room") || "Living Room";
           const rLower = room.toLowerCase();
@@ -248,11 +248,11 @@ export const FurnitureFinderPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#C87960]" />
                   <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#172B3A]">
-                    AI Recommended Design Options for this Space
+                    Recommended Design Options for this Space
                   </h3>
                 </div>
                 <span className="text-xs text-[#252B2E]/65">
-                  Click any style to apply and re-open in AI Studio
+                  Click any style to apply and re-open in Design Studio
                 </span>
               </div>
 
@@ -362,8 +362,8 @@ export const FurnitureFinderPage: React.FC = () => {
                     type="button"
                     onClick={() => handleSaveItem(p)}
                     className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full py-2 text-xs font-medium transition ${isSaved
-                        ? "bg-[#9BAE9A]/30 text-[#172B3A]"
-                        : "bg-[#172B3A] text-white hover:bg-[#C87960]"
+                      ? "bg-[#9BAE9A]/30 text-[#172B3A]"
+                      : "bg-[#172B3A] text-white hover:bg-[#C87960]"
                       }`}
                   >
                     {isSaved ? <Check className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}

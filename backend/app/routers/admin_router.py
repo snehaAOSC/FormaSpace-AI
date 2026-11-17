@@ -153,3 +153,17 @@ def admin_error_logs(_admin: dict = Depends(require_admin)):
         rows = conn.execute("SELECT * FROM error_logs ORDER BY created_at DESC LIMIT 100").fetchall()
     return {"logs": [dict(r) for r in rows]}
 
+
+@router.delete("/error-logs")
+def admin_clear_error_logs(_admin: dict = Depends(require_admin)):
+    with get_db() as conn:
+        conn.execute("DELETE FROM error_logs")
+    return {"cleared": True}
+
+
+@router.delete("/error-logs/{log_id}")
+def admin_delete_error_log(log_id: str, _admin: dict = Depends(require_admin)):
+    with get_db() as conn:
+        conn.execute("DELETE FROM error_logs WHERE id = ?", (log_id,))
+    return {"deleted": True, "id": log_id}
+

@@ -46,7 +46,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         <div className="min-h-screen bg-[#F7F4ED] p-8 text-[#172B3A] flex items-center justify-center">
           <div className="max-w-xl rounded-2xl border border-red-300 bg-white p-8 shadow-editorial">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C87960]">
-              FormaSpace AI System Guard
+              FormaSpace System Guard
             </span>
             <h1 className="mt-2 font-editorial text-2xl font-bold text-[#172B3A]">
               Application View Encountered an Error
@@ -91,7 +91,7 @@ export function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/auth" element={<AuthPage />} />
 
-                {/* Protected AI workspaces & main content */}
+                {/* Protected workspaces & main content */}
                 <Route
                   path="/studio"
                   element={

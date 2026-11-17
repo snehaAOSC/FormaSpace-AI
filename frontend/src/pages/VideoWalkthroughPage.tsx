@@ -271,7 +271,7 @@ export const VideoWalkthroughPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Tab 1: User's AI Redesigns */}
+              {/* Tab 1: User's Redesigns */}
               {selectedSpaceTab === "redesigns" && (
                 <div className="mt-3">
                   {userRedesigns.length > 0 ? (

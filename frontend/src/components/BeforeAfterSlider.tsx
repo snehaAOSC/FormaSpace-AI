@@ -14,7 +14,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   beforeSrc,
   afterSrc,
   beforeLabel = "Original",
-  afterLabel = "FormaSpace AI",
+  afterLabel = "FormaSpace",
   className = "aspect-[16/10]",
   onPositionChange,
 }) => {

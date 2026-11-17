@@ -58,12 +58,12 @@ const HERO_MODES: HeroMode[] = [
     name: "Exteriors",
     icon: Home,
     tagline: "ARCHITECTURAL FAÇADE TRANSFORMATION",
-    headline: "Redesign Exteriors with AI, in less than 30 seconds",
+    headline: "Redesign Exteriors, in less than 30 seconds",
     subhead: "Upload a photo of your house. Transform walls, roofs, windows, and finishes into luxury contemporary architecture with structure locked.",
     beforeSrc: "/images/exterior-before.jpg",
     afterSrc: "/images/exterior-after.jpg",
     beforeLabel: "Original Suburban House",
-    afterLabel: "Modern Villa · FormaSpace AI",
+    afterLabel: "Modern Villa · FormaSpace",
     categoryLabel: "Exterior Architecture",
     materialMatch: "Limestone & Cedar Timber",
     palette: ["#F7F4ED", "#C87960", "#252B2E", "#9BAE9A", "#172B3A"],
@@ -75,12 +75,12 @@ const HERO_MODES: HeroMode[] = [
     name: "Interiors",
     icon: Compass,
     tagline: "STRUCTURAL INTERIOR REDESIGN",
-    headline: "Redesign Interiors with AI, in less than 30 seconds",
+    headline: "Redesign Interiors, in less than 30 seconds",
     subhead: "Upload one photo. Get a real redesign in 30 seconds. Your walls, windows and layout stay exactly as they are. Only the design changes.",
     beforeSrc: "/images/hero-before.jpg",
     afterSrc: "/images/hero-after.jpg",
     beforeLabel: "Original 1990s Room",
-    afterLabel: "Modern Luxury · FormaSpace AI",
+    afterLabel: "Modern Luxury · FormaSpace",
     categoryLabel: "Pacific Heights Salon",
     materialMatch: "Honed Travertine & Bouclé",
     palette: ["#F7F4ED", "#DCCBB5", "#C87960", "#9BAE9A", "#172B3A"],
@@ -92,12 +92,12 @@ const HERO_MODES: HeroMode[] = [
     name: "Gardens",
     icon: Trees,
     tagline: "LANDSCAPE & PATIO TRANSFORMATION",
-    headline: "Transform Gardens & Patios with AI, in less than 30 seconds",
+    headline: "Transform Gardens & Patios, in less than 30 seconds",
     subhead: "Turn dry or neglected yards into Mediterranean courtyard sanctuaries with plunge pools, sunken firepits, and architectural olive trees.",
     beforeSrc: "/images/garden-before.jpg",
     afterSrc: "/images/garden-after.jpg",
     beforeLabel: "Original Backyard",
-    afterLabel: "Travertine Sanctuary · FormaSpace AI",
+    afterLabel: "Travertine Sanctuary · FormaSpace",
     categoryLabel: "Garden & Landscape",
     materialMatch: "Travertine Terrace & Plunge Pool",
     palette: ["#DCCBB5", "#9BAE9A", "#C87960", "#172B3A", "#F7F4ED"],
@@ -109,12 +109,12 @@ const HERO_MODES: HeroMode[] = [
     name: "Virtual Staging",
     icon: Sparkles,
     tagline: "VACANT ROOM FURNISHING",
-    headline: "Virtually Stage Empty Spaces with AI, in less than 30 seconds",
-    subhead: "Upload vacant property photos. AI automatically places curated designer sofas, rugs, lighting, and art with perfect perspective.",
+    headline: "Virtually Stage Empty Spaces, in less than 30 seconds",
+    subhead: "Upload vacant property photos. Automatically place curated designer sofas, rugs, lighting, and art with perfect perspective.",
     beforeSrc: "/images/empty-room.jpg",
     afterSrc: "/images/staged-room.jpg",
     beforeLabel: "Unfurnished Shell",
-    afterLabel: "Mid-Century Staged · FormaSpace AI",
+    afterLabel: "Mid-Century Staged · FormaSpace",
     categoryLabel: "Virtual Staging Loft",
     materialMatch: "Cognac Leather & Wool Rug",
     palette: ["#FFFFFF", "#DCCBB5", "#C87960", "#252B2E", "#172B3A"],
@@ -126,7 +126,7 @@ const HERO_MODES: HeroMode[] = [
     name: "Video Tours",
     icon: Video,
     tagline: "4K CINEMATIC MOTION WALKTHROUGHS",
-    headline: "Generate Cinematic AI Video Tours, in less than 30 seconds",
+    headline: "Generate Cinematic Video Tours, in less than 30 seconds",
     subhead: "Convert any redesigned space into smooth 4K architectural camera flythroughs with dolly, orbit, and pan pacing. Ready for clients & presentations.",
     beforeSrc: "/images/hero-before.jpg",
     afterSrc: "/images/hero-after.jpg",
@@ -143,7 +143,7 @@ const HERO_MODES: HeroMode[] = [
     name: "3D Floor Plans",
     icon: Layers,
     tagline: "2D BLUEPRINT TO 3D ISOMETRIC",
-    headline: "Convert 2D Floor Plans into 3D with AI, in less than 30 seconds",
+    headline: "Convert 2D Floor Plans into 3D, in less than 30 seconds",
     subhead: "Turn 2D blueprint drafts and CAD sketches into fully furnished 3D isometric cutaways and circulation studies with realistic daylighting.",
     beforeSrc: "/images/floorplan-2d.jpg",
     afterSrc: "/images/floorplan-3d.jpg",
@@ -270,7 +270,7 @@ export const HomePage: React.FC = () => {
                   {heroMediaMode === "video" ? (
                     <ArchitecturalVideoTourPlayer
                       sourceImage={currentHero.videoSource}
-                      title={`FormaSpace AI · ${currentHero.name} 4K Walkthrough`}
+                      title={`FormaSpace · ${currentHero.name} 4K Walkthrough`}
                       category={currentHero.categoryLabel}
                       autoPlay={true}
                       className="aspect-[16/11]"
@@ -368,7 +368,7 @@ export const HomePage: React.FC = () => {
                 Explore Design Categories
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-[#252B2E]/75">
-                Select any interior room, architectural facade, outdoor sanctuary, or commercial environment to launch directly inside AI Studio.
+                Select any interior room, architectural facade, outdoor sanctuary, or commercial environment to launch directly inside Design Studio.
               </p>
             </div>
 
@@ -480,7 +480,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* =====================================================================
-          4. AI DESIGN TOOLS SHOWCASE + DEDICATED MODULES
+          4. DESIGN TOOLS SHOWCASE + DEDICATED MODULES
       ====================================================================== */}
       <section className="py-20 bg-[#172B3A] text-[#F7F4ED]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -490,18 +490,18 @@ export const HomePage: React.FC = () => {
                 03 · Intelligent Studio Suite
               </span>
               <h2 className="mt-2 font-editorial text-3xl font-semibold text-white sm:text-4xl">
-                Ten specialized AI design instruments.
+                Ten specialized design instruments.
               </h2>
             </div>
             <button
               type="button"
               onClick={() => {
-                if (!requireAuth("/studio", "open the AI Design Studio suite")) return;
+                if (!requireAuth("/studio", "open the Design Studio suite")) return;
                 navigate("/studio");
               }}
               className="btn-terracotta self-start"
             >
-              Open AI Design Studio
+              Open Design Studio
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -559,7 +559,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               <div className="mt-6 flex items-center justify-between gap-3">
-                <span className="text-xs text-[#252B2E]/65">Includes AI Object Detection & Variations</span>
+                <span className="text-xs text-[#252B2E]/65">Includes Object Detection & Variations</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -579,7 +579,7 @@ export const HomePage: React.FC = () => {
           {/* 4 Companion Modules */}
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { to: "/video-walkthrough", icon: Film, title: "AI Video Walkthrough", desc: "Animate renders with smooth camera pan & zoom." },
+              { to: "/video-walkthrough", icon: Film, title: "Video Walkthrough", desc: "Animate renders with smooth camera pan & zoom." },
               { to: "/floor-plans", icon: Layers, title: "Floor Plan Generator", desc: "Convert 2D blueprints into furnished 3D cutaways." },
               { to: "/furniture-finder", icon: ShoppingBag, title: "Furniture Finder", desc: "Identify & source matching furnishings." },
               { to: "/budget-estimator", icon: Calculator, title: "Budget Estimator", desc: "Compare materials, labour & finish costs." },
@@ -617,7 +617,7 @@ export const HomePage: React.FC = () => {
               Before & After Architectural Studies
             </h2>
             <p className="mt-2 text-sm text-[#252B2E]/75">
-              Inspect how FormaSpace AI preserves structural envelopes across interiors, facades, gardens, and empty apartments.
+              Inspect how FormaSpace preserves structural envelopes across interiors, facades, gardens, and empty apartments.
             </p>
           </div>
 

@@ -67,7 +67,7 @@ export const PricingPage: React.FC = () => {
         <div className="mx-auto mt-6 max-w-3xl flex items-start gap-2.5 rounded-2xl border border-[#DCCBB5] bg-white px-4 py-3 text-xs text-[#252B2E]">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#C87960]" />
           <span>
-            Plan prices and monthly AI credit allowances are live-configurable from the Admin Console. Payment gateway checkout is intentionally omitted in this release.
+            Plan prices and monthly credit allowances are live-configurable from the Admin Console. Payment gateway checkout is intentionally omitted in this release.
           </span>
         </div>
 
@@ -103,7 +103,7 @@ export const PricingPage: React.FC = () => {
                   <span className="text-xs opacity-70">/ month</span>
                 </div>
                 <div className="mt-1 text-xs font-medium text-[#C87960]">
-                  {pl.credits_per_month} AI credits included monthly
+                  {pl.credits_per_month} credits included monthly
                 </div>
 
                 <ul className="mt-6 space-y-3 text-sm">

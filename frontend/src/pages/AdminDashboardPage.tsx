@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, BarChart3, FolderKanban, Layers, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, BarChart3, FolderKanban, Layers, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import type { DesignCategory, Project } from "../types";
@@ -83,6 +83,26 @@ export const AdminDashboardPage: React.FC = () => {
     loadAdminData();
   };
 
+  const handleClearLogs = async () => {
+    try {
+      await api.delete("/api/admin/error-logs");
+      setLogs([]);
+      setMsg("All system error logs cleared.");
+    } catch (err: any) {
+      setMsg(err.message || "Failed to clear logs.");
+    }
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    try {
+      await api.delete(`/api/admin/error-logs/${id}`);
+      setLogs((prev) => prev.filter((l) => l.id !== id));
+      setMsg("Error log removed.");
+    } catch (err: any) {
+      setMsg(err.message || "Failed to remove log.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F4ED] py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
@@ -131,7 +151,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { label: "Total Registered Users", val: overview.metrics.total_users },
-              { label: "AI Spatial Generations", val: overview.metrics.ai_generations },
+              { label: "Spatial Generations", val: overview.metrics.ai_generations },
               { label: "Total Projects", val: overview.metrics.total_projects },
             ].map((m) => (
               <div key={m.label} className="editorial-card p-5">
@@ -169,7 +189,7 @@ export const AdminDashboardPage: React.FC = () => {
 
             <div className="editorial-card p-6">
               <h2 className="font-editorial text-xl font-semibold text-[#172B3A] mb-4">
-                Generations by AI Feature
+                Generations by Studio Feature
               </h2>
               <div className="space-y-3">
                 {overview.feature_analytics.map((row: any) => (
@@ -294,15 +314,49 @@ export const AdminDashboardPage: React.FC = () => {
 
         {tab === "logs" && (
           <div className="editorial-card p-6">
-            <h2 className="font-editorial text-xl font-semibold text-[#172B3A] mb-4">System Error Logs</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-editorial text-xl font-semibold text-[#172B3A]">System Error Logs</h2>
+                <p className="text-xs text-[#252B2E]/65 mt-0.5">
+                  Real-time server exception monitor ({logs.length} logged error{logs.length !== 1 ? "s" : ""})
+                </p>
+              </div>
+              {logs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearLogs}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition shadow-sm"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Clear All Logs</span>
+                </button>
+              )}
+            </div>
             {logs.length === 0 ? (
-              <p className="text-xs text-[#252B2E]/65">No server errors logged. All endpoints healthy.</p>
+              <div className="rounded-2xl border border-dashed border-[#9BAE9A] bg-[#9BAE9A]/10 p-8 text-center">
+                <ShieldCheck className="mx-auto h-8 w-8 text-[#9BAE9A] mb-2" />
+                <p className="text-sm font-medium text-[#172B3A]">All endpoints healthy</p>
+                <p className="text-xs text-[#252B2E]/65 mt-0.5">No system error logs recorded.</p>
+              </div>
             ) : (
               <div className="space-y-2 text-xs">
                 {logs.map((l) => (
-                  <div key={l.id} className="rounded-xl border border-red-200 bg-red-50 p-3">
-                    <div className="font-semibold text-red-900">{l.endpoint}</div>
-                    <div className="text-red-700">{l.error_message}</div>
+                  <div key={l.id} className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-3.5">
+                    <div>
+                      <div className="font-semibold text-red-900">{l.endpoint}</div>
+                      <div className="mt-0.5 text-red-700">{l.error_message}</div>
+                      <div className="mt-1 text-[10px] text-red-500">
+                        {l.created_at ? new Date(l.created_at).toLocaleString() : "Recently logged"}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteLog(l.id)}
+                      className="rounded-lg p-1 text-red-400 hover:bg-red-100 hover:text-red-700 transition"
+                      title="Delete log entry"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 ))}
               </div>

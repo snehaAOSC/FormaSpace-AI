@@ -183,7 +183,7 @@ export const PrecisionMaskCanvas: React.FC<PrecisionMaskCanvasProps> = ({
         />
         <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-[#172B3A]/85 px-3 py-1 text-[11px] text-[#F7F4ED]">
           {hasStrokes
-            ? "Precision Mask Active — AI will edit painted area"
+            ? "Precision Mask Active — engine will edit painted area"
             : "Paint over any sofa, wall, floor, or clutter to mask"}
         </span>
       </div>

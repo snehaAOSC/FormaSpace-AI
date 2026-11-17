@@ -78,7 +78,7 @@ export const AuthPage: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#172B3A] via-[#172B3A]/40 to-transparent p-8 flex flex-col justify-end text-[#F7F4ED]">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C87960]">
-              FormaSpace AI Studio
+              FormaSpace Design Studio
             </span>
             <h2 className="mt-2 font-editorial text-2xl font-semibold">
               Private workspace for your architectural concepts.
