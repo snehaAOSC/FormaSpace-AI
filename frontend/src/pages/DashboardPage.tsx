@@ -182,10 +182,6 @@ export const DashboardPage: React.FC = () => {
                   <ShieldCheck className="h-3 w-3 text-[#9BAE9A]" />
                   {user.plan_id ? `${user.plan_id.charAt(0).toUpperCase() + user.plan_id.slice(1)} Plan` : "Architect"}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#C87960]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#C87960]">
-                  <Sparkles className="h-3 w-3 text-[#C87960]" />
-                  {user.credits ?? stats.remaining_credits ?? 0} Credits
-                </span>
               </div>
             </div>
 
@@ -246,7 +242,7 @@ export const DashboardPage: React.FC = () => {
           {tab === "overview" && (
             <>
               {/* Stat Cards Row */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div className="editorial-card p-5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#252B2E]/65">Designs Generated</span>
@@ -274,18 +270,6 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="mt-1 font-editorial text-3xl font-semibold text-[#172B3A]">
                     {projects.length}
-                  </div>
-                </div>
-
-                <div className="editorial-card p-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#252B2E]/65">Available Credits</span>
-                    <span className="rounded-full bg-[#9BAE9A]/25 px-2 py-0.5 text-[10px] font-semibold text-[#172B3A]">
-                      {user.plan_id ? user.plan_id.toUpperCase() : "PRO"}
-                    </span>
-                  </div>
-                  <div className="mt-1 font-editorial text-3xl font-semibold text-[#172B3A]">
-                    {user.credits ?? stats.remaining_credits ?? 0}
                   </div>
                 </div>
               </div>
@@ -896,7 +880,7 @@ export const DashboardPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Plan & Credits Summary Card */}
+              {/* Plan Summary Card */}
               <div className="rounded-2xl border border-[#DCCBB5] bg-[#F7F4ED]/60 p-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[#C87960]">
@@ -906,15 +890,7 @@ export const DashboardPage: React.FC = () => {
                     {user.plan_id} Plan · {user.role === "admin" ? "Administrator" : "Architect"}
                   </div>
                   <div className="text-xs text-[#252B2E]/70 mt-0.5">
-                    Monthly credits replenish automatically on billing cycle.
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] uppercase tracking-wider text-[#252B2E]/60 font-semibold">
-                    Available Credits
-                  </div>
-                  <div className="font-editorial text-2xl font-bold text-[#172B3A]">
-                    {user.credits ?? stats.remaining_credits ?? 0}
+                    Architectural plan active · Full access to design studio & modules.
                   </div>
                 </div>
               </div>
