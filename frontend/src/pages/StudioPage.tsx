@@ -8,7 +8,6 @@ import {
   Download,
   Eye,
   Film,
-  HelpCircle,
   History,
   ImagePlus,
   KeyRound,
@@ -801,14 +800,8 @@ export const StudioPage: React.FC = () => {
             {/* What is it? / Room Type */}
             <div>
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[#172B3A] flex items-center gap-1.5">
-                  <span>Room Type</span>
-                  <span
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#DCCBB5]/40 text-[10px] text-[#252B2E]/75"
-                    title="What is this space? (Bedroom, Living room, Kitchen, etc.)"
-                  >
-                    <HelpCircle className="h-3 w-3 text-[#252B2E]/60" />
-                  </span>
+                <label className="text-xs font-semibold text-[#172B3A]">
+                  Room Type
                 </label>
                 <span className="text-[11px] font-semibold text-[#C87960]">{roomType}</span>
               </div>
@@ -835,14 +828,8 @@ export const StudioPage: React.FC = () => {
             {/* Tool */}
             <div>
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[#172B3A] flex items-center gap-1.5">
-                  <span>Tool</span>
-                  <span
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#DCCBB5]/40 text-[10px] text-[#252B2E]/75"
-                    title="Transformation tool to apply to this space"
-                  >
-                    <HelpCircle className="h-3 w-3 text-[#252B2E]/60" />
-                  </span>
+                <label className="text-xs font-semibold text-[#172B3A]">
+                  Tool
                 </label>
                 <span className="text-[11px] text-[#252B2E]/65">
                   {STUDIO_FEATURES.find((f) => f.id === featureType)?.short}
@@ -868,14 +855,8 @@ export const StudioPage: React.FC = () => {
             {/* Design Style */}
             <div>
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[#172B3A] flex items-center gap-1.5">
-                  <span>Design Style</span>
-                  <span
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#DCCBB5]/40 text-[10px] text-[#252B2E]/75"
-                    title="Target architectural aesthetic"
-                  >
-                    <HelpCircle className="h-3 w-3 text-[#252B2E]/60" />
-                  </span>
+                <label className="text-xs font-semibold text-[#172B3A]">
+                  Design Style
                 </label>
                 <span className="text-[11px] font-semibold text-[#C87960]">{style}</span>
               </div>
