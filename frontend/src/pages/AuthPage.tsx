@@ -199,18 +199,6 @@ export const AuthPage: React.FC = () => {
               </div>
             )}
 
-            {mode === "login" && (
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => setMode("forgot")}
-                  className="text-xs font-medium text-[#C87960] hover:underline"
-                >
-                  Forgot password?
-                </button>
-              </div>
-            )}
-
             {error && (
               <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">
                 {error}
@@ -232,54 +220,6 @@ export const AuthPage: React.FC = () => {
                 ? "Send Reset Link"
                 : "Update Password"}
             </button>
-
-            {mode === "login" && (
-              <div className="pt-2 border-t border-[#DCCBB5]/40 space-y-2">
-                <div className="text-[11px] font-medium text-center text-[#252B2E]/60">Or test with 1-click demo accounts:</div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setEmail("studio@formaspace.ai");
-                      setPassword("FormaSpace2026!");
-                      setLoading(true);
-                      setError("");
-                      try {
-                        await login("studio@formaspace.ai", "FormaSpace2026!");
-                        navigate("/studio");
-                      } catch (err: any) {
-                        setError(err.message || "Login failed");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-[#C87960]/40 bg-[#C87960]/10 py-2.5 px-2 text-xs font-semibold text-[#C87960] hover:bg-[#C87960]/20 transition"
-                  >
-                    <span>⚡ Architect Demo</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setEmail("admin@formaspace.ai");
-                      setPassword("AdminForma2026!");
-                      setLoading(true);
-                      setError("");
-                      try {
-                        const u = await login("admin@formaspace.ai", "AdminForma2026!");
-                        navigate(u.role === "admin" ? "/admin" : "/dashboard");
-                      } catch (err: any) {
-                        setError(err.message || "Login failed");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-[#172B3A]/40 bg-[#172B3A]/5 py-2.5 px-2 text-xs font-semibold text-[#172B3A] hover:bg-[#172B3A]/10 transition"
-                  >
-                    <span>👑 Admin Demo</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </form>
 
           {/* Google OAuth - only rendered if active/configured */}
