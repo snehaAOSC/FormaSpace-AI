@@ -1067,11 +1067,6 @@ export const StudioPage: React.FC = () => {
                   <Loader2 className="h-4 w-4 animate-spin text-white" />
                   <span>Generating {roomType}...</span>
                 </>
-              ) : !originalUrl ? (
-                <>
-                  <UploadCloud className="h-4 w-4 text-[#C87960]" />
-                  <span>Upload Photo to Generate</span>
-                </>
               ) : (
                 <>
                   <Wand2 className="h-4 w-4 text-[#C87960]" />
