@@ -433,6 +433,15 @@ def list_budget_estimates(current_user: dict = Depends(get_current_user)):
     }
 
 
+@router.delete("/budget/estimates/{estimate_id}")
+def delete_budget_estimate(estimate_id: str, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        res = conn.execute("DELETE FROM budget_estimates WHERE id = ? AND user_id = ?", (estimate_id, current_user["id"]))
+        if res.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Estimate not found")
+    return {"deleted": True}
+
+
 # --- 5. Smart Furniture Cost Estimator ---
 @router.post("/smart-estimator/analyze")
 def analyze_smart_furniture_cost(req: SmartEstimatorAnalyzeRequest):

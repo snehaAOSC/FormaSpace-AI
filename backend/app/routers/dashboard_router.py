@@ -165,6 +165,22 @@ def create_project(req: CreateProjectRequest, current_user: dict = Depends(get_c
     }
 
 
+@router.patch("/dashboard/projects/{project_id}")
+def update_project(project_id: str, req: dict, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        proj = conn.execute("SELECT * FROM projects WHERE id = ? AND user_id = ?", (project_id, current_user["id"])).fetchone()
+        if not proj:
+            raise HTTPException(status_code=404, detail="Project not found")
+        folder_id = req.get("folder_id", proj["folder_id"])
+        title = req.get("title", proj["title"])
+        category = req.get("category", proj["category"])
+        conn.execute(
+            "UPDATE projects SET folder_id = ?, title = ?, category = ?, updated_at = ? WHERE id = ? AND user_id = ?",
+            (folder_id, title, category, now_iso(), project_id, current_user["id"]),
+        )
+    return {"updated": True}
+
+
 @router.delete("/dashboard/projects/{project_id}")
 def delete_project(project_id: str, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:

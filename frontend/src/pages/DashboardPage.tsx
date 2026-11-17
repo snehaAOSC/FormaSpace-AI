@@ -16,6 +16,7 @@ import {
   Sparkles,
   Trash2,
   Wand2,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -121,24 +122,102 @@ export const DashboardPage: React.FC = () => {
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
-    const res = await api.post<{ folder: ProjectFolder }>("/api/dashboard/folders", {
-      name: newFolderName,
-      color: "#C87960",
-    });
-    setFolders((prev) => [res.folder, ...prev]);
-    setNewFolderName("");
+    try {
+      const res = await api.post<{ folder: ProjectFolder }>("/api/dashboard/folders", {
+        name: newFolderName.trim(),
+        color: "#C87960",
+      });
+      setFolders((prev) => [res.folder, ...prev]);
+      setNewFolderName("");
+      setStatusMsg("Folder created successfully.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to create folder.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
+  const handleDeleteFolder = async (e: React.MouseEvent, folderId: string) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/api/dashboard/folders/${folderId}`);
+      setFolders((prev) => prev.filter((f) => f.id !== folderId));
+      if (selectedFolder === folderId) {
+        setSelectedFolder("");
+      }
+      setStatusMsg("Folder removed.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to delete folder.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
   };
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjectTitle.trim()) return;
-    const res = await api.post<{ project: Project }>("/api/dashboard/projects", {
-      title: newProjectTitle,
-      category: newProjectCat,
-      folder_id: selectedFolder || null,
-    });
-    setProjects((prev) => [res.project, ...prev]);
-    setNewProjectTitle("");
+    try {
+      const res = await api.post<{ project: Project }>("/api/dashboard/projects", {
+        title: newProjectTitle.trim(),
+        category: newProjectCat,
+        folder_id: selectedFolder || null,
+      });
+      setProjects((prev) => [res.project, ...prev]);
+      setNewProjectTitle("");
+      setStatusMsg("Project created successfully.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to create project.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await api.delete(`/api/dashboard/projects/${projectId}`);
+      setProjects((prev) => prev.filter((x) => x.id !== projectId));
+      setStatusMsg("Project deleted successfully.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to delete project.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
+  const handleDeleteDesign = async (designId: string) => {
+    try {
+      await api.delete(`/api/studio/designs/${designId}`);
+      setDesigns((prev) => prev.filter((x) => x.id !== designId));
+      setStatusMsg("Design removed from history.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to delete design.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
+  const handleDeleteFurniture = async (furnitureId: string) => {
+    try {
+      await api.delete(`/api/modules/furniture/collection/${furnitureId}`);
+      setFurniture((prev) => prev.filter((x) => x.id !== furnitureId));
+      setStatusMsg("Furniture piece removed from collection.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to remove furniture.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
+  const handleDeleteBudget = async (estimateId: string) => {
+    try {
+      await api.delete(`/api/modules/budget/estimates/${estimateId}`);
+      setBudgets((prev) => prev.filter((b) => b.id !== estimateId));
+      setStatusMsg("Cost estimate deleted.");
+      setTimeout(() => setStatusMsg(""), 2500);
+    } catch (err: any) {
+      setStatusMsg(err?.message || "Failed to delete estimate.");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
   };
 
   const handleToggleSave = async (designId: string) => {
@@ -193,11 +272,10 @@ export const DashboardPage: React.FC = () => {
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition ${
-                      active
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition ${active
                         ? "bg-[#172B3A] text-white"
                         : "text-[#252B2E] hover:bg-[#F7F4ED]"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <item.icon className={`h-4 w-4 ${active ? "text-[#C87960]" : "text-[#172B3A]/70"}`} />
@@ -205,9 +283,8 @@ export const DashboardPage: React.FC = () => {
                     </div>
                     {typeof item.count === "number" && item.count > 0 && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          active ? "bg-white/20 text-white" : "bg-[#DCCBB5]/50 text-[#172B3A]"
-                        }`}
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${active ? "bg-white/20 text-white" : "bg-[#DCCBB5]/50 text-[#172B3A]"
+                          }`}
                       >
                         {item.count}
                       </span>
@@ -512,26 +589,49 @@ export const DashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedFolder("")}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-                    selectedFolder === "" ? "bg-[#172B3A] text-white" : "bg-[#F7F4ED] text-[#252B2E] hover:bg-[#DCCBB5]/40"
-                  }`}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${selectedFolder === "" ? "bg-[#172B3A] text-white" : "bg-[#F7F4ED] text-[#252B2E] hover:bg-[#DCCBB5]/40"
+                    }`}
                 >
                   All Folders ({projects.length})
                 </button>
-                {folders.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setSelectedFolder(f.id)}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium border transition ${
-                      selectedFolder === f.id
-                        ? "border-[#C87960] bg-[#C87960] text-white"
-                        : "border-[#DCCBB5] bg-white text-[#172B3A] hover:bg-[#F7F4ED]"
-                    }`}
-                  >
-                    {f.name}
-                  </button>
-                ))}
+                {folders.map((f) => {
+                  const folderCount = projects.filter((p) => p.folder_id === f.id).length;
+                  const isSelected = selectedFolder === f.id;
+                  return (
+                    <div
+                      key={f.id}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition ${
+                        isSelected
+                          ? "border-[#C87960] bg-[#C87960] text-white"
+                          : "border-[#DCCBB5] bg-white text-[#172B3A] hover:bg-[#F7F4ED]"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFolder(isSelected ? "" : f.id)}
+                        className="flex items-center gap-1.5 focus:outline-none"
+                      >
+                        <span>{f.name}</span>
+                        <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-[#252B2E]/60"}`}>
+                          ({folderCount})
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteFolder(e, f.id)}
+                        className={`ml-1 rounded-full p-0.5 transition ${
+                          isSelected
+                            ? "hover:bg-white/20 text-white"
+                            : "hover:bg-red-50 text-[#252B2E]/50 hover:text-red-700"
+                        }`}
+                        title={`Delete folder "${f.name}"`}
+                        aria-label={`Delete ${f.name} folder`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
 
               <form onSubmit={handleCreateProject} className="flex flex-wrap gap-2 border-t border-[#DCCBB5]/60 pt-4">
@@ -563,29 +663,38 @@ export const DashboardPage: React.FC = () => {
 
               {visibleProjects.length === 0 ? (
                 <div className="py-12 text-center text-xs text-[#252B2E]/65">
-                  No projects in this folder yet.
+                  {selectedFolder
+                    ? "No projects in this folder yet. Use the form above to add one, or select 'All Folders'."
+                    : "No projects created yet. Use the form above to create your first design project."}
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {visibleProjects.map((p) => (
-                    <div key={p.id} className="rounded-2xl border border-[#DCCBB5] bg-white overflow-hidden shadow-sm">
+                    <div key={p.id} className="rounded-2xl border border-[#DCCBB5] bg-white overflow-hidden shadow-sm hover:shadow-md transition">
                       <img src={p.cover_image || "/images/hero-after.jpg"} alt={p.title} className="h-36 w-full object-cover" />
-                      <div className="p-4 flex items-center justify-between">
-                        <div>
-                          <div className="text-[10px] font-semibold uppercase text-[#C87960]">{p.category}</div>
-                          <div className="font-semibold text-sm text-[#172B3A]">{p.title}</div>
+                      <div className="p-4 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] font-semibold uppercase text-[#C87960] truncate">{p.category}</div>
+                          <div className="font-semibold text-sm text-[#172B3A] truncate">{p.title}</div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            await api.delete(`/api/dashboard/projects/${p.id}`);
-                            setProjects((prev) => prev.filter((x) => x.id !== p.id));
-                          }}
-                          className="text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition"
-                          title="Delete Project"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            to={`/studio?room=${encodeURIComponent(p.category)}&title=${encodeURIComponent(p.title)}`}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] hover:bg-[#F7F4ED] hover:text-[#C87960] transition"
+                            title="Open in AI Design Studio"
+                          >
+                            <span>Open</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(p.id)}
+                            className="text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition"
+                            title="Delete Project"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -613,18 +722,16 @@ export const DashboardPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setTab("history")}
-                      className={`rounded-full px-3.5 py-1 font-medium transition ${
-                        tab === "history" ? "bg-[#172B3A] text-white" : "text-[#252B2E]"
-                      }`}
+                      className={`rounded-full px-3.5 py-1 font-medium transition ${tab === "history" ? "bg-[#172B3A] text-white" : "text-[#252B2E]"
+                        }`}
                     >
                       All ({designs.length})
                     </button>
                     <button
                       type="button"
                       onClick={() => setTab("saved")}
-                      className={`rounded-full px-3.5 py-1 font-medium transition ${
-                        tab === "saved" ? "bg-[#172B3A] text-white" : "text-[#252B2E]"
-                      }`}
+                      className={`rounded-full px-3.5 py-1 font-medium transition ${tab === "saved" ? "bg-[#172B3A] text-white" : "text-[#252B2E]"
+                        }`}
                     >
                       Saved ({savedDesigns.length})
                     </button>
@@ -709,10 +816,7 @@ export const DashboardPage: React.FC = () => {
                             </a>
                             <button
                               type="button"
-                              onClick={async () => {
-                                await api.delete(`/api/studio/designs/${d.id}`);
-                                setDesigns((prev) => prev.filter((x) => x.id !== d.id));
-                              }}
+                              onClick={() => handleDeleteDesign(d.id)}
                               className="inline-flex items-center rounded-lg border border-red-200 bg-white p-1.5 text-red-700 hover:bg-red-50 transition"
                               title="Delete Design"
                             >
@@ -784,10 +888,7 @@ export const DashboardPage: React.FC = () => {
                           </a>
                           <button
                             type="button"
-                            onClick={async () => {
-                              await api.delete(`/api/modules/furniture/collection/${f.id}`);
-                              setFurniture((prev) => prev.filter((x) => x.id !== f.id));
-                            }}
+                            onClick={() => handleDeleteFurniture(f.id)}
                             className="text-xs text-red-600 hover:text-red-800"
                           >
                             Remove
@@ -854,12 +955,22 @@ export const DashboardPage: React.FC = () => {
                             ${Math.round(b.estimated_total).toLocaleString()}
                           </div>
                         </div>
-                        <Link
-                          to={`/budget-estimator?room=${encodeURIComponent(b.inputs?.room_type || "Bedroom")}`}
-                          className="btn-secondary py-1.5 px-3.5 text-xs"
-                        >
-                          View Details
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/budget-estimator?room=${encodeURIComponent(b.inputs?.room_type || "Bedroom")}`}
+                            className="btn-secondary py-1.5 px-3.5 text-xs"
+                          >
+                            View Details
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBudget(b.id)}
+                            className="inline-flex items-center rounded-lg border border-red-200 bg-white p-1.5 text-red-700 hover:bg-red-50 transition"
+                            title="Delete Estimate"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
