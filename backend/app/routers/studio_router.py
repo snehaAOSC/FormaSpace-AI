@@ -138,13 +138,33 @@ async def generate_design(
             "INSERT INTO credit_transactions (id, user_id, delta, reason, created_at) VALUES (?, ?, ?, ?, ?)",
             (str(uuid.uuid4()), current_user["id"], -credit_cost, f"AI Studio: {req.feature_type} ({req.style})", created),
         )
+        # Ensure an active project is automatically created/stored for this redesign
+        auto_project_id = req.project_id or str(uuid.uuid4())
+        room_name = req.room_type or req.category or "Interior Space"
+        feature_name = req.feature_type.replace("_", " ").title()
+        project_title = f"{room_name} · {req.style} {feature_name}"
+        conn.execute(
+            """INSERT OR REPLACE INTO projects (id, user_id, folder_id, title, category, style, cover_image, status, created_at, updated_at)
+               VALUES (?, ?, NULL, ?, ?, ?, ?, 'active', ?, ?)""",
+            (
+                auto_project_id,
+                current_user["id"],
+                project_title,
+                req.category or room_name,
+                req.style or "Modern Luxury",
+                result["generated_image_url"],
+                created,
+                created,
+            ),
+        )
+
         conn.execute(
             """INSERT INTO designs (id, user_id, project_id, feature_type, category, room_type, style, intervention_level, prompt, settings_json, original_image_url, generated_image_url, variations_json, detected_objects_json, credits_used, is_saved, is_demo_mode, provider, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)""",
             (
                 design_id,
                 current_user["id"],
-                req.project_id,
+                auto_project_id,
                 req.feature_type,
                 req.category,
                 req.room_type,

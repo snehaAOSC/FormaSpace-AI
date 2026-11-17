@@ -127,6 +127,36 @@ def delete_folder(folder_id: str, current_user: dict = Depends(get_current_user)
 @router.get("/dashboard/projects")
 def list_projects(folder_id: str = "", current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
+        # Automatically sync any user design into projects table so all generated designs appear as projects
+        designs = conn.execute(
+            "SELECT * FROM designs WHERE user_id = ? ORDER BY created_at DESC",
+            (current_user["id"],),
+        ).fetchall()
+        for d in designs:
+            p_match = conn.execute(
+                "SELECT id FROM projects WHERE user_id = ? AND (id = ? OR cover_image = ?)",
+                (current_user["id"], d["project_id"] or d["id"], d["generated_image_url"]),
+            ).fetchone()
+            if not p_match:
+                pid = d["project_id"] or d["id"]
+                room = d["room_type"] or d["category"] or "Interior Space"
+                feat = (d["feature_type"] or "Redesign").replace("_", " ").title()
+                p_title = f"{room} · {d['style']} {feat}"
+                conn.execute(
+                    """INSERT OR IGNORE INTO projects (id, user_id, folder_id, title, category, style, cover_image, status, created_at, updated_at)
+                       VALUES (?, ?, NULL, ?, ?, ?, ?, 'active', ?, ?)""",
+                    (
+                        pid,
+                        current_user["id"],
+                        p_title,
+                        d["category"] or room,
+                        d["style"] or "Modern Luxury",
+                        d["generated_image_url"],
+                        d["created_at"],
+                        d["created_at"],
+                    ),
+                )
+
         if folder_id:
             rows = conn.execute(
                 "SELECT * FROM projects WHERE user_id = ? AND folder_id = ? ORDER BY updated_at DESC",
@@ -184,9 +214,12 @@ def update_project(project_id: str, req: dict, current_user: dict = Depends(get_
 @router.delete("/dashboard/projects/{project_id}")
 def delete_project(project_id: str, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
-        res = conn.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project_id, current_user["id"]))
-        if res.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Project not found")
+        proj = conn.execute("SELECT * FROM projects WHERE id = ? AND user_id = ?", (project_id, current_user["id"])).fetchone()
+        if proj:
+            conn.execute("DELETE FROM designs WHERE user_id = ? AND (project_id = ? OR generated_image_url = ?)", (current_user["id"], project_id, proj["cover_image"]))
+            conn.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project_id, current_user["id"]))
+        else:
+            conn.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project_id, current_user["id"]))
     return {"deleted": True}
 
 

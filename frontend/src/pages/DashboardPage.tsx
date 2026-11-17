@@ -49,16 +49,12 @@ export const DashboardPage: React.FC = () => {
     remaining_credits: 0,
     plan_id: "starter",
   });
-  const [folders, setFolders] = useState<ProjectFolder[]>([]);
-  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [designs, setDesigns] = useState<DesignResult[]>([]);
   const [furniture, setFurniture] = useState<any[]>([]);
   const [budgets, setBudgets] = useState<BudgetEstimateResult[]>([]);
 
-  const [newFolderName, setNewFolderName] = useState("");
-  const [newProjectTitle, setNewProjectTitle] = useState("");
-  const [newProjectCat, setNewProjectCat] = useState("Living Room");
   const [profileName, setProfileName] = useState(user?.full_name || "");
   const [statusMsg, setStatusMsg] = useState("");
 
@@ -69,16 +65,14 @@ export const DashboardPage: React.FC = () => {
   const loadAll = async () => {
     if (!user) return;
     try {
-      const [ov, fl, pr, ds, fn, bg] = await Promise.all([
+      const [ov, pr, ds, fn, bg] = await Promise.all([
         api.get<any>("/api/dashboard/overview"),
-        api.get<{ folders: ProjectFolder[] }>("/api/dashboard/folders"),
         api.get<{ projects: Project[] }>("/api/dashboard/projects"),
         api.get<{ designs: DesignResult[] }>("/api/studio/history"),
         api.get<{ items: any[] }>("/api/modules/furniture/collection"),
         api.get<{ estimates: BudgetEstimateResult[] }>("/api/modules/budget/estimates"),
       ]);
       setStats(ov.stats || {});
-      setFolders(fl.folders || []);
       setProjects(pr.projects || []);
       setDesigns(ds.designs || []);
       setFurniture(fn.items || []);
@@ -111,66 +105,13 @@ export const DashboardPage: React.FC = () => {
   // Focused, essential navigation items only
   const navItems: Array<{ id: TabId; label: string; icon: any; count?: number }> = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "projects", label: "My Projects", icon: FolderPlus, count: projects.length },
+    { id: "projects", label: "My Projects", icon: Sparkles, count: projects.length },
     { id: "history", label: "Design History", icon: History, count: designs.length },
     { id: "saved", label: "Saved Designs", icon: Bookmark, count: designs.filter((d) => d.is_saved).length },
     { id: "furniture", label: "Furniture Collection", icon: ShoppingBag, count: furniture.length },
     { id: "budgets", label: "Cost Estimates", icon: Calculator, count: budgets.length },
     { id: "settings", label: "Account Settings", icon: Settings },
   ];
-
-  const handleCreateFolder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFolderName.trim()) return;
-    try {
-      const res = await api.post<{ folder: ProjectFolder }>("/api/dashboard/folders", {
-        name: newFolderName.trim(),
-        color: "#C87960",
-      });
-      setFolders((prev) => [res.folder, ...prev]);
-      setNewFolderName("");
-      setStatusMsg("Folder created successfully.");
-      setTimeout(() => setStatusMsg(""), 2500);
-    } catch (err: any) {
-      setStatusMsg(err?.message || "Failed to create folder.");
-      setTimeout(() => setStatusMsg(""), 3000);
-    }
-  };
-
-  const handleDeleteFolder = async (e: React.MouseEvent, folderId: string) => {
-    e.stopPropagation();
-    try {
-      await api.delete(`/api/dashboard/folders/${folderId}`);
-      setFolders((prev) => prev.filter((f) => f.id !== folderId));
-      if (selectedFolder === folderId) {
-        setSelectedFolder("");
-      }
-      setStatusMsg("Folder removed.");
-      setTimeout(() => setStatusMsg(""), 2500);
-    } catch (err: any) {
-      setStatusMsg(err?.message || "Failed to delete folder.");
-      setTimeout(() => setStatusMsg(""), 3000);
-    }
-  };
-
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProjectTitle.trim()) return;
-    try {
-      const res = await api.post<{ project: Project }>("/api/dashboard/projects", {
-        title: newProjectTitle.trim(),
-        category: newProjectCat,
-        folder_id: selectedFolder || null,
-      });
-      setProjects((prev) => [res.project, ...prev]);
-      setNewProjectTitle("");
-      setStatusMsg("Project created successfully.");
-      setTimeout(() => setStatusMsg(""), 2500);
-    } catch (err: any) {
-      setStatusMsg(err?.message || "Failed to create project.");
-      setTimeout(() => setStatusMsg(""), 3000);
-    }
-  };
 
   const handleDeleteProject = async (projectId: string) => {
     try {
@@ -239,8 +180,8 @@ export const DashboardPage: React.FC = () => {
     setTimeout(() => setStatusMsg(""), 3000);
   };
 
-  const visibleProjects = selectedFolder
-    ? projects.filter((p) => p.folder_id === selectedFolder)
+  const visibleProjects = selectedCategory
+    ? projects.filter((p) => p.category?.toLowerCase() === selectedCategory.toLowerCase())
     : projects;
 
   const savedDesigns = designs.filter((d) => d.is_saved);
@@ -559,141 +500,116 @@ export const DashboardPage: React.FC = () => {
             </>
           )}
 
-          {/* TAB 2: MY PROJECTS */}
+          {/* TAB 2: MY REDESIGN PROJECTS */}
           {tab === "projects" && (
             <div className="editorial-card p-6 space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="font-editorial text-2xl font-semibold text-[#172B3A]">
-                    Projects & Folders
+                    My Redesign Projects
                   </h2>
                   <p className="text-xs text-[#252B2E]/65 mt-0.5">
-                    Organize your design projects and room transformations
+                    All AI room redesigns generated in the studio are automatically stored here ({projects.length} project{projects.length !== 1 ? "s" : ""})
                   </p>
                 </div>
-                <form onSubmit={handleCreateFolder} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    placeholder="New folder name..."
-                    className="rounded-full border border-[#DCCBB5] bg-[#F7F4ED]/60 px-4 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#C87960]"
-                  />
-                  <button type="submit" className="btn-secondary py-1.5 px-4 text-xs">
-                    <FolderPlus className="h-3.5 w-3.5" /> Add Folder
-                  </button>
-                </form>
+                <Link to="/studio" className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" /> Start New AI Redesign
+                </Link>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedFolder("")}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${selectedFolder === "" ? "bg-[#172B3A] text-white" : "bg-[#F7F4ED] text-[#252B2E] hover:bg-[#DCCBB5]/40"
-                    }`}
-                >
-                  All Folders ({projects.length})
-                </button>
-                {folders.map((f) => {
-                  const folderCount = projects.filter((p) => p.folder_id === f.id).length;
-                  const isSelected = selectedFolder === f.id;
+              {/* Quick Room Category Filter */}
+              <div className="flex flex-wrap gap-2 border-b border-[#DCCBB5]/50 pb-4">
+                {["All", "Living Room", "Bedroom", "Kitchen", "Bathroom", "Dining Room", "Office", "House Exterior", "Garden"].map((cat) => {
+                  const count =
+                    cat === "All"
+                      ? projects.length
+                      : projects.filter((p) => p.category?.toLowerCase() === cat.toLowerCase()).length;
+                  const isActive =
+                    (selectedCategory === "" && cat === "All") ||
+                    selectedCategory.toLowerCase() === cat.toLowerCase();
                   return (
-                    <div
-                      key={f.id}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition ${
-                        isSelected
-                          ? "border-[#C87960] bg-[#C87960] text-white"
-                          : "border-[#DCCBB5] bg-white text-[#172B3A] hover:bg-[#F7F4ED]"
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat === "All" ? "" : cat)}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
+                        isActive
+                          ? "bg-[#172B3A] text-white shadow-sm"
+                          : "border border-[#DCCBB5] bg-white text-[#172B3A] hover:bg-[#F7F4ED]"
                       }`}
                     >
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFolder(isSelected ? "" : f.id)}
-                        className="flex items-center gap-1.5 focus:outline-none"
-                      >
-                        <span>{f.name}</span>
-                        <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-[#252B2E]/60"}`}>
-                          ({folderCount})
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleDeleteFolder(e, f.id)}
-                        className={`ml-1 rounded-full p-0.5 transition ${
-                          isSelected
-                            ? "hover:bg-white/20 text-white"
-                            : "hover:bg-red-50 text-[#252B2E]/50 hover:text-red-700"
-                        }`}
-                        title={`Delete folder "${f.name}"`}
-                        aria-label={`Delete ${f.name} folder`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
+                      {cat} <span className={`text-[10px] ${isActive ? "text-white/80" : "text-[#252B2E]/60"}`}>({count})</span>
+                    </button>
                   );
                 })}
               </div>
 
-              <form onSubmit={handleCreateProject} className="flex flex-wrap gap-2 border-t border-[#DCCBB5]/60 pt-4">
-                <input
-                  type="text"
-                  value={newProjectTitle}
-                  onChange={(e) => setNewProjectTitle(e.target.value)}
-                  placeholder="New project title (e.g. Master Bedroom Renovation)..."
-                  className="flex-1 min-w-[200px] rounded-full border border-[#DCCBB5] bg-[#F7F4ED]/60 px-4 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#C87960]"
-                />
-                <select
-                  value={newProjectCat}
-                  onChange={(e) => setNewProjectCat(e.target.value)}
-                  className="rounded-full border border-[#DCCBB5] bg-white px-4 py-2 text-xs"
-                >
-                  <option>Living Room</option>
-                  <option>Bedroom</option>
-                  <option>Kitchen</option>
-                  <option>Bathroom</option>
-                  <option>Dining Room</option>
-                  <option>Office</option>
-                  <option>House Exterior</option>
-                  <option>Garden</option>
-                </select>
-                <button type="submit" className="btn-primary py-2 px-5 text-xs">
-                  <Plus className="h-3.5 w-3.5" /> Create Project
-                </button>
-              </form>
-
               {visibleProjects.length === 0 ? (
-                <div className="py-12 text-center text-xs text-[#252B2E]/65">
-                  {selectedFolder
-                    ? "No projects in this folder yet. Use the form above to add one, or select 'All Folders'."
-                    : "No projects created yet. Use the form above to create your first design project."}
+                <div className="py-16 text-center">
+                  <Sparkles className="mx-auto h-8 w-8 text-[#C87960] mb-2" />
+                  <p className="text-sm font-medium text-[#172B3A]">No redesign projects yet</p>
+                  <p className="text-xs text-[#252B2E]/65 mt-1">
+                    Whenever you generate an interior or exterior room redesign in the studio, it automatically appears here.
+                  </p>
+                  <Link to="/studio" className="btn-primary mt-4 py-2 px-5 text-xs inline-flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5" /> Open AI Design Studio
+                  </Link>
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {visibleProjects.map((p) => (
-                    <div key={p.id} className="rounded-2xl border border-[#DCCBB5] bg-white overflow-hidden shadow-sm hover:shadow-md transition">
-                      <img src={p.cover_image || "/images/hero-after.jpg"} alt={p.title} className="h-36 w-full object-cover" />
-                      <div className="p-4 flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[10px] font-semibold uppercase text-[#C87960] truncate">{p.category}</div>
-                          <div className="font-semibold text-sm text-[#172B3A] truncate">{p.title}</div>
+                    <div
+                      key={p.id}
+                      className="rounded-2xl border border-[#DCCBB5] bg-white overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                    >
+                      <div className="relative aspect-[16/11] bg-black/5 overflow-hidden">
+                        <img
+                          src={p.cover_image || "/images/hero-after.jpg"}
+                          alt={p.title}
+                          className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                        />
+                        <div className="absolute top-2.5 left-2.5">
+                          <span className="rounded-full bg-[#172B3A]/85 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
+                            {p.category}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                      </div>
+                      <div className="p-4 flex flex-col flex-1 justify-between">
+                        <div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#C87960]">
+                            {p.style} · Redesign Project
+                          </div>
+                          <div className="font-semibold text-sm text-[#172B3A] mt-0.5">{p.title}</div>
+                          <div className="text-[11px] text-[#252B2E]/55 mt-1">
+                            {p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recently generated"}
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-[#DCCBB5]/60 flex items-center justify-between gap-2">
                           <Link
                             to={`/studio?room=${encodeURIComponent(p.category)}&title=${encodeURIComponent(p.title)}`}
                             className="inline-flex items-center gap-1 rounded-lg border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] hover:bg-[#F7F4ED] hover:text-[#C87960] transition"
                             title="Open in AI Design Studio"
                           >
-                            <span>Open</span>
+                            <span>Open in Studio</span>
                             <ArrowRight className="h-3 w-3" />
                           </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProject(p.id)}
-                            className="text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition"
-                            title="Delete Project"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              to={`/budget-estimator?image=${encodeURIComponent(p.cover_image || "")}&style=${encodeURIComponent(p.style || "")}&room=${encodeURIComponent(p.category || "")}`}
+                              className="inline-flex items-center gap-1 rounded-lg bg-[#C87960]/10 px-2 py-1.5 text-xs font-medium text-[#C87960] hover:bg-[#C87960]/20 transition"
+                              title="Estimate Furniture Cost"
+                            >
+                              <Calculator className="h-3 w-3" />
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProject(p.id)}
+                              className="text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition"
+                              title="Delete Project"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
