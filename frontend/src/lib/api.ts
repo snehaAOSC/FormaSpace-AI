@@ -1,4 +1,6 @@
 const TOKEN_KEY = "formaspace_token";
+const env = (import.meta as any).env || {};
+const API_BASE = (env.VITE_API_BASE_URL || env.VITE_API_URL || "").replace(/\/$/, "");
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -25,7 +27,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const resp = await fetch(path, { ...options, headers });
+  const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
+  const resp = await fetch(url, { ...options, headers });
   const text = await resp.text();
   let data: any = {};
   try {
