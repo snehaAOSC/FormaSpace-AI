@@ -17,9 +17,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
+cors_origins = list(settings.CORS_ORIGINS)
+for default_origin in [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://formaspace-ai-frontend.vercel.app",
+]:
+    if default_origin not in cors_origins:
+        cors_origins.append(default_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,6 +62,17 @@ async def global_exception_handler(request: Request, exc: Exception):
     except Exception:
         pass
     return JSONResponse(status_code=500, content={"detail": "Internal server error", "error": str(exc)})
+
+
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "app": settings.APP_NAME,
+        "message": "FormaSpace Studio API is live and operational",
+        "docs": "/docs",
+        "health": "/api/health",
+    }
 
 
 @app.get("/api/health")
