@@ -18,6 +18,7 @@ from ..services.ai_provider import (
     _apply_demo_pil_transform,
     calculate_renovation_budget,
     detect_architectural_objects,
+    generate_3d_floorplan_from_blueprint,
 )
 from ..services.smart_cost_estimator import (
     detect_room_furniture_detailed,
@@ -48,68 +49,73 @@ def generate_floor_plan(
     # Produce authentic 3D isometric cutaway visualization matching blueprint geometry & style
     style_lower = req.layout_style.lower()
     clean_source = _normalize_storage_url(req.source_plan_url)
-    is_sample = "floorplan-2d" in clean_source.lower()
+    is_sample = (
+        "floorplan-2d" in clean_source.lower()
+        and "uploads" not in clean_source.lower()
+        and not clean_source.startswith("data:")
+        and not clean_source.startswith("blob:")
+    )
 
-    if "industrial" in style_lower or "loft" in style_lower:
-        base_3d = "/images/floorplan-3d-industrial.jpg"
-        rooms = [
-            {"name": "Industrial Great Room", "area_sqft": 420, "zone": "Social", "suggested_pieces": ["Cognac Leather Chesterfield Sofa", "Reclaimed Timber Table", "Crittall Steel Glass Wall"]},
-            {"name": "Stainless Chef's Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Stainless Waterfall Island", "Matte Black Barstools", "Linear Fluted Pendant"]},
-            {"name": "Mezzanine Primary Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Low Oak Platform Bed", "Walk-in Dressing Closet", "Subway Tile Ensuite"]},
-            {"name": "Creative Studio / Library", "area_sqft": 180, "zone": "Work", "suggested_pieces": ["Steel Frame Desk", "Eames Aluminum Chair", "Floor-to-Ceiling Iron Shelving"]},
-        ]
-    elif "japandi" in style_lower or "scandi" in style_lower or "zen" in style_lower:
-        base_3d = "/images/floorplan-3d-japandi.jpg"
-        rooms = [
-            {"name": "Zen Living Salon", "area_sqft": 350, "zone": "Social", "suggested_pieces": ["Curved Cream Bouclé Sofa", "Organic Pebble Table", "Washi Paper Floor Lamp"]},
-            {"name": "Slatted Oak Kitchen & Dining", "area_sqft": 230, "zone": "Culinary", "suggested_pieces": ["Blonde Oak Waterfall Counter", "Wishbone Dining Chairs", "Ceramic Pendant"]},
-            {"name": "Tatami Primary Bedroom", "area_sqft": 250, "zone": "Private", "suggested_pieces": ["Low Wood Platform Bed", "Beige Linen Bedding", "Shoji Sliding Screen"]},
-            {"name": "Indoor Bonsai Courtyard", "area_sqft": 140, "zone": "Wellness", "suggested_pieces": ["River Stone Bed", "Miniature Sculptural Pine", "Bespoke Bench"]},
-        ]
-    elif "mid-century" in style_lower or "palm springs" in style_lower or "vintage" in style_lower:
-        base_3d = "/images/floorplan-3d-midcentury.jpg"
-        rooms = [
-            {"name": "Sunken Conversation Pit Salon", "area_sqft": 380, "zone": "Social", "suggested_pieces": ["Burnt Orange Velvet Pit Sofa", "Brass Cantilever Table", "Eames Lounge & Ottoman"]},
-            {"name": "Walnut & Terrazzo Kitchen", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Honed Terrazzo Island", "Saarinen Tulip Chairs", "Walnut Credenza"]},
-            {"name": "Poolside Primary Suite", "area_sqft": 270, "zone": "Private", "suggested_pieces": ["Walnut Spindle Bed", "Slatted Wood Bench", "Terrazzo Shower Suite"]},
-            {"name": "Guest Pavilion Room", "area_sqft": 170, "zone": "Flexible", "suggested_pieces": ["Nelson Daybed", "Noguchi Sculptural Lamp", "Travertine Side Table"]},
-        ]
-    elif "mediterranean" in style_lower or "coastal" in style_lower or "terracotta" in style_lower:
-        base_3d = "/images/floorplan-3d-mediterranean.jpg"
-        rooms = [
-            {"name": "Arched Living Salon", "area_sqft": 360, "zone": "Social", "suggested_pieces": ["Off-White Linen Sofas", "Limestone Coffee Table", "Wrought Iron Chandelier"]},
-            {"name": "Rustic Zellige Tile Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Rustic Farmhouse Table", "Woven Rattan Barstools", "Zellige Backsplash Island"]},
-            {"name": "Canopy Master Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Four-Poster Canopy Bed", "Terracotta Floor Tiles", "Tadelakt Ensuite Bath"]},
-            {"name": "Bougainvillea Loggia / Terrace", "area_sqft": 200, "zone": "Outdoor", "suggested_pieces": ["Teak Sun Loungers", "Pergola Dining Set", "Terracotta Olive Urns"]},
-        ]
-    elif is_sample:
-        base_3d = "/images/floorplan-3d-sample.jpg"
-        rooms = [
-            {"name": "Living & Entertainment Salon (Center)", "area_sqft": 320, "zone": "Social", "suggested_pieces": ["Curved Sectional Sofa", "Travertine Coffee Table", "Fluted Media Console"]},
-            {"name": "Open Dining & Waterfall Kitchen (Left)", "area_sqft": 240, "zone": "Culinary", "suggested_pieces": ["Marble Waterfall Island", "Oak Barstools", "Round Oak Dining Table"]},
-            {"name": "Primary Suite & Ensuite Bath (Right)", "area_sqft": 260, "zone": "Private", "suggested_pieces": ["King Upholstered Bed", "Fluted Oak Wardrobe", "Freestanding Soaking Tub"]},
-            {"name": "Secondary Bedroom & Bath (Far Right)", "area_sqft": 190, "zone": "Flexible", "suggested_pieces": ["Queen Platform Bed", "Floating Desk", "Frameless Glass Shower"]},
-        ]
+    if is_sample:
+        if "industrial" in style_lower or "loft" in style_lower:
+            base_3d = "/images/floorplan-3d-industrial.jpg"
+            rooms = [
+                {"name": "Industrial Great Room", "area_sqft": 420, "zone": "Social", "suggested_pieces": ["Cognac Leather Chesterfield Sofa", "Reclaimed Timber Table", "Crittall Steel Glass Wall"]},
+                {"name": "Stainless Chef's Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Stainless Waterfall Island", "Matte Black Barstools", "Linear Fluted Pendant"]},
+                {"name": "Mezzanine Primary Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Low Oak Platform Bed", "Walk-in Dressing Closet", "Subway Tile Ensuite"]},
+                {"name": "Creative Studio / Library", "area_sqft": 180, "zone": "Work", "suggested_pieces": ["Steel Frame Desk", "Eames Aluminum Chair", "Floor-to-Ceiling Iron Shelving"]},
+            ]
+        elif "japandi" in style_lower or "scandi" in style_lower or "zen" in style_lower:
+            base_3d = "/images/floorplan-3d-japandi.jpg"
+            rooms = [
+                {"name": "Zen Living Salon", "area_sqft": 350, "zone": "Social", "suggested_pieces": ["Curved Cream Bouclé Sofa", "Organic Pebble Table", "Washi Paper Floor Lamp"]},
+                {"name": "Slatted Oak Kitchen & Dining", "area_sqft": 230, "zone": "Culinary", "suggested_pieces": ["Blonde Oak Waterfall Counter", "Wishbone Dining Chairs", "Ceramic Pendant"]},
+                {"name": "Tatami Primary Bedroom", "area_sqft": 250, "zone": "Private", "suggested_pieces": ["Low Wood Platform Bed", "Beige Linen Bedding", "Shoji Sliding Screen"]},
+                {"name": "Indoor Bonsai Courtyard", "area_sqft": 140, "zone": "Wellness", "suggested_pieces": ["River Stone Bed", "Miniature Sculptural Pine", "Bespoke Bench"]},
+            ]
+        elif "mid-century" in style_lower or "palm springs" in style_lower or "vintage" in style_lower:
+            base_3d = "/images/floorplan-3d-midcentury.jpg"
+            rooms = [
+                {"name": "Sunken Conversation Pit Salon", "area_sqft": 380, "zone": "Social", "suggested_pieces": ["Burnt Orange Velvet Pit Sofa", "Brass Cantilever Table", "Eames Lounge & Ottoman"]},
+                {"name": "Walnut & Terrazzo Kitchen", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Honed Terrazzo Island", "Saarinen Tulip Chairs", "Walnut Credenza"]},
+                {"name": "Poolside Primary Suite", "area_sqft": 270, "zone": "Private", "suggested_pieces": ["Walnut Spindle Bed", "Slatted Wood Bench", "Terrazzo Shower Suite"]},
+                {"name": "Guest Pavilion Room", "area_sqft": 170, "zone": "Flexible", "suggested_pieces": ["Nelson Daybed", "Noguchi Sculptural Lamp", "Travertine Side Table"]},
+            ]
+        elif "mediterranean" in style_lower or "coastal" in style_lower or "terracotta" in style_lower:
+            base_3d = "/images/floorplan-3d-mediterranean.jpg"
+            rooms = [
+                {"name": "Arched Living Salon", "area_sqft": 360, "zone": "Social", "suggested_pieces": ["Off-White Linen Sofas", "Limestone Coffee Table", "Wrought Iron Chandelier"]},
+                {"name": "Rustic Zellige Tile Kitchen", "area_sqft": 220, "zone": "Culinary", "suggested_pieces": ["Rustic Farmhouse Table", "Woven Rattan Barstools", "Zellige Backsplash Island"]},
+                {"name": "Canopy Master Suite", "area_sqft": 280, "zone": "Private", "suggested_pieces": ["Four-Poster Canopy Bed", "Terracotta Floor Tiles", "Tadelakt Ensuite Bath"]},
+                {"name": "Bougainvillea Loggia / Terrace", "area_sqft": 200, "zone": "Outdoor", "suggested_pieces": ["Teak Sun Loungers", "Pergola Dining Set", "Terracotta Olive Urns"]},
+            ]
+        else:
+            base_3d = "/images/floorplan-3d-sample.jpg"
+            rooms = [
+                {"name": "Living & Entertainment Salon (Center)", "area_sqft": 320, "zone": "Social", "suggested_pieces": ["Curved Sectional Sofa", "Travertine Coffee Table", "Fluted Media Console"]},
+                {"name": "Open Dining & Waterfall Kitchen (Left)", "area_sqft": 240, "zone": "Culinary", "suggested_pieces": ["Marble Waterfall Island", "Oak Barstools", "Round Oak Dining Table"]},
+                {"name": "Primary Suite & Ensuite Bath (Right)", "area_sqft": 260, "zone": "Private", "suggested_pieces": ["King Upholstered Bed", "Fluted Oak Wardrobe", "Freestanding Soaking Tub"]},
+                {"name": "Secondary Bedroom & Bath (Far Right)", "area_sqft": 190, "zone": "Flexible", "suggested_pieces": ["Queen Platform Bed", "Floating Desk", "Frameless Glass Shower"]},
+            ]
+        try:
+            render_3d, _ = _apply_demo_pil_transform(
+                base_3d,
+                "interior_redesign",
+                req.layout_style,
+                "High",
+                {"perspective": req.perspective, "lighting": req.lighting_mood},
+                1,
+            )
+        except Exception:
+            render_3d = base_3d
     else:
-        base_3d = "/images/floorplan-3d-rendered.jpg"
-        rooms = [
-            {"name": "Living & Reception Salon", "area_sqft": 340, "zone": "Social", "suggested_pieces": ["Curved Bouclé Sofa", "Travertine Coffee Table", "Wool Rug"]},
-            {"name": "Open Architectural Kitchen & Dining", "area_sqft": 210, "zone": "Culinary", "suggested_pieces": ["Waterfall Marble Island", "Oak Barstools", "Brass Pendant"]},
-            {"name": "Primary Suite (Northwest)", "area_sqft": 265, "zone": "Private", "suggested_pieces": ["Platform Bed", "Fluted Nightstands", "Linen Drapery"]},
-            {"name": "Secondary Bedroom (Northeast)", "area_sqft": 165, "zone": "Flexible", "suggested_pieces": ["Architectural Desk", "Daybed", "Built-in Shelving"]},
-        ]
-
-    try:
-        render_3d, _ = _apply_demo_pil_transform(
-            base_3d,
-            "interior_redesign",
-            req.layout_style,
-            "High",
-            {"perspective": req.perspective, "lighting": req.lighting_mood},
-            1,
+        # Authentic 3D Isometric Axonometric Conversion strictly preserving the customer's uploaded blueprint layout!
+        render_3d, rooms = generate_3d_floorplan_from_blueprint(
+            clean_source,
+            layout_style=req.layout_style,
+            perspective=req.perspective,
+            lighting_mood=req.lighting_mood,
         )
-    except Exception:
-        render_3d = base_3d
 
     furnished_2d = "/images/floorplan-2d.jpg" if is_sample else clean_source
     render_3d = _normalize_storage_url(render_3d)
