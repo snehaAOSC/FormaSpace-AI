@@ -4,6 +4,14 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://formaspace-ai.onrender.com/api/:path*"
+    },
+    {
+      "source": "/storage/:path*",
+      "destination": "https://formaspace-ai.onrender.com/storage/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
