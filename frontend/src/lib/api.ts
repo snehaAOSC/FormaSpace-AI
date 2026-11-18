@@ -1,6 +1,15 @@
 const TOKEN_KEY = "formaspace_token";
 const env = (import.meta as any).env || {};
-const API_BASE = (env.VITE_API_BASE_URL || env.VITE_API_URL || "").replace(/\/$/, "");
+const isLocal =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1");
+
+export const API_BASE = (
+  env.VITE_API_BASE_URL ||
+  env.VITE_API_URL ||
+  (isLocal ? "" : "https://formaspace-ai.onrender.com")
+).replace(/\/$/, "");
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
