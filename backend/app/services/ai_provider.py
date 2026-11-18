@@ -4,8 +4,15 @@ import json
 from typing import Any, Optional
 import httpx
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
-import cv2
-import numpy as np
+
+try:
+    import cv2
+    import numpy as np
+    HAS_CV2 = True
+except Exception:
+    cv2 = None
+    np = None
+    HAS_CV2 = False
 
 from ..config import settings
 from .storage_service import resolve_local_image_path, save_image_bytes
@@ -598,6 +605,8 @@ def detect_objects_cv_robust(image_path: str, room_type: str = "bedroom") -> lis
     Runs locally using OpenCV/NumPy to accurately detect windows, primary furniture, and perimeter storage.
     """
     if not image_path:
+        return []
+    if not HAS_CV2 or cv2 is None or np is None:
         return []
     try:
         img = cv2.imread(image_path)
