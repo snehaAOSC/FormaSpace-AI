@@ -918,8 +918,8 @@ export const StudioPage: React.FC = () => {
                         setShowObjectsOverlay(true);
                       }}
                       className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${inspectSide === "before"
-                          ? "bg-[#172B3A] text-white shadow-sm"
-                          : "text-[#252B2E]/70 hover:text-[#172B3A]"
+                        ? "bg-[#172B3A] text-white shadow-sm"
+                        : "text-[#252B2E]/70 hover:text-[#172B3A]"
                         }`}
                     >
                       Original Space ({detectedBeforeObjects.length})
@@ -932,8 +932,8 @@ export const StudioPage: React.FC = () => {
                         setShowObjectsOverlay(true);
                       }}
                       className={`py-1 text-center rounded-md text-[11px] font-semibold transition ${inspectSide === "after"
-                          ? "bg-[#C87960] text-white shadow-sm"
-                          : "text-[#252B2E]/70 hover:text-[#172B3A]"
+                        ? "bg-[#C87960] text-white shadow-sm"
+                        : "text-[#252B2E]/70 hover:text-[#172B3A]"
                         }`}
                     >
                       Modern Side ({detectedAfterObjects.length})
@@ -1338,8 +1338,8 @@ export const StudioPage: React.FC = () => {
                             setSelectedObjectId(null);
                           }}
                           className={`rounded-full px-2.5 py-0.5 font-medium transition ${inspectSide === "before"
-                              ? "bg-white text-[#172B3A] shadow-sm font-semibold"
-                              : "text-white/80 hover:text-white"
+                            ? "bg-white text-[#172B3A] shadow-sm font-semibold"
+                            : "text-white/80 hover:text-white"
                             }`}
                         >
                           Old Space Objects
@@ -1351,8 +1351,8 @@ export const StudioPage: React.FC = () => {
                             setSelectedObjectId(null);
                           }}
                           className={`rounded-full px-2.5 py-0.5 font-medium transition ${inspectSide === "after"
-                              ? "bg-[#C87960] text-white shadow-sm font-semibold"
-                              : "text-white/80 hover:text-white"
+                            ? "bg-[#C87960] text-white shadow-sm font-semibold"
+                            : "text-white/80 hover:text-white"
                             }`}
                         >
                           Modern Objects
@@ -1577,8 +1577,8 @@ export const StudioPage: React.FC = () => {
                         }
                       }}
                       className={`group relative overflow-hidden rounded-xl border text-left transition p-2.5 ${isSelected
-                          ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
-                          : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
+                        ? "border-[#C87960] bg-[#C87960]/5 shadow-sm ring-1 ring-[#C87960]"
+                        : "border-[#DCCBB5] bg-white hover:border-[#C87960]"
                         }`}
                     >
                       <div className="aspect-[16/10] w-full overflow-hidden rounded-lg mb-2 bg-[#252B2E]">
