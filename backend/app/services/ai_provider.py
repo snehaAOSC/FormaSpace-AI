@@ -258,38 +258,79 @@ def _apply_demo_pil_transform(
         not mask_data_url
         and feature_type in {"interior_redesign", "virtual_staging", "furniture_replacement"}
     ):
-        room_templates_map = {
-            "kitchen": [
-                "/images/kitchen-renovated-luxury.jpg",
-                "/images/kitchen-after.jpg",
-            ],
-            "bed": [
-                "/images/bedroom-renovated-luxury.jpg",
-                "/images/bedroom-after-japandi.jpg",
-            ],
-            "bath": [
-                "/images/bathroom-after.jpg",
-            ],
-            "living": [
-                "/images/hero-after.jpg",
-                "/images/staged-room.jpg",
-            ],
-            "salon": [
-                "/images/hero-after.jpg",
-            ],
-            "dining": [
-                "/images/hero-after.jpg",
-            ],
-            "office": [
-                "/images/hero-after.jpg",
-            ],
-            "exterior": [
-                "/images/exterior-after.jpg",
-            ],
-            "garden": [
-                "/images/garden-after.jpg",
-            ],
-        }
+        if feature_type == "virtual_staging":
+            room_templates_map = {
+                "living": [
+                    "/images/kinkead-living-staged.jpg",
+                    "/images/staged-room.jpg",
+                ],
+                "lounge": [
+                    "/images/kinkead-living-staged.jpg",
+                    "/images/staged-room.jpg",
+                ],
+                "bed": [
+                    "/images/kinkead-bed1-staged.jpg",
+                    "/images/bedroom-renovated-luxury.jpg",
+                ],
+                "dining": [
+                    "/images/kinkead-dining-staged.jpg",
+                ],
+                "kitchen": [
+                    "/images/kitchen-renovated-luxury.jpg",
+                ],
+                "bath": [
+                    "/images/bathroom-after.jpg",
+                ],
+                "office": [
+                    "/images/staged-room.jpg",
+                ],
+                "study": [
+                    "/images/staged-room.jpg",
+                ],
+                "patio": [
+                    "/images/garden-after.jpg",
+                ],
+                "garden": [
+                    "/images/garden-after.jpg",
+                ],
+                "exterior": [
+                    "/images/exterior-after.jpg",
+                ],
+            }
+        else:
+            room_templates_map = {
+                "kitchen": [
+                    "/images/kitchen-renovated-luxury.jpg",
+                    "/images/kitchen-after.jpg",
+                ],
+                "bed": [
+                    "/images/bedroom-renovated-luxury.jpg",
+                    "/images/bedroom-after-japandi.jpg",
+                ],
+                "bath": [
+                    "/images/bathroom-after.jpg",
+                ],
+                "living": [
+                    "/images/hero-after.jpg",
+                    "/images/staged-room.jpg",
+                ],
+                "salon": [
+                    "/images/hero-after.jpg",
+                ],
+                "dining": [
+                    "/images/kinkead-dining-staged.jpg",
+                    "/images/hero-after.jpg",
+                ],
+                "office": [
+                    "/images/staged-room.jpg",
+                ],
+                "exterior": [
+                    "/images/exterior-after.jpg",
+                ],
+                "garden": [
+                    "/images/garden-after.jpg",
+                ],
+            }
 
         matched_template = None
         for r_key, t_list in room_templates_map.items():

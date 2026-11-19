@@ -22,6 +22,7 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const featureLinks = [
+    { to: "/virtual-staging", label: "Virtual Staging Studio", desc: "Batch upload empty property photos & stage with luxury furniture" },
     { to: "/studio", label: "Design Studio", desc: "10 interior, exterior, staging & material tools" },
     { to: "/floor-plans", label: "Floor Plan Generator", desc: "2D architectural plans to 3D furnished layouts" },
     { to: "/video-walkthrough", label: "Video Walkthrough", desc: "Cinematic camera motion & orbit exports" },
@@ -72,6 +73,15 @@ export const Navbar: React.FC = () => {
               }`}
           >
             Studio
+          </button>
+          <button
+            type="button"
+            onClick={() => handleProtectedNavigation("/virtual-staging", "access Virtual Staging")}
+            className={`text-sm font-medium transition-colors hover:text-[#C87960] flex items-center gap-1.5 ${isActive("/virtual-staging") ? "text-[#172B3A] underline decoration-[#C87960] underline-offset-8" : "text-[#252B2E]/80"
+              }`}
+          >
+            <span>Virtual Staging</span>
+            <span className="rounded-full bg-[#C87960] px-1.5 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">New</span>
           </button>
           <Link
             to="/explore"

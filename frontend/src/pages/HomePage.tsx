@@ -223,7 +223,14 @@ export const HomePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    const target = `/studio?${currentHero.studioParam}`;
+                    const target =
+                      currentHero.id === "staging"
+                        ? "/virtual-staging"
+                        : currentHero.id === "videos"
+                        ? "/video-walkthrough"
+                        : currentHero.id === "floorplans"
+                        ? "/floor-plans"
+                        : `/studio?${currentHero.studioParam}`;
                     if (!requireAuth(target, `start designing your ${currentHero.name.toLowerCase()}`)) return;
                     navigate(target);
                   }}

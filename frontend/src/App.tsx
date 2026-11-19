@@ -17,6 +17,7 @@ import { FurnitureFinderPage } from "./pages/FurnitureFinderPage";
 import { HomePage } from "./pages/HomePage";
 import { StudioPage } from "./pages/StudioPage";
 import { VideoWalkthroughPage } from "./pages/VideoWalkthroughPage";
+import { VirtualStagingPage } from "./pages/VirtualStagingPage";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -97,6 +98,14 @@ export function App() {
                   element={
                     <ProtectedRoute>
                       <StudioPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/virtual-staging"
+                  element={
+                    <ProtectedRoute>
+                      <VirtualStagingPage />
                     </ProtectedRoute>
                   }
                 />
