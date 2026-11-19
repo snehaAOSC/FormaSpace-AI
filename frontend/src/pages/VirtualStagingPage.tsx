@@ -92,6 +92,13 @@ const ROOM_INVENTORIES: Record<string, StagingItem[]> = {
     { id: "inv-table", name: "Travertine Low Outdoor Coffee Table", category: "Outdoor", material: "Weather-Sealed Travertine", estimatedPrice: 950, dimensions: "90cm Diameter" },
     { id: "inv-planters", name: "Sculptural Concrete Olive Planters (Pair)", category: "Landscape", material: "Reinforced Fiber Concrete", estimatedPrice: 580, dimensions: "70cm H" },
   ],
+  "Bathroom": [
+    { id: "inv-bath-vanity", name: "Floating Fluted Oak & Stone Basin Vanity", category: "Sanitaryware", material: "Fluted White Oak & Honed Terrazzo", estimatedPrice: 1850, dimensions: "120cm W x 50cm D" },
+    { id: "inv-bath-mirror", name: "Backlit Circular LED Ambient Mirror", category: "Lighting & Fixtures", material: "Brushed Brass & Anti-Fog Glass", estimatedPrice: 420, dimensions: "80cm Diameter" },
+    { id: "inv-bath-shower", name: "Frameless Walk-In Glass Rain Shower", category: "Shower Enclosure", material: "10mm Toughened Glass & Brass Channel", estimatedPrice: 890, dimensions: "100cm x 200cm" },
+    { id: "inv-bath-tapware", name: "Minimalist Brushed Brass Mixer Taps", category: "Tapware", material: "Electroplated Solid Brass", estimatedPrice: 340, dimensions: "Wall-Mounted Basin Mixer" },
+    { id: "inv-bath-towels", name: "Organic Waffle Spa Towel Collection", category: "Textile", material: "100% Organic Turkish Cotton", estimatedPrice: 160, dimensions: "6-Piece Set" },
+  ],
 };
 
 const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
@@ -117,6 +124,12 @@ const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
     { id: "obj-stools", label: "Designer Oak Counter Stools", category: "Seating", confidence: 0.96, box: [24, 60, 48, 32] },
     { id: "obj-pendant", label: "Brass Cylinder Pendants", category: "Lighting", confidence: 0.94, box: [38, 6, 24, 26] },
   ],
+  "Bathroom": [
+    { id: "obj-bath-vanity", label: "Floating Stone Vanity & Basin", category: "Sanitaryware", confidence: 0.98, box: [16, 52, 38, 42] },
+    { id: "obj-bath-mirror", label: "Backlit Circular LED Mirror", category: "Fixtures", confidence: 0.96, box: [20, 14, 30, 34] },
+    { id: "obj-bath-shower", label: "Frameless Walk-in Rain Shower", category: "Shower", confidence: 0.95, box: [62, 14, 34, 80] },
+    { id: "obj-bath-tapware", label: "Brushed Brass Fixtures", category: "Hardware", confidence: 0.94, box: [26, 48, 8, 10] },
+  ],
   "Home Office": [
     { id: "obj-desk", label: "Executive Timber Desk", category: "Workspace", confidence: 0.97, box: [22, 54, 52, 34] },
     { id: "obj-chair", label: "Ergonomic Bouclé Chair", category: "Seating", confidence: 0.95, box: [38, 56, 24, 30] },
@@ -134,6 +147,7 @@ const STAGING_ROOM_TEMPLATES: Record<string, string> = {
   "Bedroom": "/images/kinkead-bed1-staged.jpg",
   "Dining Room": "/images/kinkead-dining-staged.jpg",
   "Kitchen": "/images/kitchen-renovated-luxury.jpg",
+  "Bathroom": "/images/bathroom-after.jpg",
   "Home Office": "/images/staged-room.jpg",
   "Patio": "/images/garden-after.jpg",
 };
@@ -143,55 +157,9 @@ export const VirtualStagingPage: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize with the 4 key vacant spaces of 23 Kinkead St, Evatt ACT
-  const [photos, setPhotos] = useState<StagingPhoto[]>([
-    {
-      id: "kinkead-living",
-      name: "23 Kinkead St · Formal Living Area",
-      originalUrl: "/images/kinkead-living-empty.jpg",
-      roomType: "Living Room",
-      style: "Modern Luxury",
-      status: "staged",
-      stagedUrl: "/images/kinkead-living-staged.jpg",
-      detectedObjects: DEFAULT_OBJECTS["Living Room"],
-      inventory: ROOM_INVENTORIES["Living Room"],
-    },
-    {
-      id: "kinkead-bed1",
-      name: "23 Kinkead St · Master Bedroom Suite",
-      originalUrl: "/images/kinkead-bed1-empty.jpg",
-      roomType: "Bedroom",
-      style: "Modern Luxury",
-      status: "staged",
-      stagedUrl: "/images/kinkead-bed1-staged.jpg",
-      detectedObjects: DEFAULT_OBJECTS["Bedroom"],
-      inventory: ROOM_INVENTORIES["Bedroom"],
-    },
-    {
-      id: "kinkead-dining",
-      name: "23 Kinkead St · Dining & Terrace View",
-      originalUrl: "/images/kinkead-dining-empty.jpg",
-      roomType: "Dining Room",
-      style: "Modern Luxury",
-      status: "staged",
-      stagedUrl: "/images/kinkead-dining-staged.jpg",
-      detectedObjects: DEFAULT_OBJECTS["Dining Room"],
-      inventory: ROOM_INVENTORIES["Dining Room"],
-    },
-    {
-      id: "kinkead-patio",
-      name: "23 Kinkead St · Covered Alfresco Living",
-      originalUrl: "/images/garden-before.jpg",
-      roomType: "Patio",
-      style: "Modern Luxury",
-      status: "staged",
-      stagedUrl: "/images/garden-after.jpg",
-      detectedObjects: DEFAULT_OBJECTS["Patio"],
-      inventory: ROOM_INVENTORIES["Patio"],
-    },
-  ]);
-
-  const [activePhotoId, setActivePhotoId] = useState<string>("kinkead-living");
+  // Photos queue starts empty; populates only when the user uploads photos or loads demo
+  const [photos, setPhotos] = useState<StagingPhoto[]>([]);
+  const [activePhotoId, setActivePhotoId] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("Modern Luxury");
   const [stagingTier, setStagingTier] = useState<string>("Full Staging Suite");
   const [viewMode, setViewMode] = useState<"slider" | "side" | "staged" | "empty">("slider");
@@ -200,40 +168,109 @@ export const VirtualStagingPage: React.FC = () => {
   const [isStagingActive, setIsStagingActive] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
 
-  const activePhoto = photos.find((p) => p.id === activePhotoId) || photos[0];
+  const activePhoto = photos.find((p) => p.id === activePhotoId) || (photos.length > 0 ? photos[0] : null);
+
+  // Visual image content analyzer using HTML5 canvas pixel sampling
+  const analyzeImageContent = (img: HTMLImageElement): "Bathroom" | "Patio" | "Living Room" => {
+    try {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return "Living Room";
+      const w = 120;
+      const h = 80;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      let whiteTilePixels = 0;
+      let greenPixels = 0;
+      const totalPixels = w * h;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // White / high-brightness low-saturation tile / porcelain / sanitaryware
+        if (r > 170 && g > 170 && b > 170 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25) {
+          whiteTilePixels++;
+        }
+        // Green foliage / outdoor vegetation
+        if (g > 85 && g > r * 1.15 && g > b * 1.15) {
+          greenPixels++;
+        }
+      }
+
+      const whiteRatio = whiteTilePixels / totalPixels;
+      const greenRatio = greenPixels / totalPixels;
+
+      // Bathrooms have characteristic white ceramic tiles, enamel tub, sink porcelain (whiteRatio > 0.32)
+      if (whiteRatio > 0.32) {
+        return "Bathroom";
+      }
+      if (greenRatio > 0.22) {
+        return "Patio";
+      }
+      return "Living Room";
+    } catch {
+      return "Living Room";
+    }
+  };
 
   // Guess room type from filename
   const inferRoomType = (filename: string): string => {
     const s = filename.toLowerCase();
-    if (s.includes("bed") || s.includes("room_1") || s.includes("master")) return "Bedroom";
+    if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("sink")) return "Bathroom";
+    if (s.includes("bed") || s.includes("room_1") || s.includes("master") || s.includes("sleep")) return "Bedroom";
     if (s.includes("dine") || s.includes("dining")) return "Dining Room";
     if (s.includes("kitchen") || s.includes("cook")) return "Kitchen";
-    if (s.includes("office") || s.includes("study") || s.includes("desk")) return "Home Office";
-    if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard")) return "Patio";
+    if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) return "Home Office";
+    if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("balcony") || s.includes("alfresco")) return "Patio";
     return "Living Room";
   };
 
-  // Handle Multi-File Upload
+  // Handle Multi-File Upload with visual content analysis
   const handleBatchUpload = (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     const newItems: StagingPhoto[] = [];
 
     Array.from(fileList).forEach((file, idx) => {
-      const roomType = inferRoomType(file.name);
+      const initialRoomType = inferRoomType(file.name);
       const url = URL.createObjectURL(file);
       const id = `upload-${Date.now()}-${idx}`;
+
+      // Visual Content Analysis via HTML5 Image & Canvas
+      const img = new Image();
+      img.onload = () => {
+        const visualRoomType = analyzeImageContent(img);
+        if (visualRoomType === "Bathroom" || (initialRoomType === "Living Room" && visualRoomType !== "Living Room")) {
+          setPhotos((prev) =>
+            prev.map((p) =>
+              p.id === id
+                ? {
+                  ...p,
+                  roomType: visualRoomType,
+                  inventory: ROOM_INVENTORIES[visualRoomType] || ROOM_INVENTORIES["Living Room"],
+                  detectedObjects: DEFAULT_OBJECTS[visualRoomType] || DEFAULT_OBJECTS["Living Room"],
+                }
+                : p
+            )
+          );
+        }
+      };
+      img.src = url;
 
       newItems.push({
         id,
         file,
         name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
         originalUrl: url,
-        roomType,
+        roomType: initialRoomType,
         style: selectedStyle,
         status: "ready",
         stagedUrl: undefined,
-        detectedObjects: [],
-        inventory: ROOM_INVENTORIES[roomType] || ROOM_INVENTORIES["Living Room"],
+        detectedObjects: DEFAULT_OBJECTS[initialRoomType] || DEFAULT_OBJECTS["Living Room"],
+        inventory: ROOM_INVENTORIES[initialRoomType] || ROOM_INVENTORIES["Living Room"],
       });
     });
 
@@ -572,6 +609,7 @@ export const VirtualStagingPage: React.FC = () => {
                               <option value="Bedroom">Bedroom</option>
                               <option value="Dining Room">Dining Room</option>
                               <option value="Kitchen">Kitchen</option>
+                              <option value="Bathroom">Bathroom & Ensuite</option>
                               <option value="Home Office">Home Office</option>
                               <option value="Patio">Patio & Alfresco</option>
                             </select>
@@ -655,9 +693,9 @@ export const VirtualStagingPage: React.FC = () => {
                   <div className="pt-3 sm:pt-4">
                     <button
                       type="button"
-                      onClick={() => handleStagePhoto(activePhoto.id)}
-                      disabled={isStagingActive}
-                      className="btn-primary py-2 px-5 text-xs font-bold shadow-md"
+                      onClick={() => activePhoto && handleStagePhoto(activePhoto.id)}
+                      disabled={isStagingActive || !activePhoto}
+                      className="btn-primary py-2 px-5 text-xs font-bold shadow-md disabled:opacity-50"
                     >
                       {isStagingActive ? (
                         <>
@@ -826,7 +864,7 @@ export const VirtualStagingPage: React.FC = () => {
                         })}
                     </div>
                   )
-                ) : (
+                ) : activePhoto ? (
                   /* Vacant State Prompt */
                   <div className="relative h-full w-full">
                     <img
@@ -856,6 +894,27 @@ export const VirtualStagingPage: React.FC = () => {
                         </button>
                       </div>
                     </div>
+                  </div>
+                ) : (
+                  /* Clean Empty Queue State */
+                  <div className="relative flex h-full w-full flex-col items-center justify-center p-8 text-center bg-[#172B3A]/5">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C87960]/15 text-[#C87960] mb-3">
+                      <UploadCloud className="h-7 w-7" />
+                    </div>
+                    <h3 className="font-editorial text-xl font-semibold text-[#172B3A]">
+                      No Room Photos Uploaded Yet
+                    </h3>
+                    <p className="mt-1.5 max-w-md text-xs text-[#252B2E]/70 leading-relaxed">
+                      Upload your room photos using the upload panel on the left (or click below) to detect room types, furniture zones, and stage vacant spaces.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="btn-primary mt-4 px-5 py-2 text-xs font-semibold"
+                    >
+                      <UploadCloud className="h-4 w-4" />
+                      <span>Upload Vacant Room Photos</span>
+                    </button>
                   </div>
                 )}
               </div>

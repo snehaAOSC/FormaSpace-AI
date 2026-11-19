@@ -441,31 +441,40 @@ export const StudioPage: React.FC = () => {
     // Smart room type recognition from filename, preserving active selection if ambiguous
     const lowerName = file.name.toLowerCase();
     let detected = roomType || "Living Room";
+    let hasExplicitKeyword = false;
+
     if (
       lowerName.includes("bed") ||
       lowerName.includes("bedroom") ||
       lowerName.includes("58a50328")
     ) {
       detected = "Bedroom";
+      hasExplicitKeyword = true;
     } else if (lowerName.includes("kitchen") || lowerName.includes("cook") || lowerName.includes("krtchen") || lowerName.includes("kit")) {
       detected = "Kitchen";
-    } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
+      hasExplicitKeyword = true;
+    } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom") || lowerName.includes("shower") || lowerName.includes("powder") || lowerName.includes("ensuite")) {
       detected = "Bathroom";
+      hasExplicitKeyword = true;
     } else if (lowerName.includes("dining")) {
       detected = "Dining Room";
+      hasExplicitKeyword = true;
     } else if (lowerName.includes("exterior") || lowerName.includes("facade") || lowerName.includes("house")) {
       detected = "House Exterior";
+      hasExplicitKeyword = true;
       setFeatureType("exterior_design");
     } else if (lowerName.includes("garden") || lowerName.includes("yard") || lowerName.includes("patio")) {
       detected = "Garden";
+      hasExplicitKeyword = true;
       setFeatureType("garden_landscape");
     } else if (lowerName.includes("office") || lowerName.includes("study") || lowerName.includes("desk")) {
       detected = "Office";
+      hasExplicitKeyword = true;
     }
     setRoomType(detected);
     setCategory(detected);
 
-    // Read immediately as base64 Data URL so both frontend & backend have direct byte-level access without relying on browser-internal blob URLs
+    // Read immediately as base64 Data URL so both frontend & backend have direct byte-level access
     const reader = new FileReader();
     reader.onload = async () => {
       const dataUrl = reader.result as string;
@@ -475,6 +484,54 @@ export const StudioPage: React.FC = () => {
         setOriginalUrl(dataUrl);
         setCurrentDesign(null);
         setMaskDataUrl(null);
+      }
+
+      // Visual Content Analysis via HTML5 Canvas Pixel Inspection
+      if (!isInspiration) {
+        try {
+          const img = new Image();
+          await new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = dataUrl;
+          });
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (ctx && img.width > 0 && img.height > 0) {
+            canvas.width = 120;
+            canvas.height = 80;
+            ctx.drawImage(img, 0, 0, 120, 80);
+            const data = ctx.getImageData(0, 0, 120, 80).data;
+            let whiteTilePixels = 0;
+            let greenPixels = 0;
+            const total = 120 * 80;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              if (r > 170 && g > 170 && b > 170 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25) {
+                whiteTilePixels++;
+              }
+              if (g > 85 && g > r * 1.15 && g > b * 1.15) {
+                greenPixels++;
+              }
+            }
+            const whiteRatio = whiteTilePixels / total;
+            const greenRatio = greenPixels / total;
+            if (whiteRatio > 0.32 && (!hasExplicitKeyword || detected !== "Kitchen")) {
+              detected = "Bathroom";
+              setRoomType("Bathroom");
+              setCategory("Bathroom");
+            } else if (greenRatio > 0.22 && !hasExplicitKeyword) {
+              detected = "Garden";
+              setRoomType("Garden");
+              setCategory("Garden");
+              setFeatureType("garden_landscape");
+            }
+          }
+        } catch (visErr) {
+          console.warn("Visual space analysis:", visErr);
+        }
       }
 
       // Concurrently upload to server storage

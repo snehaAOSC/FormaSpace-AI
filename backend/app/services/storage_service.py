@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 from typing import Tuple
 
-from ..config import ROOT_DIR, settings
+from ..config import BASE_DIR, ROOT_DIR, settings
 from ..database import get_supabase_client
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -48,6 +48,14 @@ def save_image_bytes(content: bytes, folder: str, filename: str) -> Tuple[str, P
 def resolve_local_image_path(image_url: str) -> Path:
     """Resolve /storage/..., /images/..., Supabase public URLs, or HTTP URLs to local disk paths for image processing."""
     clean = image_url.split("?")[0].strip()
+
+    # -1. Direct local file path
+    try:
+        p = Path(clean)
+        if p.is_file():
+            return p
+    except Exception:
+        pass
 
     # 0. Data URL (Base64 payload passed directly from frontend client)
     if clean.startswith("data:image"):
@@ -123,7 +131,7 @@ def resolve_local_image_path(image_url: str) -> Path:
             import httpx
             with httpx.Client(timeout=8.0) as client:
                 resp = client.get(prod_url)
-                if resp.status_code == 200 and len(resp.content) > 1000:
+                if resp.status_code == 200 and resp.headers.get("content-type", "").startswith("image/") and len(resp.content) > 1000:
                     cache_file = settings.STORAGE_DIR / "uploads" / f"cached_{rel}"
                     cache_file.parent.mkdir(parents=True, exist_ok=True)
                     cache_file.write_bytes(resp.content)
