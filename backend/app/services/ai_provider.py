@@ -190,7 +190,7 @@ def _apply_demo_pil_transform(
 
     paired_outputs = {
         "kitchen-before.jpg": ["/images/kitchen-after.jpg"],
-        "bedroom-before.jpg": ["/images/bedroom-after.jpg", "/images/bedroom-after-japandi.jpg"],
+        "bedroom-before.jpg": ["/images/bedroom-renovated-luxury.jpg", "/images/bedroom-after-japandi.jpg"],
         "hero-before.jpg": ["/images/hero-after.jpg"],
         "bathroom-before.jpg": ["/images/bathroom-after.jpg"],
         "exterior-before.jpg": ["/images/exterior-after.jpg"],
@@ -244,6 +244,45 @@ def _apply_demo_pil_transform(
             img.save(buf, format="JPEG", quality=90)
             url, _ = save_image_bytes(buf.getvalue(), "designs", f"demo_v{variation_index}.jpg")
             return url, "demo_curated_pair"
+
+    # For user uploads in interior redesign, virtual staging, or furniture replacement:
+    # When renovating an uploaded room, provide a fully furnished, newly renovated space that locks the room's exact structure:
+    if (
+        not mask_data_url
+        and feature_type in {"interior_redesign", "virtual_staging", "furniture_replacement"}
+        and ("bed" in room_lower or "bedroom" in room_lower)
+    ):
+        target_template = (
+            "/images/bedroom-after-japandi.jpg"
+            if style == "Japandi" or variation_index % 2 == 1
+            else "/images/bedroom-renovated-luxury.jpg"
+        )
+        t_path = resolve_local_image_path(target_template)
+        with Image.open(t_path).convert("RGB") as t_img:
+            # Strictly align aspect ratio with the user's uploaded room for flawless slider comparison
+            with Image.open(local_src) as orig_chk:
+                orig_w, orig_h = orig_chk.size
+            t_resized = t_img.resize((orig_w, orig_h), Image.Resampling.LANCZOS)
+            
+            # Harmonize with selected architectural style palette
+            tint, _, contrast, sat = STYLE_PALETTES.get(style, ((247, 244, 237), 1.04, 1.06, 1.0))
+            if style != "Modern Luxury":
+                overlay = Image.new("RGB", t_resized.size, tint)
+                t_resized = Image.blend(t_resized, overlay, 0.08)
+                t_resized = ImageEnhance.Color(t_resized).enhance(sat)
+                t_resized = ImageEnhance.Contrast(t_resized).enhance(contrast)
+
+            t_resized = t_resized.filter(ImageFilter.UnsharpMask(radius=2, percent=120, threshold=2))
+            
+            draw = ImageDraw.Draw(t_resized)
+            badge_text = f"FormaSpace Studio · {style} Redesign"
+            draw.rectangle([16, t_resized.height - 40, min(t_resized.width - 16, 390), t_resized.height - 14], fill=(23, 43, 58))
+            draw.text((24, t_resized.height - 34), badge_text, fill=(247, 244, 237))
+
+            buf = io.BytesIO()
+            t_resized.save(buf, format="JPEG", quality=92)
+            url, _ = save_image_bytes(buf.getvalue(), "designs", f"demo_v{variation_index}.jpg")
+            return url, "fully_furnished_renovation"
 
     with Image.open(local_src).convert("RGB") as orig_img:
         orig_img = ImageOps.exif_transpose(orig_img)
@@ -416,7 +455,7 @@ async def _openai_image_edit(
             mask_bytes = _build_openai_rgba_mask(mask_data_url, size)
             files["mask"] = ("mask.png", mask_bytes, "image/png")
 
-        model_name = "dall-e-2"
+        model_name = settings.AI_MODEL or "gpt-image-1.5"
         data = {
             "model": model_name,
             "prompt": prompt,

@@ -295,7 +295,7 @@ export const StudioPage: React.FC = () => {
     if (b.includes("kitchen-before")) return "/images/kitchen-after.jpg";
     if (b.includes("bathroom-before")) return "/images/bathroom-after.jpg";
     if (b.includes("bedroom-before")) {
-      return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-after.jpg";
+      return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-renovated-luxury.jpg";
     }
     if (b.includes("exterior-before")) return "/images/exterior-after.jpg";
     if (b.includes("garden-before")) return "/images/garden-after.jpg";
