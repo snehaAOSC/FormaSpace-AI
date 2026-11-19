@@ -6,9 +6,11 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  ExternalLink,
   Eye,
   Film,
   History,
+  Home,
   ImagePlus,
   KeyRound,
   Layers,
@@ -31,6 +33,7 @@ import { useAuth } from "../context/AuthContext";
 import {
   DESIGN_CATEGORIES,
   DESIGN_STYLES,
+  KINKEAD_PROPERTY_SHOWCASE,
   MATERIAL_SWATCHES,
   STUDIO_FEATURES,
   WEATHER_PRESETS,
@@ -121,15 +124,42 @@ const getAiRecommendedDesigns = (
         prompt: "Mediterranean courtyard with travertine hardscaping, architectural olive planting, patinated brass fixtures, and evening ambient illumination.",
       },
     ];
-  } else if (b.includes("empty-room") || b.includes("staged-room")) {
-    // 4. EMPTY APARTMENT: Unique staged redesign (Shown once, not repeated)
+  } else if (b.includes("kinkead-bed1")) {
     recs = [
       {
-        style: "Contemporary",
+        style: "Modern Luxury",
+        tag: "Master Staging",
+        description: "Low white oak bed, washed linen bedding, oak nightstands & minimalist art.",
+        imageUrl: "/images/kinkead-bed1-staged.jpg",
+        prompt: "Virtually stage 23 Kinkead St master bedroom with low white oak platform bed, linen bedding, and soft daylight.",
+      },
+      {
+        style: "Japandi",
+        tag: "Wabi-Sabi Sanctuary",
+        description: "Hinoki timber platform bed, Noguchi paper pendant & slatted oak sliding wardrobes.",
+        imageUrl: "/images/bedroom-after-japandi.jpg",
+        prompt: "Virtually stage in Japandi style with Hinoki timber bed, rice paper pendant, and light oak.",
+      },
+    ];
+  } else if (b.includes("kinkead-dining")) {
+    recs = [
+      {
+        style: "Modern Luxury",
+        tag: "Nordic Dining",
+        description: "Scandinavian solid oak 6-seater dining table, sculptural cream chairs & fluted glass pendant.",
+        imageUrl: "/images/kinkead-dining-staged.jpg",
+        prompt: "Virtually stage 23 Kinkead St dining room with solid oak dining suite, fluted pendant, and linen drapery.",
+      },
+    ];
+  } else if (b.includes("empty-room") || b.includes("staged-room") || b.includes("kinkead-living")) {
+    // 4. EMPTY APARTMENT / LIVING: Unique staged redesign (Shown once, not repeated)
+    recs = [
+      {
+        style: "Modern Luxury",
         tag: "Tailored Staging",
         description: "Curated cognac leather seating, textured woven rug & architectural shelving.",
-        imageUrl: "/images/staged-room.jpg",
-        prompt: "Virtually stage this empty room with contemporary architectural furniture, textured wool rug, layered lighting, and curated decor.",
+        imageUrl: "/images/kinkead-living-staged.jpg",
+        prompt: "Virtually stage this empty living room with contemporary architectural furniture, textured wool rug, layered lighting, and curated decor.",
       },
     ];
   } else {
@@ -137,7 +167,7 @@ const getAiRecommendedDesigns = (
       b.startsWith("/storage/") ||
       b.startsWith("blob:") ||
       b.startsWith("data:") ||
-      (!b.includes("bedroom-before") && !b.includes("hero-before") && !b.includes("exterior-before") && !b.includes("garden-before") && !b.includes("empty-room"));
+      (!b.includes("bedroom-before") && !b.includes("hero-before") && !b.includes("exterior-before") && !b.includes("garden-before") && !b.includes("empty-room") && !b.includes("kinkead"));
 
     if (isCustomUpload) {
       // 5. CUSTOM CUSTOMER PHOTO: Unique redesign of customer's active space
@@ -281,7 +311,8 @@ export const StudioPage: React.FC = () => {
         u.includes("bathroom-before") ||
         u.includes("exterior-before") ||
         u.includes("garden-before") ||
-        u.includes("empty-room")) &&
+        u.includes("empty-room") ||
+        u.includes("kinkead")) &&
       !u.includes("/uploads/") &&
       !u.includes("/designs/") &&
       !u.startsWith("data:") &&
@@ -297,6 +328,9 @@ export const StudioPage: React.FC = () => {
     if (b.includes("bedroom-before")) {
       return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-renovated-luxury.jpg";
     }
+    if (b.includes("kinkead-bed1")) return "/images/kinkead-bed1-staged.jpg";
+    if (b.includes("kinkead-dining")) return "/images/kinkead-dining-staged.jpg";
+    if (b.includes("kinkead-living")) return "/images/kinkead-living-staged.jpg";
     if (b.includes("exterior-before")) return "/images/exterior-after.jpg";
     if (b.includes("garden-before")) return "/images/garden-after.jpg";
     if (b.includes("empty-room")) return "/images/staged-room.jpg";
@@ -679,6 +713,100 @@ export const StudioPage: React.FC = () => {
             LEFT CONTROLS (4 Cols): Step 1: Upload → Step 2: Customize → Step 3: Generate
         ================================================================== */}
         <aside className="space-y-4 lg:col-span-4">
+          {/* FEATURED REAL ESTATE VIRTUAL STAGING SHOWCASE */}
+          <div className="editorial-card p-4 bg-gradient-to-br from-[#172B3A] via-[#1E374B] to-[#252B2E] text-white shadow-editorial space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C87960] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Real Estate Virtual Staging
+                </div>
+                <h3 className="mt-1 font-editorial text-base font-semibold text-white leading-tight">
+                  {KINKEAD_PROPERTY_SHOWCASE.address}
+                </h3>
+                <p className="mt-0.5 text-[11px] text-white/70">
+                  {KINKEAD_PROPERTY_SHOWCASE.specs} · {KINKEAD_PROPERTY_SHOWCASE.photoCount} Photos
+                </p>
+              </div>
+              <a
+                href={KINKEAD_PROPERTY_SHOWCASE.listingUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] text-[#DCCBB5] hover:text-white transition"
+              >
+                <span>Listing</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            <div className="text-[11px] text-[#DCCBB5]/90 font-medium">
+              Select any vacant space to stage instantly:
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {KINKEAD_PROPERTY_SHOWCASE.rooms.map((room) => {
+                const isActive = originalUrl === room.emptyImage;
+                return (
+                  <button
+                    key={room.id}
+                    type="button"
+                    onClick={() => {
+                      setOriginalUrl(room.emptyImage);
+                      setRoomType(room.roomType);
+                      setCategory(room.roomType);
+                      setFeatureType("virtual_staging");
+                      setStyle("Modern Luxury");
+                      setDetectedBeforeObjects(room.emptyObjects as any);
+                      setDetectedAfterObjects(room.stagedObjects as any);
+                      setCurrentDesign({
+                        id: `kinkead-${room.id}`,
+                        user_id: user?.id || "demo-user",
+                        project_id: selectedProjectId || undefined,
+                        feature_type: "virtual_staging",
+                        category: room.roomType,
+                        room_type: room.roomType,
+                        style: "Modern Luxury",
+                        intervention_level: "Medium",
+                        prompt: room.description,
+                        settings: {},
+                        original_image_url: room.emptyImage,
+                        generated_image_url: room.stagedImage,
+                        variations: [room.stagedImage],
+                        detected_objects: room.stagedObjects as any,
+                        credits_used: 0,
+                        is_saved: false,
+                        is_demo_mode: true,
+                        provider: "virtual_staging_ai",
+                        prompt_used: room.description,
+                        created_at: new Date().toISOString(),
+                      });
+                      setActiveVariationIdx(0);
+                    }}
+                    className={`group relative overflow-hidden rounded-xl border p-2 text-left transition ${
+                      isActive
+                        ? "border-[#C87960] bg-[#C87960]/20 ring-1 ring-[#C87960]"
+                        : "border-white/15 bg-white/5 hover:border-[#C87960] hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="aspect-[16/10] w-full overflow-hidden rounded-lg mb-1.5 bg-black/40">
+                      <img
+                        src={room.thumb}
+                        alt={room.name}
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="text-[11px] font-semibold text-white truncate">
+                      {room.name}
+                    </div>
+                    <div className="text-[10px] text-[#9BAE9A] font-medium flex items-center gap-1">
+                      <span>Empty → Staged</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* UPLOAD SPACE PHOTO */}
           <div className="editorial-card p-4 space-y-3">
             <div className="flex items-center justify-between">

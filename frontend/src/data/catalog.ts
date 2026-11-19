@@ -46,6 +46,9 @@ export const STUDIO_FEATURES = [
 ];
 
 export const SAMPLE_IMAGES = [
+  { label: "23 Kinkead St (Living)", url: "/images/kinkead-living-empty.jpg", roomType: "Living Room", feature: "virtual_staging" },
+  { label: "23 Kinkead St (Bedroom)", url: "/images/kinkead-bed1-empty.jpg", roomType: "Bedroom", feature: "virtual_staging" },
+  { label: "23 Kinkead St (Dining)", url: "/images/kinkead-dining-empty.jpg", roomType: "Dining Room", feature: "virtual_staging" },
   { label: "Rustic Kitchen", url: "/images/kitchen-before.jpg", roomType: "Kitchen", feature: "interior_redesign" },
   { label: "Rustic Bedroom", url: "/images/bedroom-before.jpg", roomType: "Bedroom", feature: "interior_redesign" },
   { label: "Dated Living Room", url: "/images/hero-before.jpg", roomType: "Living Room", feature: "interior_redesign" },
@@ -55,6 +58,99 @@ export const SAMPLE_IMAGES = [
   { label: "Neglected Backyard", url: "/images/garden-before.jpg", roomType: "Garden", feature: "garden_landscape" },
   { label: "Architectural Sketch", url: "/images/sketch-sample.jpg", roomType: "Living Room", feature: "sketch_to_render" },
 ];
+
+export interface StagingPropertyRoom {
+  id: string;
+  name: string;
+  roomType: string;
+  emptyImage: string;
+  stagedImage: string;
+  description: string;
+  thumb: string;
+  emptyObjects: Array<{ id: string; label: string; category: string; confidence: number; box: [number, number, number, number] }>;
+  stagedObjects: Array<{ id: string; label: string; category: string; confidence: number; box: [number, number, number, number] }>;
+}
+
+export const KINKEAD_PROPERTY_SHOWCASE = {
+  address: "23 Kinkead St, Evatt ACT 2617",
+  listingUrl: "https://www.realestate.com.au/property/23-kinkead-st-evatt-act-2617/",
+  specs: "3 Bed · 1 Bath · 888m² RZ2 Corner Block · Canberra ACT",
+  photoCount: 27,
+  rooms: [
+    {
+      id: "living",
+      name: "Main Living & Lounge",
+      roomType: "Living Room",
+      emptyImage: "/images/kinkead-living-empty.jpg",
+      stagedImage: "/images/kinkead-living-staged.jpg",
+      thumb: "/images/kinkead-living-staged.jpg",
+      description: "Empty hardwood living room staged with cognac leather lounge, plinth travertine table & wool rug.",
+      emptyObjects: [
+        { id: "obj-win", label: "Large Window Opening", category: "Architecture", confidence: 0.98, box: [22, 14, 56, 44] as [number, number, number, number] },
+        { id: "obj-floor", label: "Hardwood Flooring", category: "Flooring", confidence: 0.96, box: [4, 58, 92, 40] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-sofa", label: "Cognac Leather Lounge", category: "Seating", confidence: 0.98, box: [24, 48, 52, 36] as [number, number, number, number] },
+        { id: "obj-table", label: "Travertine Coffee Table", category: "Table", confidence: 0.96, box: [38, 62, 28, 22] as [number, number, number, number] },
+        { id: "obj-rug", label: "Textured Wool Area Rug", category: "Textile", confidence: 0.95, box: [18, 56, 68, 38] as [number, number, number, number] },
+        { id: "obj-lamp", label: "Architectural Floor Lamp", category: "Lighting", confidence: 0.93, box: [78, 32, 14, 52] as [number, number, number, number] },
+      ],
+    },
+    {
+      id: "master-bed",
+      name: "Master Bedroom Suite",
+      roomType: "Bedroom",
+      emptyImage: "/images/kinkead-bed1-empty.jpg",
+      stagedImage: "/images/kinkead-bed1-staged.jpg",
+      thumb: "/images/kinkead-bed1-staged.jpg",
+      description: "Vacant master bedroom virtually staged with low white oak bed, washed linen bedding & oak nightstands.",
+      emptyObjects: [
+        { id: "obj-win", label: "Sliding Aluminium Window", category: "Architecture", confidence: 0.98, box: [15, 18, 45, 42] as [number, number, number, number] },
+        { id: "obj-fl", label: "Light Oak Flooring", category: "Flooring", confidence: 0.97, box: [8, 55, 84, 42] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-bed", label: "Low White Oak Bed Frame", category: "Furniture", confidence: 0.98, box: [22, 44, 58, 46] as [number, number, number, number] },
+        { id: "obj-linen", label: "Washed Linen Bedding", category: "Textile", confidence: 0.97, box: [28, 52, 46, 34] as [number, number, number, number] },
+        { id: "obj-stands", label: "Twin Oak Nightstands", category: "Storage", confidence: 0.95, box: [12, 54, 18, 26] as [number, number, number, number] },
+        { id: "obj-art", label: "Minimalist Canvas Art", category: "Decor", confidence: 0.94, box: [38, 16, 26, 22] as [number, number, number, number] },
+      ],
+    },
+    {
+      id: "dining",
+      name: "Open Dining & Patio View",
+      roomType: "Dining Room",
+      emptyImage: "/images/kinkead-dining-empty.jpg",
+      stagedImage: "/images/kinkead-dining-staged.jpg",
+      thumb: "/images/kinkead-dining-staged.jpg",
+      description: "Empty open-plan dining staged with Scandinavian solid oak 6-seater dining table & fluted pendant.",
+      emptyObjects: [
+        { id: "obj-doors", label: "Glass Sliding Patio Doors", category: "Architecture", confidence: 0.98, box: [10, 16, 42, 58] as [number, number, number, number] },
+        { id: "obj-fl", label: "Polished Timber Flooring", category: "Flooring", confidence: 0.96, box: [6, 58, 88, 40] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-table", label: "Solid Oak 6-Seater Table", category: "Dining", confidence: 0.98, box: [26, 46, 50, 38] as [number, number, number, number] },
+        { id: "obj-chairs", label: "Sculptural Cream Chairs", category: "Seating", confidence: 0.96, box: [20, 48, 62, 34] as [number, number, number, number] },
+        { id: "obj-pendant", label: "Fluted Pendant Luminaire", category: "Lighting", confidence: 0.95, box: [42, 12, 18, 24] as [number, number, number, number] },
+      ],
+    },
+    {
+      id: "patio",
+      name: "Sunroom & Alfresco Living",
+      roomType: "Garden",
+      emptyImage: "/images/garden-before.jpg",
+      stagedImage: "/images/garden-after.jpg",
+      thumb: "/images/garden-after.jpg",
+      description: "Covered alfresco garden area transformed with Roman travertine, sunken firepit lounge & olive trees.",
+      emptyObjects: [
+        { id: "obj-paving", label: "Concrete Terrace Slab", category: "Hardscape", confidence: 0.95, box: [8, 54, 84, 44] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-terrace", label: "Honed Roman Travertine", category: "Hardscape", confidence: 0.96, box: [8, 54, 84, 44] as [number, number, number, number] },
+        { id: "obj-lounge", label: "Sunken Firepit & Lounge", category: "Outdoor Living", confidence: 0.95, box: [24, 48, 54, 38] as [number, number, number, number] },
+      ],
+    },
+  ],
+};
 
 export const MATERIAL_SWATCHES = {
   walls: [

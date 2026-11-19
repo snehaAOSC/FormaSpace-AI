@@ -198,6 +198,9 @@ def _apply_demo_pil_transform(
         "garden-before.jpg": ["/images/garden-after.jpg"],
         "floorplan-2d.jpg": ["/images/floorplan-3d.jpg"],
         "sketch-sample.jpg": ["/images/hero-after.jpg"],
+        "kinkead-living-empty.jpg": ["/images/kinkead-living-staged.jpg"],
+        "kinkead-bed1-empty.jpg": ["/images/kinkead-bed1-staged.jpg"],
+        "kinkead-dining-empty.jpg": ["/images/kinkead-dining-staged.jpg"],
     }
 
     # Strictly isolate preset showroom sample files from user uploads:
@@ -210,6 +213,9 @@ def _apply_demo_pil_transform(
         "empty-room.jpg",
         "garden-before.jpg",
         "sketch-sample.jpg",
+        "kinkead-living-empty.jpg",
+        "kinkead-bed1-empty.jpg",
+        "kinkead-dining-empty.jpg",
     }
     # An image is a showroom sample ONLY if its filename is in the catalog AND it is not an uploaded path
     is_showroom_sample = (
@@ -311,11 +317,6 @@ def _apply_demo_pil_transform(
                     t_resized = ImageEnhance.Contrast(t_resized).enhance(contrast)
 
                 t_resized = t_resized.filter(ImageFilter.UnsharpMask(radius=2, percent=120, threshold=2))
-                
-                draw = ImageDraw.Draw(t_resized)
-                badge_text = f"FormaSpace Studio · {style} Redesign"
-                draw.rectangle([16, t_resized.height - 40, min(t_resized.width - 16, 390), t_resized.height - 14], fill=(23, 43, 58))
-                draw.text((24, t_resized.height - 34), badge_text, fill=(247, 244, 237))
 
                 buf = io.BytesIO()
                 t_resized.save(buf, format="JPEG", quality=92)
@@ -1078,6 +1079,53 @@ def detect_architectural_objects(image_url: str, room_type: str) -> list[dict[st
             {"id": "obj-table", "label": "Pietra Travertine Table", "category": "Coffee Table", "confidence": 0.94, "box": [42, 65, 18, 12]},
             {"id": "obj-chair", "label": "Sienna Lounge Chair", "category": "Accent Seating", "confidence": 0.92, "box": [33, 59, 10, 18]},
             {"id": "obj-plant", "label": "Architectural Olive Tree", "category": "Botanical", "confidence": 0.90, "box": [62, 36, 14, 38]},
+        ]
+
+    # 1b. 23 KINKEAD ST, EVATT ACT 2617 — VIRTUAL STAGING GROUND TRUTH
+    if "kinkead-living-empty" in img_lower or "empty-room" in img_lower:
+        return [
+            {"id": "obj-win", "label": "Large Window Opening", "category": "Architecture", "confidence": 0.98, "box": [22, 14, 56, 44]},
+            {"id": "obj-floor", "label": "Hardwood Flooring", "category": "Flooring", "confidence": 0.96, "box": [4, 58, 92, 40]},
+            {"id": "obj-wall", "label": "Neutral Plaster Wall", "category": "Architecture", "confidence": 0.95, "box": [2, 10, 24, 76]},
+        ]
+
+    if "kinkead-living-staged" in img_lower or "staged-room" in img_lower:
+        return [
+            {"id": "obj-sofa", "label": "Cognac Leather Lounge", "category": "Seating", "confidence": 0.98, "box": [24, 48, 52, 36]},
+            {"id": "obj-table", "label": "Travertine Plinth Coffee Table", "category": "Table", "confidence": 0.96, "box": [38, 62, 28, 22]},
+            {"id": "obj-rug", "label": "Textured Wool Area Rug", "category": "Textile", "confidence": 0.95, "box": [18, 56, 68, 38]},
+            {"id": "obj-lamp", "label": "Architectural Floor Lamp", "category": "Lighting", "confidence": 0.93, "box": [78, 32, 14, 52]},
+            {"id": "obj-art", "label": "Curated Gallery Artwork", "category": "Decor", "confidence": 0.91, "box": [4, 22, 18, 28]},
+        ]
+
+    if "kinkead-bed1-empty" in img_lower:
+        return [
+            {"id": "obj-win", "label": "Sliding Aluminium Window", "category": "Architecture", "confidence": 0.98, "box": [15, 18, 45, 42]},
+            {"id": "obj-fl", "label": "Light Oak Laminate Floor", "category": "Flooring", "confidence": 0.97, "box": [8, 55, 84, 42]},
+            {"id": "obj-wall", "label": "Cream Plaster Wall", "category": "Architecture", "confidence": 0.95, "box": [60, 12, 36, 75]},
+        ]
+
+    if "kinkead-bed1-staged" in img_lower or "bedroom-renovated-luxury" in img_lower:
+        return [
+            {"id": "obj-bed", "label": "Low White Oak Bed Frame", "category": "Furniture", "confidence": 0.98, "box": [22, 44, 58, 46]},
+            {"id": "obj-linen", "label": "Washed Linen Bedding", "category": "Textile", "confidence": 0.97, "box": [28, 52, 46, 34]},
+            {"id": "obj-stands", "label": "Twin Oak Nightstands", "category": "Storage", "confidence": 0.95, "box": [12, 54, 18, 26]},
+            {"id": "obj-art", "label": "Minimalist Canvas Art", "category": "Decor", "confidence": 0.94, "box": [38, 16, 26, 22]},
+            {"id": "obj-rug", "label": "Plush Wool Area Rug", "category": "Textile", "confidence": 0.92, "box": [16, 68, 68, 28]},
+        ]
+
+    if "kinkead-dining-empty" in img_lower:
+        return [
+            {"id": "obj-doors", "label": "Glass Sliding Patio Doors", "category": "Architecture", "confidence": 0.98, "box": [10, 16, 42, 58]},
+            {"id": "obj-fl", "label": "Polished Timber Flooring", "category": "Flooring", "confidence": 0.96, "box": [6, 58, 88, 40]},
+        ]
+
+    if "kinkead-dining-staged" in img_lower:
+        return [
+            {"id": "obj-table", "label": "Solid Oak 6-Seater Table", "category": "Dining", "confidence": 0.98, "box": [26, 46, 50, 38]},
+            {"id": "obj-chairs", "label": "Sculptural Cream Dining Chairs", "category": "Seating", "confidence": 0.96, "box": [20, 48, 62, 34]},
+            {"id": "obj-pendant", "label": "Fluted Pendant Luminaire", "category": "Lighting", "confidence": 0.95, "box": [42, 12, 18, 24]},
+            {"id": "obj-drapes", "label": "Tailored Sheer Linen Drapes", "category": "Textile", "confidence": 0.93, "box": [8, 14, 16, 68]},
         ]
 
     # 2. DYNAMIC COMPUTER VISION FOR ANY USER-UPLOADED OR CUSTOM IMAGE

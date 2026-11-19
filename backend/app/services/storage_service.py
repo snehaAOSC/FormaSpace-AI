@@ -98,6 +98,9 @@ def resolve_local_image_path(image_url: str) -> Path:
             candidate = settings.STORAGE_DIR / folder / filename
             if candidate.exists():
                 return candidate
+        static_img = BASE_DIR / "static" / "images" / filename
+        if static_img.exists():
+            return static_img
         candidate_img = ROOT_DIR / "frontend" / "public" / "images" / filename
         if candidate_img.exists():
             return candidate_img
@@ -105,9 +108,28 @@ def resolve_local_image_path(image_url: str) -> Path:
     # 4. Frontend public images
     if clean.startswith("/images/"):
         rel = clean.replace("/images/", "", 1)
+        static_img = BASE_DIR / "static" / "images" / rel
+        if static_img.exists():
+            return static_img
         frontend_img = ROOT_DIR / "frontend" / "public" / "images" / rel
         if frontend_img.exists():
             return frontend_img
+
+    # 4b. Remote fallback: Fetch from production frontend URL if on remote server (like Render)
+    if clean.startswith("/images/") or (filename and not clean.startswith("http")):
+        rel = clean.replace("/images/", "", 1) if clean.startswith("/images/") else filename
+        prod_url = f"https://formaspace-ai-frontend.vercel.app/images/{rel}"
+        try:
+            import httpx
+            with httpx.Client(timeout=8.0) as client:
+                resp = client.get(prod_url)
+                if resp.status_code == 200 and len(resp.content) > 1000:
+                    cache_file = settings.STORAGE_DIR / "uploads" / f"cached_{rel}"
+                    cache_file.parent.mkdir(parents=True, exist_ok=True)
+                    cache_file.write_bytes(resp.content)
+                    return cache_file
+        except Exception:
+            pass
 
     # 5. Remote HTTP/HTTPS image: cache locally so PIL has guaranteed high-speed access
     if clean.startswith("http://") or clean.startswith("https://"):
