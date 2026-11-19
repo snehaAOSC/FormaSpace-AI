@@ -269,53 +269,44 @@ export const StudioPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inspInputRef = useRef<HTMLInputElement>(null);
 
-  // Curated room-aware fallback preview — NEVER substitutes a living room for a kitchen, bathroom, or bedroom!
+  // Only preset showroom catalog samples are allowed to use pre-rendered showroom pairs.
+  // Custom user uploads NEVER substitute a showroom photo; they are always authentically redesigned!
+  const isShowroomPreset = (url: string) => {
+    if (!url) return false;
+    const u = url.toLowerCase();
+    return (
+      (u.includes("hero-before") ||
+        u.includes("kitchen-before") ||
+        u.includes("bedroom-before") ||
+        u.includes("bathroom-before") ||
+        u.includes("exterior-before") ||
+        u.includes("garden-before") ||
+        u.includes("empty-room")) &&
+      !u.includes("/uploads/") &&
+      !u.includes("/designs/") &&
+      !u.startsWith("data:") &&
+      !u.startsWith("blob:")
+    );
+  };
+
   const getCuratedAfterUrl = (beforeUrl: string, room: string, styleName: string) => {
-    if (!beforeUrl) return "";
-    const r = (room || "").toLowerCase();
-    const b = (beforeUrl || "").toLowerCase();
-    if (r.includes("kitchen") || b.includes("kitchen") || b.includes("cook")) {
-      return "/images/kitchen-after.jpg";
-    }
-    if (r.includes("bath") || b.includes("bath") || b.includes("toilet") || b.includes("washroom")) {
-      return "/images/bathroom-after.jpg";
-    }
-    if (r.includes("bedroom") || b.includes("bedroom") || b.includes("58a50328")) {
+    if (!beforeUrl || !isShowroomPreset(beforeUrl)) return "";
+    const b = beforeUrl.toLowerCase();
+    if (b.includes("kitchen-before")) return "/images/kitchen-after.jpg";
+    if (b.includes("bathroom-before")) return "/images/bathroom-after.jpg";
+    if (b.includes("bedroom-before")) {
       return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-after.jpg";
     }
-    if (r.includes("dining") || b.includes("dining")) {
-      return "/images/kitchen-after.jpg";
-    }
-    if (r.includes("exterior") || b.includes("exterior") || r.includes("facade") || r.includes("house")) {
-      return "/images/exterior-after.jpg";
-    }
-    if (r.includes("garden") || b.includes("garden") || r.includes("backyard") || r.includes("patio")) {
-      return "/images/garden-after.jpg";
-    }
-    if (r.includes("office") || b.includes("office") || r.includes("study")) {
-      return "/images/staged-room.jpg";
-    }
-    if (b.includes("empty-room") || b.includes("staged-room")) {
-      return "/images/staged-room.jpg";
-    }
-    const isCustom = b.startsWith("/storage/") || b.includes("supabase.co") || b.includes("/uploads/") || b.includes("/designs/") || b.startsWith("blob:") || b.startsWith("data:");
-    if (isCustom) {
-      if (r.includes("kitchen")) return "/images/kitchen-after.jpg";
-      if (r.includes("bath")) return "/images/bathroom-after.jpg";
-      if (r.includes("bed")) return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-after.jpg";
-      if (r.includes("dining")) return "/images/kitchen-after.jpg";
-      if (r.includes("exterior") || r.includes("facade")) return "/images/exterior-after.jpg";
-      if (r.includes("garden") || r.includes("patio") || r.includes("backyard")) return "/images/garden-after.jpg";
-      if (r.includes("office") || r.includes("study")) return "/images/staged-room.jpg";
-      return beforeUrl;
-    }
+    if (b.includes("exterior-before")) return "/images/exterior-after.jpg";
+    if (b.includes("garden-before")) return "/images/garden-after.jpg";
+    if (b.includes("empty-room")) return "/images/staged-room.jpg";
     return "/images/hero-after.jpg";
   };
 
   const activeGeneratedUrl =
     currentDesign?.variations?.[activeVariationIdx] ||
     currentDesign?.generated_image_url ||
-    (originalUrl ? getCuratedAfterUrl(originalUrl, roomType, style) : "");
+    (originalUrl && isShowroomPreset(originalUrl) ? getCuratedAfterUrl(originalUrl, roomType, style) : "");
 
 
   const loadStatus = () => {
@@ -385,7 +376,7 @@ export const StudioPage: React.FC = () => {
       .catch(() => { });
 
     // Detect objects on the Modern Redesign (New) Space
-    if (activeGeneratedUrl) {
+    if (activeGeneratedUrl && activeGeneratedUrl !== originalUrl) {
       api
         .post<{ objects: DetectedObject[] }>("/api/studio/detect-objects", {
           image_url: activeGeneratedUrl,
@@ -413,60 +404,73 @@ export const StudioPage: React.FC = () => {
     setErrorMsg("");
     if (!file) return;
 
-    // 1. Immediately create local URL so user sees their photo loaded instantly without delay
-    const localUrl = URL.createObjectURL(file);
-
-    if (isInspiration) {
-      setInspirationUrl(localUrl);
-    } else {
-      setOriginalUrl(localUrl);
-      setCurrentDesign(null);
-      setMaskDataUrl(null);
-
-      // Smart room type recognition from filename, preserving active selection if ambiguous
-      const lowerName = file.name.toLowerCase();
-      let detected = roomType || "Living Room";
-      if (
-        lowerName.includes("bed") ||
-        lowerName.includes("bedroom") ||
-        lowerName.includes("58a50328")
-      ) {
-        detected = "Bedroom";
-      } else if (lowerName.includes("kitchen") || lowerName.includes("cook")) {
-        detected = "Kitchen";
-      } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
-        detected = "Bathroom";
-      } else if (lowerName.includes("dining")) {
-        detected = "Dining Room";
-      } else if (lowerName.includes("exterior") || lowerName.includes("facade") || lowerName.includes("house")) {
-        detected = "House Exterior";
-        setFeatureType("exterior_design");
-      } else if (lowerName.includes("garden") || lowerName.includes("yard") || lowerName.includes("patio")) {
-        detected = "Garden";
-        setFeatureType("garden_landscape");
-      } else if (lowerName.includes("office") || lowerName.includes("study") || lowerName.includes("desk")) {
-        detected = "Office";
-      }
-      setRoomType(detected);
-      setCategory(detected);
+    // Smart room type recognition from filename, preserving active selection if ambiguous
+    const lowerName = file.name.toLowerCase();
+    let detected = roomType || "Living Room";
+    if (
+      lowerName.includes("bed") ||
+      lowerName.includes("bedroom") ||
+      lowerName.includes("58a50328")
+    ) {
+      detected = "Bedroom";
+    } else if (lowerName.includes("kitchen") || lowerName.includes("cook")) {
+      detected = "Kitchen";
+    } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
+      detected = "Bathroom";
+    } else if (lowerName.includes("dining")) {
+      detected = "Dining Room";
+    } else if (lowerName.includes("exterior") || lowerName.includes("facade") || lowerName.includes("house")) {
+      detected = "House Exterior";
+      setFeatureType("exterior_design");
+    } else if (lowerName.includes("garden") || lowerName.includes("yard") || lowerName.includes("patio")) {
+      detected = "Garden";
+      setFeatureType("garden_landscape");
+    } else if (lowerName.includes("office") || lowerName.includes("study") || lowerName.includes("desk")) {
+      detected = "Office";
     }
+    setRoomType(detected);
+    setCategory(detected);
 
-    // 2. Concurrently attempt server storage upload
-    setUploading(true);
-    try {
-      const res = await api.uploadFile(file);
-      if (res && res.url) {
-        if (isInspiration) {
-          setInspirationUrl(res.url);
-        } else {
-          setOriginalUrl(res.url);
+    // Read immediately as base64 Data URL so both frontend & backend have direct byte-level access without relying on browser-internal blob URLs
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      if (isInspiration) {
+        setInspirationUrl(dataUrl);
+      } else {
+        setOriginalUrl(dataUrl);
+        setCurrentDesign(null);
+        setMaskDataUrl(null);
+      }
+
+      // Concurrently upload to server storage
+      setUploading(true);
+      let serverUrl = "";
+      try {
+        const res = await api.uploadFile(file);
+        if (res && res.url) {
+          serverUrl = res.url;
+          if (isInspiration) {
+            setInspirationUrl(res.url);
+          } else {
+            setOriginalUrl(res.url);
+          }
         }
+      } catch (err: any) {
+        console.warn("Backend image upload notice:", err?.message || err);
+      } finally {
+        setUploading(false);
       }
-    } catch (err: any) {
-      console.warn("Backend image upload notice (using local preview):", err?.message || err);
-    } finally {
-      setUploading(false);
-    }
+
+      // Automatically trigger authentic redesign of the user's uploaded room!
+      if (!isInspiration) {
+        const targetImage = serverUrl || dataUrl;
+        setTimeout(() => {
+          handleGenerate(style, targetImage, detected);
+        }, 300);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSaveAiConfig = async (e: React.FormEvent) => {
@@ -491,9 +495,15 @@ export const StudioPage: React.FC = () => {
     }
   };
 
-  const handleGenerate = async (targetStyleOverride?: string) => {
+  const handleGenerate = async (
+    targetStyleOverride?: string,
+    sourceUrlOverride?: string,
+    roomTypeOverride?: string
+  ) => {
     setErrorMsg("");
-    if (!originalUrl) {
+    const effectiveUrl = sourceUrlOverride || originalUrl;
+    const effectiveRoomType = roomTypeOverride || roomType;
+    if (!effectiveUrl) {
       setErrorMsg("Please upload a photograph of your space or select an architectural sample space first.");
       return;
     }
@@ -506,7 +516,7 @@ export const StudioPage: React.FC = () => {
     setGenStage(
       maskDataUrl
         ? "Applying Precision+ mask & analyzing surrounding architecture..."
-        : `Analyzing ${roomType.toLowerCase()} spatial geometry & architectural proportions...`
+        : `Analyzing ${effectiveRoomType.toLowerCase()} spatial geometry & architectural proportions...`
     );
 
     const timer1 = setTimeout(
@@ -546,19 +556,19 @@ export const StudioPage: React.FC = () => {
         settingsPayload.target_object = selectedObj?.label;
       }
       if (featureType === "furniture_replacement") {
-        settingsPayload.target_object = selectedObj?.label || (roomType === "Bedroom" ? "Bed" : "Sofa");
+        settingsPayload.target_object = selectedObj?.label || (effectiveRoomType === "Bedroom" ? "Bed" : "Sofa");
         settingsPayload.replacement_spec = replacementSpec;
       }
 
       const res = await api.post<{ design: DesignResult; remaining_credits: number }>(
         "/api/studio/generate",
         {
-          original_image_url: originalUrl,
+          original_image_url: effectiveUrl,
           inspiration_image_url: inspirationUrl || null,
           mask_data_url: maskDataUrl,
           feature_type: featureType,
-          category,
-          room_type: roomType,
+          category: effectiveRoomType,
+          room_type: effectiveRoomType,
           style: effectiveStyle,
           intervention_level: interventionLevel,
           prompt,
@@ -1219,7 +1229,7 @@ export const StudioPage: React.FC = () => {
                   {viewMode === "slider" && (
                     <BeforeAfterSlider
                       beforeSrc={originalUrl}
-                      afterSrc={activeGeneratedUrl}
+                      afterSrc={activeGeneratedUrl || originalUrl}
                       beforeLabel="Original Space"
                       afterLabel={currentDesign ? `${currentDesign.style} · Generated` : `${style} · Redesign Preview`}
                       className="aspect-[16/10]"
@@ -1259,7 +1269,7 @@ export const StudioPage: React.FC = () => {
 
                       <div className="group relative overflow-hidden rounded-2xl border border-[#C87960]/50 bg-[#252B2E] shadow-sm">
                         <img
-                          src={activeGeneratedUrl}
+                          src={activeGeneratedUrl || originalUrl}
                           alt="After / Redesigned Space"
                           className="aspect-[16/11] w-full object-cover"
                         />

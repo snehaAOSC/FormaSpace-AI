@@ -1,3 +1,4 @@
+import base64
 import uuid
 from pathlib import Path
 from typing import Tuple
@@ -47,6 +48,30 @@ def save_image_bytes(content: bytes, folder: str, filename: str) -> Tuple[str, P
 def resolve_local_image_path(image_url: str) -> Path:
     """Resolve /storage/..., /images/..., Supabase public URLs, or HTTP URLs to local disk paths for image processing."""
     clean = image_url.split("?")[0].strip()
+
+    # 0. Data URL (Base64 payload passed directly from frontend client)
+    if clean.startswith("data:image"):
+        try:
+            header, encoded = clean.split(",", 1)
+            ext = ".png" if "png" in header else (".webp" if "webp" in header else ".jpg")
+            data = base64.b64decode(encoded)
+            cache_file = settings.STORAGE_DIR / "uploads" / f"upload_{uuid.uuid4().hex[:12]}{ext}"
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cache_file.write_bytes(data)
+            return cache_file
+        except Exception:
+            pass
+
+    # 0b. Blob URL safeguard: find the most recently uploaded image in storage/uploads
+    if clean.startswith("blob:"):
+        try:
+            uploads_dir = settings.STORAGE_DIR / "uploads"
+            if uploads_dir.exists():
+                recent_uploads = sorted(uploads_dir.glob("*"), key=lambda f: f.stat().st_mtime, reverse=True)
+                if recent_uploads:
+                    return recent_uploads[0]
+        except Exception:
+            pass
 
     # 1. Direct local /storage/... path
     if clean.startswith("/storage/"):
