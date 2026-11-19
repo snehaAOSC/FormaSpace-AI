@@ -292,7 +292,7 @@ export const StudioPage: React.FC = () => {
   const getCuratedAfterUrl = (beforeUrl: string, room: string, styleName: string) => {
     if (!beforeUrl || !isShowroomPreset(beforeUrl)) return "";
     const b = beforeUrl.toLowerCase();
-    if (b.includes("kitchen-before")) return "/images/kitchen-after.jpg";
+    if (b.includes("kitchen-before")) return "/images/kitchen-renovated-luxury.jpg";
     if (b.includes("bathroom-before")) return "/images/bathroom-after.jpg";
     if (b.includes("bedroom-before")) {
       return styleName === "Japandi" ? "/images/bedroom-after-japandi.jpg" : "/images/bedroom-renovated-luxury.jpg";
@@ -413,7 +413,7 @@ export const StudioPage: React.FC = () => {
       lowerName.includes("58a50328")
     ) {
       detected = "Bedroom";
-    } else if (lowerName.includes("kitchen") || lowerName.includes("cook")) {
+    } else if (lowerName.includes("kitchen") || lowerName.includes("cook") || lowerName.includes("krtchen") || lowerName.includes("kit")) {
       detected = "Kitchen";
     } else if (lowerName.includes("bath") || lowerName.includes("toilet") || lowerName.includes("washroom")) {
       detected = "Bathroom";
