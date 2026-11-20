@@ -78,6 +78,27 @@ export const KINKEAD_PROPERTY_SHOWCASE = {
   photoCount: 27,
   rooms: [
     {
+      id: "kitchen-dining-suite",
+      name: "Chef's Kitchen & Dining Area (Photo 1)",
+      roomType: "Kitchen",
+      emptyImage: "/images/kinkead-realestate1-empty.jpg",
+      stagedImage: "/images/kinkead-realestate1-staged.jpg",
+      thumb: "/images/kinkead-realestate1-staged.jpg",
+      description: "Original vacant kitchen and open dining area redesigned into a luxury Calacatta marble & fluted oak culinary space.",
+      emptyObjects: [
+        { id: "obj-1-stove", label: "Freestanding Electric Stove", category: "Appliance", confidence: 0.98, box: [59, 53, 10, 24] as [number, number, number, number] },
+        { id: "obj-1-cab", label: "White Laminate Cabinets", category: "Cabinetry", confidence: 0.97, box: [69, 58, 25, 22] as [number, number, number, number] },
+        { id: "obj-1-win", label: "Kitchen Sink Window", category: "Architecture", confidence: 0.99, box: [77, 31, 15, 20] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-1-island", label: "Calacatta Gold Marble Kitchen Island", category: "Kitchen", confidence: 0.99, box: [22, 55, 48, 38] as [number, number, number, number] },
+        { id: "obj-1-cabinetry", label: "Custom Fluted Natural Oak Cabinetry", category: "Cabinetry", confidence: 0.98, box: [58, 48, 40, 46] as [number, number, number, number] },
+        { id: "obj-1-cooktop", label: "Miele Induction Cooktop & Rangehood", category: "Appliance", confidence: 0.97, box: [64, 52, 28, 22] as [number, number, number, number] },
+        { id: "obj-1-tapware", label: "Brushed Brass Gooseneck Mixer Tap", category: "Fixtures", confidence: 0.96, box: [78, 42, 12, 18] as [number, number, number, number] },
+        { id: "obj-1-pendant", label: "Minimalist Brass Linear Pendant Lights", category: "Lighting", confidence: 0.95, box: [35, 18, 32, 16] as [number, number, number, number] },
+      ],
+    },
+    {
       id: "backyard-alfresco",
       name: "Suburban Backyard & Alfresco (Photo 11)",
       roomType: "Patio",

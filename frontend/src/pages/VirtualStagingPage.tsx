@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Eye,
   Film,
+  Key,
   Layers,
   Loader2,
   Maximize2,
@@ -22,6 +23,7 @@ import {
   Trash2,
   UploadCloud,
   Wand2,
+  X,
 } from "lucide-react";
 import { BeforeAfterSlider } from "../components/BeforeAfterSlider";
 import { DemoModeBanner } from "../components/DemoModeBanner";
@@ -201,12 +203,30 @@ const REALESTATE11_INVENTORY: StagingItem[] = [
   { id: "inv-11-lighting", name: "Architectural Low-Voltage Path & Festoon Lights", category: "Lighting", material: "Solid Brass & Warm LED", estimatedPrice: 850, dimensions: "Full Garden Zone" },
 ];
 
+const REALESTATE1_OBJECTS: DetectedObject[] = [
+  { id: "obj-1-island", label: "Calacatta Gold Marble Kitchen Island", category: "Kitchen", confidence: 0.99, box: [22, 55, 48, 38] },
+  { id: "obj-1-cabinetry", label: "Custom Fluted Natural Oak Cabinetry", category: "Cabinetry", confidence: 0.98, box: [58, 48, 40, 46] },
+  { id: "obj-1-cooktop", label: "Miele Induction Cooktop & Integrated Rangehood", category: "Appliance", confidence: 0.97, box: [64, 52, 28, 22] },
+  { id: "obj-1-tapware", label: "Brushed Brass Gooseneck Mixer Tap", category: "Fixtures", confidence: 0.96, box: [78, 42, 12, 18] },
+  { id: "obj-1-pendant", label: "Minimalist Brass Linear Pendant Lights", category: "Lighting", confidence: 0.95, box: [35, 18, 32, 16] },
+  { id: "obj-1-stools", label: "Scandinavian Oak & Leather Bar Stools", category: "Seating", confidence: 0.96, box: [18, 62, 26, 32] },
+];
+
+const REALESTATE1_INVENTORY: StagingItem[] = [
+  { id: "inv-1-island", name: "Bespoke Calacatta Marble Kitchen Island", category: "Kitchen", material: "Italian Calacatta Marble & Fluted Oak", estimatedPrice: 5800, dimensions: "240cm W x 95cm D" },
+  { id: "inv-1-cabinetry", name: "Custom Floor-to-Ceiling Oak Joinery", category: "Cabinetry", material: "Natural Tasmanian Oak with Soft-Close Hardware", estimatedPrice: 7200, dimensions: "Full Kitchen Run" },
+  { id: "inv-1-appliances", name: "Integrated Miele Induction & Pyrolytic Oven Suite", category: "Appliance", material: "Matte Black Ceramic Glass & Stainless Steel", estimatedPrice: 4600, dimensions: "90cm Induction + 60cm Oven" },
+  { id: "inv-1-tapware", name: "Brodware Brushed Brass Pull-Out Kitchen Mixer", category: "Fixtures", material: "PVD Brushed Brass & Ceramic Disc", estimatedPrice: 780, dimensions: "42cm Height" },
+  { id: "inv-1-stools", name: "Nordic Minimalist Oak Counter Stools (Trio)", category: "Seating", material: "Solid American Oak & Aniline Cognac Leather", estimatedPrice: 1150, dimensions: "65cm Seat Height" },
+  { id: "inv-1-pendant", name: "Architectural Slimline Brass LED Linear Pendant", category: "Lighting", material: "Hand-finished Brass & Warm 2700K LED", estimatedPrice: 620, dimensions: "160cm Length" },
+];
+
 const STAGING_ROOM_TEMPLATES: Record<string, string> = {
   "Living Room": "/images/kinkead-realestate16-staged.jpg",
   "Lobby": "/images/kinkead-realestate16-staged.jpg",
   "Bedroom": "/images/kinkead-bed1-staged.jpg",
   "Dining Room": "/images/kinkead-dining-staged.jpg",
-  "Kitchen": "/images/kitchen-renovated-luxury.jpg",
+  "Kitchen": "/images/kinkead-realestate1-staged.jpg",
   "Bathroom": "/images/bathroom-after.jpg",
   "Home Office": "/images/staged-room.jpg",
   "Patio": "/images/kinkead-realestate11-staged.jpg",
@@ -227,6 +247,10 @@ export const VirtualStagingPage: React.FC = () => {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [isStagingActive, setIsStagingActive] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
+  const [showApiModal, setShowApiModal] = useState<boolean>(false);
+  const [customApiKey, setCustomApiKey] = useState<string>(() => localStorage.getItem("formaspace_custom_api_key") || "");
+  const [customProvider, setCustomProvider] = useState<string>(() => localStorage.getItem("formaspace_custom_provider") || "gemini");
+  const [keySavedToast, setKeySavedToast] = useState<boolean>(false);
 
   const activePhoto = photos.find((p) => p.id === activePhotoId) || (photos.length > 0 ? photos[0] : null);
 
@@ -243,7 +267,7 @@ export const VirtualStagingPage: React.FC = () => {
     if (s.includes("bed") || s.includes("bedroom") || s.includes("master")) {
       return "Bedroom";
     }
-    if (s.includes("kitchen") || s.includes("cook")) {
+    if (s.includes("realestate1") || (s.includes("1") && !s.includes("11") && !s.includes("16") && !s.includes("17") && !s.includes("21")) || s.includes("kitchen") || s.includes("cook")) {
       return "Kitchen";
     }
     if (s.includes("lobby") || s.includes("hall") || s.includes("foyer") || s.includes("corridor")) {
@@ -290,8 +314,9 @@ export const VirtualStagingPage: React.FC = () => {
         }
       }
 
-      // Strong outdoor presence (open sky or widespread turf/vegetation)
-      if (skyPixels / topArea > 0.16 || greenPixels / totalPixels > 0.28) {
+      // Strong outdoor presence: ONLY when daytime open sky AND grass are both present!
+      // This prevents indoor rooms with garden windows from being mistakenly classified as Patio.
+      if (skyPixels / topArea > 0.18 && greenPixels / totalPixels > 0.15) {
         return "Patio";
       }
 
@@ -314,7 +339,7 @@ export const VirtualStagingPage: React.FC = () => {
     if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("restroom") || s.includes("wc") || s.includes("21")) return "Bathroom";
     if (s.includes("bed") || s.includes("bedroom") || s.includes("master") || s.includes("sleep")) return "Bedroom";
     if (s.includes("dine") || s.includes("dining")) return "Dining Room";
-    if (s.includes("kitchen") || s.includes("cook")) return "Kitchen";
+    if (s.includes("realestate1") || (s.includes("1") && !s.includes("11") && !s.includes("16") && !s.includes("17") && !s.includes("21")) || s.includes("kitchen") || s.includes("cook")) return "Kitchen";
     if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) return "Home Office";
     if (s.includes("lobby") || s.includes("hall") || s.includes("entry") || s.includes("foyer") || s.includes("corridor")) return "Lobby";
     // General empty rooms (e.g. realestate17, room1) default to Living Room
@@ -393,6 +418,15 @@ export const VirtualStagingPage: React.FC = () => {
 
       // 1. Precise photo identification for listing spaces
       if (
+        checkStr.includes("realestate1") ||
+        (checkStr.includes("1") && !checkStr.includes("11") && !checkStr.includes("16") && !checkStr.includes("17") && !checkStr.includes("21")) ||
+        checkStr.includes("kitchen") ||
+        target.roomType === "Kitchen"
+      ) {
+        finalStagedUrl = "/images/kinkead-realestate1-staged.jpg";
+        customObjects = REALESTATE1_OBJECTS;
+        customInventory = REALESTATE1_INVENTORY;
+      } else if (
         checkStr.includes("11") ||
         checkStr.includes("backyard") ||
         checkStr.includes("lawn") ||
@@ -433,9 +467,9 @@ export const VirtualStagingPage: React.FC = () => {
         customObjects = DEFAULT_OBJECTS["Dining Room"];
         customInventory = ROOM_INVENTORIES["Dining Room"];
       } else if (checkStr.includes("kitchen") || target.roomType === "Kitchen") {
-        finalStagedUrl = "/images/kitchen-renovated-luxury.jpg";
-        customObjects = DEFAULT_OBJECTS["Kitchen"];
-        customInventory = ROOM_INVENTORIES["Kitchen"];
+        finalStagedUrl = "/images/kinkead-realestate1-staged.jpg";
+        customObjects = REALESTATE1_OBJECTS;
+        customInventory = REALESTATE1_INVENTORY;
       }
 
       // 2. If user uploaded a real file and backend is available, call backend endpoint
@@ -564,6 +598,18 @@ export const VirtualStagingPage: React.FC = () => {
             >
               <Building className="h-3.5 w-3.5" />
               <span>23 Kinkead St, ACT (4 Rooms)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowApiModal(true)}
+              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
+                customApiKey
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                  : "border-[#C87960]/30 bg-[#C87960]/10 text-[#C87960] hover:bg-[#C87960] hover:text-white"
+              }`}
+            >
+              <Key className="h-3.5 w-3.5" />
+              <span>{customApiKey ? "Live AI Key: Active" : "Connect AI Key"}</span>
             </button>
             <a
               href="https://www.realestate.com.au/property/23-kinkead-st-evatt-act-2617/"
@@ -1146,6 +1192,135 @@ export const VirtualStagingPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* AI Key & Live Engine Settings Modal */}
+      {showApiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#DCCBB5] space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCCBB5]/40 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C87960]/10 text-[#C87960]">
+                  <Key className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-editorial text-base font-bold text-[#172B3A]">AI Engine Configuration</h3>
+                  <p className="text-[11px] text-[#252B2E]/70">Connect Live AI for on-the-fly photo transformations</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowApiModal(false)}
+                className="rounded-lg p-1 text-[#252B2E]/60 hover:bg-neutral-100 hover:text-[#172B3A]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-[#172B3A] mb-1">AI Provider</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCustomProvider("gemini")}
+                    className={`rounded-xl border p-2.5 text-left transition ${
+                      customProvider === "gemini"
+                        ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
+                        : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
+                    }`}
+                  >
+                    <div className="text-xs font-bold">Google Gemini</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold">Free Tier (15 RPM)</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCustomProvider("openai")}
+                    className={`rounded-xl border p-2.5 text-left transition ${
+                      customProvider === "openai"
+                        ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
+                        : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
+                    }`}
+                  >
+                    <div className="text-xs font-bold">OpenAI</div>
+                    <div className="text-[10px] text-[#252B2E]/60">DALL-E 3 & GPT-4o</div>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#172B3A] mb-1">
+                  {customProvider === "gemini" ? "Gemini API Key" : "OpenAI API Key"}
+                </label>
+                <input
+                  type="password"
+                  placeholder={customProvider === "gemini" ? "AIzaSy..." : "sk-..."}
+                  value={customApiKey}
+                  onChange={(e) => setCustomApiKey(e.target.value)}
+                  className="w-full rounded-xl border border-[#DCCBB5] bg-white px-3 py-2 text-xs font-mono text-[#172B3A] focus:border-[#C87960] focus:outline-none"
+                />
+                <div className="mt-1 flex items-center justify-between text-[11px] text-[#252B2E]/60">
+                  {customProvider === "gemini" ? (
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[#C87960] hover:underline"
+                    >
+                      <span>Get free key at Google AI Studio</span>
+                      <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  ) : (
+                    <span>Requires funded OpenAI account balance</span>
+                  )}
+                  {customApiKey && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomApiKey("");
+                        localStorage.removeItem("formaspace_custom_api_key");
+                      }}
+                      className="text-red-600 hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {keySavedToast && (
+                <div className="rounded-lg bg-emerald-50 p-2 text-center text-xs font-bold text-emerald-800">
+                  ✓ AI configuration saved successfully!
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-[#DCCBB5]/40 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowApiModal(false)}
+                className="rounded-xl border border-[#DCCBB5] px-3.5 py-1.5 text-xs font-semibold text-[#172B3A] hover:bg-neutral-50"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.setItem("formaspace_custom_api_key", customApiKey.trim());
+                  localStorage.setItem("formaspace_custom_provider", customProvider);
+                  setKeySavedToast(true);
+                  setTimeout(() => {
+                    setKeySavedToast(false);
+                    setShowApiModal(false);
+                  }, 900);
+                }}
+                className="btn-primary py-1.5 px-4 text-xs font-bold shadow-sm"
+              >
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

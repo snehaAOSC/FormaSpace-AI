@@ -352,6 +352,8 @@ def _apply_demo_pil_transform(
 
         if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
             matched_template = "/images/bathroom-after.jpg"
+        elif "realestate1" in check_str or "kinkead-realestate1" in check_str or ("kitchen" in check_str and "11" not in check_str and "16" not in check_str and "17" not in check_str):
+            matched_template = "/images/kinkead-realestate1-staged.jpg"
         elif "11" in check_str or "patio" in check_str or "garden" in check_str or "yard" in check_str or "lawn" in check_str or "backyard" in check_str:
             matched_template = "/images/kinkead-realestate11-staged.jpg"
         elif "16" in check_str:
@@ -1200,6 +1202,15 @@ def detect_architectural_objects(image_url: str, room_type: str) -> list[dict[st
             {"id": "obj-stands", "label": "Twin Oak Nightstands", "category": "Storage", "confidence": 0.95, "box": [12, 54, 18, 26]},
             {"id": "obj-art", "label": "Minimalist Canvas Art", "category": "Decor", "confidence": 0.94, "box": [38, 16, 26, 22]},
             {"id": "obj-rug", "label": "Plush Wool Area Rug", "category": "Textile", "confidence": 0.92, "box": [16, 68, 68, 28]},
+        ]
+
+    if "realestate1" in img_lower or "kinkead-realestate1" in img_lower:
+        return [
+            {"id": "obj-1-island", "label": "Calacatta Gold Marble Kitchen Island", "category": "Kitchen", "confidence": 0.99, "box": [22, 55, 48, 38]},
+            {"id": "obj-1-cabinetry", "label": "Custom Fluted Natural Oak Cabinetry", "category": "Cabinetry", "confidence": 0.98, "box": [58, 48, 40, 46]},
+            {"id": "obj-1-cooktop", "label": "Miele Induction Cooktop & Integrated Rangehood", "category": "Appliance", "confidence": 0.97, "box": [64, 52, 28, 22]},
+            {"id": "obj-1-tapware", "label": "Brushed Brass Gooseneck Mixer Tap", "category": "Fixtures", "confidence": 0.96, "box": [78, 42, 12, 18]},
+            {"id": "obj-1-pendant", "label": "Minimalist Brass Linear Pendant Lights", "category": "Lighting", "confidence": 0.95, "box": [35, 18, 32, 16]},
         ]
 
     if "realestate11" in img_lower or "kinkead-realestate11" in img_lower:
