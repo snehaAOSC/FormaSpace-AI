@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from ..auth import get_current_user, get_optional_user
 from ..config import settings
 from ..database import get_db, now_iso
-from ..models import ConfigureAIRequest, DetectObjectsRequest, GenerateDesignRequest, SaveDesignRequest
+from ..models import AnalyzeSpaceRequest, ConfigureAIRequest, DetectObjectsRequest, GenerateDesignRequest, SaveDesignRequest
 from ..services.ai_provider import (
+    analyze_space_live,
     detect_architectural_objects_live,
     generate_design_images,
 )
@@ -88,6 +89,23 @@ async def detect_objects(
         "objects": objects,
         "is_demo_mode": not settings.is_live_ai_configured,
     }
+
+
+@router.post("/analyze-space")
+async def analyze_space_endpoint(
+    req: AnalyzeSpaceRequest,
+    current_user: Optional[dict] = Depends(get_optional_user),
+):
+    """Universal Space Detection using Google Gemini Vision (or local CV fallback)."""
+    try:
+        analysis = await analyze_space_live(
+            image_url=req.image_url,
+            custom_api_key=req.custom_api_key,
+            custom_provider=req.custom_provider,
+        )
+        return analysis
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/generate")

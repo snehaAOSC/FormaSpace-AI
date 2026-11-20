@@ -5,20 +5,15 @@ import {
   Building,
   Check,
   CheckCircle2,
-  ChevronRight,
   Download,
   ExternalLink,
-  Eye,
-  Film,
   Key,
   Layers,
   Loader2,
-  Maximize2,
   Package,
-  Plus,
   RefreshCw,
   ScanEye,
-  ShoppingBag,
+  SlidersHorizontal,
   Sparkles,
   Trash2,
   UploadCloud,
@@ -50,36 +45,77 @@ export interface StagingPhoto {
   name: string;
   originalUrl: string;
   roomType: string;
+  environment?: "indoor" | "outdoor";
+  confidence?: number;
   style: string;
   status: "ready" | "staging" | "staged" | "error";
   stagedUrl?: string;
   detectedObjects: DetectedObject[];
   inventory: StagingItem[];
+  architecturalFeatures?: Record<string, string>;
 }
 
-const ROOM_INVENTORIES: Record<string, StagingItem[]> = {
+export const UNIVERSAL_SPACE_CATEGORIES = {
+  indoor: [
+    "Bedroom",
+    "Living Room",
+    "Kitchen",
+    "Bathroom",
+    "Dining Room",
+    "Office",
+    "Study Room",
+    "Lobby",
+    "Reception Area",
+    "Hallway",
+    "Corridor",
+    "Conference Room",
+    "Hotel Room",
+    "Studio Apartment",
+    "Empty Commercial Space",
+  ],
+  outdoor: [
+    "Garden",
+    "Backyard",
+    "Front Yard",
+    "Balcony",
+    "Terrace",
+    "Patio",
+    "Rooftop",
+    "Outdoor Lounge",
+    "Swimming Pool Area",
+    "Outdoor Dining Area",
+  ],
+};
+
+export const UNIVERSAL_INVENTORIES: Record<string, StagingItem[]> = {
   "Living Room": [
     { id: "inv-sofa", name: "Cognac Atelier Leather Lounge", category: "Seating", material: "Semi-Aniline Top Grain Leather", estimatedPrice: 2850, dimensions: "240cm W x 95cm D" },
     { id: "inv-table", name: "Pietra Honed Travertine Plinth", category: "Table", material: "Natural Honed Travertine", estimatedPrice: 1250, dimensions: "120cm W x 60cm D" },
     { id: "inv-rug", name: "Textured Bouclé Wool Area Rug", category: "Textile", material: "100% New Zealand Wool", estimatedPrice: 890, dimensions: "300cm x 240cm" },
     { id: "inv-lamp", name: "Architectural Arched Brass Lamp", category: "Lighting", material: "Brushed Solid Brass", estimatedPrice: 420, dimensions: "190cm H" },
     { id: "inv-art", name: "Minimalist Framed Canvas Art", category: "Decor", material: "Textured Acrylic & Oak Frame", estimatedPrice: 380, dimensions: "120cm x 90cm" },
-    { id: "inv-stools", name: "Sculptural White Oak Counter Stools (Pair)", category: "Seating", material: "Solid White Oak", estimatedPrice: 560, dimensions: "65cm Counter Height" },
     { id: "inv-plant", name: "Potted Ficus Lyrata Tree & Ceramic Planter", category: "Botanical", material: "Glazed Ceramic & Organic Soil", estimatedPrice: 220, dimensions: "160cm H" },
   ],
-  "Lobby": [
-    { id: "inv-lobby-console", name: "Sculptural Fluted Oak Console Table", category: "Entryway Table", material: "Solid FSC White Oak", estimatedPrice: 1450, dimensions: "160cm W x 40cm D" },
-    { id: "inv-lobby-mirror", name: "Oversized Minimalist Arch Wall Mirror", category: "Decor & Mirror", material: "Brushed Brass Edge & Float Glass", estimatedPrice: 620, dimensions: "180cm H x 80cm W" },
-    { id: "inv-lobby-bench", name: "Bouclé Upholstered Entry Bench", category: "Seating", material: "Textured Cream Bouclé & Oak Base", estimatedPrice: 790, dimensions: "120cm W x 45cm D" },
-    { id: "inv-lobby-runner", name: "Hand-Knotted Textured Hallway Runner", category: "Textile", material: "100% Wool", estimatedPrice: 540, dimensions: "350cm x 90cm" },
-    { id: "inv-lobby-plant", name: "Architectural Ceramic Planter & Ficus", category: "Botanical", material: "Handmade Ceramic & Living Tree", estimatedPrice: 320, dimensions: "170cm H" },
-  ],
   "Bedroom": [
-    { id: "inv-bed", name: "Low White Oak Platform Bed Frame", category: "Furniture", material: "FSC European White Oak", estimatedPrice: 2200, dimensions: "Queen (160cm x 210cm)" },
+    { id: "inv-bed", name: "Low White Oak Platform Bed Frame", category: "Bed", material: "FSC European White Oak", estimatedPrice: 2200, dimensions: "Queen (160cm x 210cm)" },
     { id: "inv-linen", name: "Washed French Linen Bedding Set", category: "Textile", material: "100% Organic Flax Linen", estimatedPrice: 480, dimensions: "Duvet + 4 Shams" },
     { id: "inv-nightstands", name: "Twin Fluted Oak Bedside Tables", category: "Storage", material: "Solid Oak & Soft-Close Drawers", estimatedPrice: 780, dimensions: "50cm W x 45cm H" },
     { id: "inv-lamps", name: "Ceramic Minimalist Table Lamps (Pair)", category: "Lighting", material: "Cast Ceramic & Linen Shades", estimatedPrice: 340, dimensions: "42cm H" },
     { id: "inv-rug", name: "Plush Oatmeal Wool Underbed Rug", category: "Textile", material: "Hand-Knotted Wool", estimatedPrice: 760, dimensions: "280cm x 200cm" },
+  ],
+  "Bathroom": [
+    { id: "inv-bath-vanity", name: "Floating Fluted Oak & Stone Basin Vanity", category: "Vanity & Basin", material: "Fluted White Oak & Honed Terrazzo", estimatedPrice: 1850, dimensions: "120cm W x 50cm D" },
+    { id: "inv-bath-mirror", name: "Backlit Circular LED Ambient Mirror", category: "Lighting & Fixtures", material: "Brushed Brass & Anti-Fog Glass", estimatedPrice: 420, dimensions: "80cm Diameter" },
+    { id: "inv-bath-shower", name: "Frameless Walk-In Glass Rain Shower", category: "Shower Enclosure", material: "10mm Toughened Glass & Brass Channel", estimatedPrice: 890, dimensions: "100cm x 200cm" },
+    { id: "inv-bath-tapware", name: "Minimalist Brushed Brass Mixer Taps", category: "Tapware", material: "Electroplated Solid Brass", estimatedPrice: 340, dimensions: "Wall-Mounted Mixer" },
+    { id: "inv-bath-towels", name: "Organic Waffle Spa Towel Collection", category: "Textile", material: "100% Organic Turkish Cotton", estimatedPrice: 160, dimensions: "6-Piece Set" },
+  ],
+  "Kitchen": [
+    { id: "inv-island", name: "Bespoke Calacatta Marble Kitchen Island", category: "Kitchen Island", material: "Italian Calacatta Marble & Fluted Oak", estimatedPrice: 5800, dimensions: "240cm W x 95cm D" },
+    { id: "inv-cabinetry", name: "Custom Floor-to-Ceiling Oak Joinery", category: "Cabinetry", material: "Natural Tasmanian Oak with Soft-Close Hardware", estimatedPrice: 7200, dimensions: "Full Kitchen Run" },
+    { id: "inv-appliances", name: "Integrated Miele Induction & Pyrolytic Oven Suite", category: "Appliance", material: "Matte Black Ceramic Glass & Stainless Steel", estimatedPrice: 4600, dimensions: "90cm Induction + 60cm Oven" },
+    { id: "inv-tapware", name: "Brodware Brushed Brass Pull-Out Kitchen Mixer", category: "Fixtures", material: "PVD Brushed Brass & Ceramic Disc", estimatedPrice: 780, dimensions: "42cm Height" },
+    { id: "inv-stools", name: "Nordic Minimalist Oak Counter Stools (Trio)", category: "Seating", material: "Solid American Oak & Aniline Cognac Leather", estimatedPrice: 1150, dimensions: "65cm Seat Height" },
   ],
   "Dining Room": [
     { id: "inv-table", name: "Solid White Oak 6-Seater Table", category: "Dining", material: "Solid European Oak", estimatedPrice: 2100, dimensions: "200cm L x 95cm W" },
@@ -87,28 +123,93 @@ const ROOM_INVENTORIES: Record<string, StagingItem[]> = {
     { id: "inv-pendant", name: "Fluted Opal Glass Linear Chandelier", category: "Lighting", material: "Brass & Matte Opal Glass", estimatedPrice: 650, dimensions: "110cm Length" },
     { id: "inv-drapes", name: "Tailored Sheer Linen Window Drapes", category: "Textile", material: "Belgian Sheer Linen", estimatedPrice: 420, dimensions: "Floor-to-Ceiling" },
   ],
-  "Kitchen": [
-    { id: "inv-stools", name: "Fluted Timber Counter Stools (Set of 3)", category: "Seating", material: "Solid Oak & Leather Pad", estimatedPrice: 840, dimensions: "65cm Counter Height" },
-    { id: "inv-pendants", name: "Brushed Brass Cylinder Pendants (Pair)", category: "Lighting", material: "Spun Brass & Warm LED", estimatedPrice: 390, dimensions: "25cm H" },
-    { id: "inv-decor", name: "Artisan Ceramic & Olive Branch Styling", category: "Decor", material: "Handmade Stoneware", estimatedPrice: 180, dimensions: "Curated Set" },
-  ],
-  "Home Office": [
+  "Office": [
     { id: "inv-desk", name: "Executive Minimalist White Oak Desk", category: "Workspace", material: "Solid Oak & Cable Conduit", estimatedPrice: 1650, dimensions: "160cm W x 80cm D" },
     { id: "inv-chair", name: "Ergonomic Bouclé Executive Swivel Chair", category: "Seating", material: "Italian Mechanism & Bouclé", estimatedPrice: 890, dimensions: "Adjustable Height" },
     { id: "inv-shelving", name: "Architectural Open Bookcase", category: "Storage", material: "Black Steel & Oak Shelves", estimatedPrice: 1200, dimensions: "180cm H x 100cm W" },
     { id: "inv-lamp", name: "Solid Brass Task Luminaire", category: "Lighting", material: "Brushed Brass", estimatedPrice: 280, dimensions: "Desk Lamp" },
   ],
-  "Patio": [
-    { id: "inv-lounge", name: "Outdoor Teak Lounge Sofa & Armchairs", category: "Outdoor", material: "Grade-A Teak & Sunbrella Fabric", estimatedPrice: 3200, dimensions: "3-Piece Suite" },
-    { id: "inv-table", name: "Travertine Low Outdoor Coffee Table", category: "Outdoor", material: "Weather-Sealed Travertine", estimatedPrice: 950, dimensions: "90cm Diameter" },
-    { id: "inv-planters", name: "Sculptural Concrete Olive Planters (Pair)", category: "Landscape", material: "Reinforced Fiber Concrete", estimatedPrice: 580, dimensions: "70cm H" },
+  "Study Room": [
+    { id: "inv-desk", name: "Executive Minimalist White Oak Desk", category: "Workspace", material: "Solid Oak & Cable Conduit", estimatedPrice: 1650, dimensions: "160cm W x 80cm D" },
+    { id: "inv-chair", name: "Ergonomic Bouclé Executive Swivel Chair", category: "Seating", material: "Italian Mechanism & Bouclé", estimatedPrice: 890, dimensions: "Adjustable Height" },
+    { id: "inv-shelving", name: "Architectural Open Bookcase", category: "Storage", material: "Black Steel & Oak Shelves", estimatedPrice: 1200, dimensions: "180cm H x 100cm W" },
   ],
-  "Bathroom": [
-    { id: "inv-bath-vanity", name: "Floating Fluted Oak & Stone Basin Vanity", category: "Sanitaryware", material: "Fluted White Oak & Honed Terrazzo", estimatedPrice: 1850, dimensions: "120cm W x 50cm D" },
-    { id: "inv-bath-mirror", name: "Backlit Circular LED Ambient Mirror", category: "Lighting & Fixtures", material: "Brushed Brass & Anti-Fog Glass", estimatedPrice: 420, dimensions: "80cm Diameter" },
-    { id: "inv-bath-shower", name: "Frameless Walk-In Glass Rain Shower", category: "Shower Enclosure", material: "10mm Toughened Glass & Brass Channel", estimatedPrice: 890, dimensions: "100cm x 200cm" },
-    { id: "inv-bath-tapware", name: "Minimalist Brushed Brass Mixer Taps", category: "Tapware", material: "Electroplated Solid Brass", estimatedPrice: 340, dimensions: "Wall-Mounted Basin Mixer" },
-    { id: "inv-bath-towels", name: "Organic Waffle Spa Towel Collection", category: "Textile", material: "100% Organic Turkish Cotton", estimatedPrice: 160, dimensions: "6-Piece Set" },
+  "Lobby": [
+    { id: "inv-lobby-console", name: "Sculptural Fluted Oak Console Table", category: "Entryway Table", material: "Solid FSC White Oak", estimatedPrice: 1450, dimensions: "160cm W x 40cm D" },
+    { id: "inv-lobby-mirror", name: "Oversized Minimalist Arch Wall Mirror", category: "Decor & Mirror", material: "Brushed Brass Edge & Float Glass", estimatedPrice: 620, dimensions: "180cm H x 80cm W" },
+    { id: "inv-lobby-bench", name: "Bouclé Upholstered Entry Bench", category: "Seating", material: "Textured Cream Bouclé & Oak Base", estimatedPrice: 790, dimensions: "120cm W x 45cm D" },
+    { id: "inv-lobby-runner", name: "Hand-Knotted Textured Hallway Runner", category: "Textile", material: "100% Wool", estimatedPrice: 540, dimensions: "350cm x 90cm" },
+  ],
+  "Reception Area": [
+    { id: "inv-rec-desk", name: "Curved Roman Travertine Reception Counter", category: "Reception", material: "Natural Travertine & Oak", estimatedPrice: 3800, dimensions: "220cm W x 110cm H" },
+    { id: "inv-rec-chairs", name: "Designer Velvet Waiting Armchairs (Pair)", category: "Seating", material: "Plush Velvet & Brushed Brass", estimatedPrice: 1600, dimensions: "85cm W x 80cm D" },
+    { id: "inv-rec-plant", name: "Architectural Column Planter & Tree", category: "Botanical", material: "Matte Charcoal Ceramic", estimatedPrice: 380, dimensions: "180cm H" },
+  ],
+  "Hallway": [
+    { id: "inv-hall-console", name: "Slim Minimalist Floating Console", category: "Storage", material: "Solid White Oak", estimatedPrice: 650, dimensions: "120cm W x 25cm D" },
+    { id: "inv-hall-lights", name: "Architectural Linear LED Sconce Lights (Trio)", category: "Lighting", material: "Solid Brushed Brass", estimatedPrice: 480, dimensions: "60cm H" },
+    { id: "inv-hall-runner", name: "Textured Jute & Wool Hall Runner", category: "Textile", material: "Natural Fibers", estimatedPrice: 320, dimensions: "400cm x 80cm" },
+  ],
+  "Corridor": [
+    { id: "inv-corridor-console", name: "Slim Minimalist Floating Console", category: "Storage", material: "Solid White Oak", estimatedPrice: 650, dimensions: "120cm W x 25cm D" },
+    { id: "inv-corridor-lights", name: "Architectural Linear LED Sconce Lights", category: "Lighting", material: "Solid Brushed Brass", estimatedPrice: 480, dimensions: "60cm H" },
+  ],
+  "Backyard": [
+    { id: "inv-back-lounge", name: "Grade-A Teak Outdoor Lounge Suite", category: "Outdoor Living", material: "Solid Teak & Charcoal Sunbrella Fabric", estimatedPrice: 4200, dimensions: "4-Piece Modular Suite" },
+    { id: "inv-back-patio", name: "Honed Roman Travertine Paved Terrace", category: "Hardscape", material: "Natural Honed Travertine Slabs", estimatedPrice: 6500, dimensions: "38m² Area" },
+    { id: "inv-back-table", name: "Pietra Outdoor Travertine Plinth", category: "Table", material: "Sealed Weatherproof Travertine", estimatedPrice: 1100, dimensions: "120cm W x 60cm D" },
+    { id: "inv-back-dining", name: "Scandinavian Teak Outdoor Dining & Armchairs", category: "Dining", material: "FSC Certified Teak & Powdercoated Aluminium", estimatedPrice: 2800, dimensions: "200cm Table + 6 Chairs" },
+  ],
+  "Garden": [
+    { id: "inv-gar-lounge", name: "Teak Outdoor Lounge Sofa & Armchairs", category: "Outdoor Living", material: "Grade-A Teak & Sunbrella Fabric", estimatedPrice: 3200, dimensions: "3-Piece Suite" },
+    { id: "inv-gar-table", name: "Travertine Low Outdoor Coffee Table", category: "Outdoor", material: "Weather-Sealed Travertine", estimatedPrice: 950, dimensions: "90cm Diameter" },
+    { id: "inv-gar-planters", name: "Sculptural Concrete Olive Planters (Pair)", category: "Landscape", material: "Reinforced Fiber Concrete", estimatedPrice: 580, dimensions: "70cm H" },
+  ],
+  "Front Yard": [
+    { id: "inv-front-hardscape", name: "Architectural Hardscape & Paver Driveway Entry", category: "Hardscape", material: "Permeable Stone Pavers", estimatedPrice: 4800, dimensions: "Entry Zone" },
+    { id: "inv-front-box", name: "Architectural Modern Mailbox & Number Plinth", category: "Fixtures", material: "Corten Steel & Matte Black Aluminium", estimatedPrice: 520, dimensions: "90cm H" },
+    { id: "inv-front-border", name: "Manicured Low-Maintenance Planting Border", category: "Landscaping", material: "Boxwood, Ornamental Grasses & Mulch", estimatedPrice: 950, dimensions: "Driveway Perimeter" },
+  ],
+  "Patio": [
+    { id: "inv-patio-lounge", name: "Outdoor Teak Lounge Sofa & Armchairs", category: "Outdoor", material: "Grade-A Teak & Sunbrella Fabric", estimatedPrice: 3200, dimensions: "3-Piece Suite" },
+    { id: "inv-patio-table", name: "Travertine Low Outdoor Coffee Table", category: "Outdoor", material: "Weather-Sealed Travertine", estimatedPrice: 950, dimensions: "90cm Diameter" },
+    { id: "inv-patio-planters", name: "Sculptural Concrete Olive Planters (Pair)", category: "Landscape", material: "Reinforced Fiber Concrete", estimatedPrice: 580, dimensions: "70cm H" },
+  ],
+  "Balcony": [
+    { id: "inv-balcony-bistro", name: "Compact Bistro Teak Table & 2 Armchairs", category: "Outdoor Dining", material: "Solid Weathered Teak & Rope Weave", estimatedPrice: 1200, dimensions: "75cm Diameter Table" },
+    { id: "inv-balcony-planters", name: "Slimline Railing Planter Boxes (Trio)", category: "Botanical", material: "Powdercoated Aluminium", estimatedPrice: 340, dimensions: "80cm Length" },
+  ],
+  "Terrace": [
+    { id: "inv-terrace-lounge", name: "Outdoor Teak Lounge Sofa & Armchairs", category: "Outdoor Living", material: "Grade-A Teak & Sunbrella Fabric", estimatedPrice: 3200, dimensions: "3-Piece Suite" },
+    { id: "inv-terrace-table", name: "Travertine Low Outdoor Coffee Table", category: "Outdoor Table", material: "Weather-Sealed Travertine", estimatedPrice: 950, dimensions: "90cm Diameter" },
+  ],
+  "Rooftop": [
+    { id: "inv-roof-sofa", name: "All-Weather Modular Sectional Sofa", category: "Outdoor Living", material: "Quick-Dry Foam & Sunbrella Fabric", estimatedPrice: 4600, dimensions: "5-Piece Modular Suite" },
+    { id: "inv-roof-pit", name: "Concrete Gas Fire Pit Table", category: "Hardscape", material: "Glass-Fiber Concrete & Lava Rocks", estimatedPrice: 1850, dimensions: "120cm x 80cm" },
+  ],
+  "Swimming Pool Area": [
+    { id: "inv-pool-loungers", name: "Luxury Teak Pool Sun Loungers (Pair)", category: "Poolside", material: "Solid Teak & Quick-Dry Cushion", estimatedPrice: 1900, dimensions: "200cm L x 65cm W" },
+    { id: "inv-pool-umbrella", name: "Cantilever Architectural Shade Umbrella", category: "Shade", material: "Anodized Aluminium & Sunbrella Fabric", estimatedPrice: 1400, dimensions: "300cm Diameter" },
+  ],
+  "Outdoor Dining Area": [
+    { id: "inv-out-table", name: "Solid Teak 8-Seater Outdoor Dining Table", category: "Dining Table", material: "Grade-A Weatherproof Teak", estimatedPrice: 3100, dimensions: "240cm L x 100cm W" },
+    { id: "inv-out-chairs", name: "Woven Rope Outdoor Dining Chairs (Set of 8)", category: "Seating", material: "All-Weather Rope & Aluminium Legs", estimatedPrice: 2400, dimensions: "8 Chairs" },
+  ],
+  "Conference Room": [
+    { id: "inv-conf-table", name: "Executive Fluted White Oak Boardroom Table", category: "Conference", material: "Solid Oak & Integrated Power Modules", estimatedPrice: 4200, dimensions: "320cm L x 120cm W" },
+    { id: "inv-conf-chairs", name: "Ergonomic High-Back Leather Chairs (Set of 8)", category: "Seating", material: "Aniline Leather & Chrome Base", estimatedPrice: 3200, dimensions: "8 Chairs" },
+  ],
+  "Hotel Room": [
+    { id: "inv-hotel-bed", name: "Bespoke Upholstered King Headboard & Base", category: "Bed", material: "Textured Velvet & Solid Timber", estimatedPrice: 2600, dimensions: "King Bed" },
+    { id: "inv-hotel-stands", name: "Integrated Marble Bedside Consoles", category: "Storage", material: "Arabescato Marble & Brass Trim", estimatedPrice: 980, dimensions: "Pair" },
+  ],
+  "Studio Apartment": [
+    { id: "inv-studio-sofa", name: "Multi-Functional Modular Sofa Bed", category: "Furniture", material: "Cream Bouclé & Easy-Fold Mechanism", estimatedPrice: 2100, dimensions: "Queen Convertible" },
+    { id: "inv-studio-table", name: "Compact Round White Oak Dining Table & Chairs", category: "Dining", material: "Solid Oak & 2 Chairs", estimatedPrice: 950, dimensions: "90cm Diameter" },
+  ],
+  "Empty Commercial Space": [
+    { id: "inv-comm-desk", name: "Modular Reception Desk & Consultation Island", category: "Commercial", material: "Terrazzo & Fluted Timber", estimatedPrice: 4800, dimensions: "300cm W" },
+    { id: "inv-comm-chairs", name: "Architectural Waiting Area Armchairs", category: "Seating", material: "Commercial Grade Wool & Steel", estimatedPrice: 1800, dimensions: "Set of 4" },
   ],
 };
 
@@ -119,13 +220,6 @@ const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
     { id: "obj-rug", label: "Textured Ribbed Wool Rug", category: "Textile", confidence: 0.95, box: [18, 56, 68, 38] },
     { id: "obj-art", label: "Minimalist Framed Wall Art", category: "Decor", confidence: 0.94, box: [58, 20, 24, 30] },
     { id: "obj-lamp", label: "Architectural Arched Lamp", category: "Lighting", confidence: 0.93, box: [78, 32, 14, 52] },
-    { id: "obj-stools", label: "Oak Counter Stools", category: "Seating", confidence: 0.92, box: [12, 54, 16, 26] },
-  ],
-  "Lobby": [
-    { id: "obj-lobby-sofa", label: "Designer Bouclé Lounge & Bench", category: "Seating", confidence: 0.98, box: [24, 48, 52, 36] },
-    { id: "obj-lobby-table", label: "Travertine Coffee & Plinth Table", category: "Table", confidence: 0.96, box: [38, 62, 28, 22] },
-    { id: "obj-lobby-art", label: "Oversized Minimalist Canvas Art", category: "Decor", confidence: 0.95, box: [58, 20, 24, 30] },
-    { id: "obj-lobby-tree", label: "Tall Potted Olive Tree", category: "Landscape", confidence: 0.94, box: [82, 34, 14, 52] },
   ],
   "Bedroom": [
     { id: "obj-bed", label: "Low White Oak Bed Frame", category: "Furniture", confidence: 0.98, box: [22, 44, 58, 46] },
@@ -133,169 +227,22 @@ const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
     { id: "obj-stands", label: "Twin Oak Nightstands", category: "Storage", confidence: 0.95, box: [12, 54, 18, 26] },
     { id: "obj-art", label: "Minimalist Canvas Art", category: "Decor", confidence: 0.94, box: [38, 16, 26, 22] },
   ],
-  "Dining Room": [
-    { id: "obj-table", label: "Solid Oak 6-Seater Table", category: "Dining", confidence: 0.98, box: [26, 46, 50, 38] },
-    { id: "obj-chairs", label: "Sculptural Cream Chairs", category: "Seating", confidence: 0.96, box: [20, 48, 62, 34] },
-    { id: "obj-pendant", label: "Fluted Pendant Luminaire", category: "Lighting", confidence: 0.95, box: [42, 12, 18, 24] },
-  ],
-  "Kitchen": [
-    { id: "obj-island", label: "Honed Marble Waterfall Island", category: "Kitchen Island", confidence: 0.98, box: [18, 52, 64, 44] },
-    { id: "obj-stools", label: "Designer Oak Counter Stools", category: "Seating", confidence: 0.96, box: [24, 60, 48, 32] },
-    { id: "obj-pendant", label: "Brass Cylinder Pendants", category: "Lighting", confidence: 0.94, box: [38, 6, 24, 26] },
-  ],
   "Bathroom": [
     { id: "obj-bath-vanity", label: "Floating Stone Vanity & Basin", category: "Sanitaryware", confidence: 0.98, box: [16, 52, 38, 42] },
     { id: "obj-bath-mirror", label: "Backlit Circular LED Mirror", category: "Fixtures", confidence: 0.96, box: [20, 14, 30, 34] },
     { id: "obj-bath-shower", label: "Frameless Walk-in Rain Shower", category: "Shower", confidence: 0.95, box: [62, 14, 34, 80] },
     { id: "obj-bath-tapware", label: "Brushed Brass Fixtures", category: "Hardware", confidence: 0.94, box: [26, 48, 8, 10] },
   ],
-  "Home Office": [
-    { id: "obj-desk", label: "Executive Timber Desk", category: "Workspace", confidence: 0.97, box: [22, 54, 52, 34] },
-    { id: "obj-chair", label: "Ergonomic Bouclé Chair", category: "Seating", confidence: 0.95, box: [38, 56, 24, 30] },
-    { id: "obj-shelves", label: "Architectural Bookcase", category: "Storage", confidence: 0.93, box: [70, 16, 24, 70] },
+  "Kitchen": [
+    { id: "obj-island", label: "Honed Marble Waterfall Island", category: "Kitchen Island", confidence: 0.98, box: [18, 52, 64, 44] },
+    { id: "obj-stools", label: "Designer Oak Counter Stools", category: "Seating", confidence: 0.96, box: [24, 60, 48, 32] },
+    { id: "obj-pendant", label: "Brass Cylinder Pendants", category: "Lighting", confidence: 0.94, box: [38, 6, 24, 26] },
   ],
-  "Patio": [
-    { id: "obj-terrace", label: "Honed Roman Travertine", category: "Hardscape", confidence: 0.96, box: [8, 54, 84, 44] },
-    { id: "obj-lounge", label: "Teak Outdoor Lounge Suite", category: "Outdoor Living", confidence: 0.95, box: [24, 48, 54, 38] },
-    { id: "obj-olive", label: "Mature Olive Tree", category: "Landscape", confidence: 0.93, box: [68, 20, 24, 60] },
+  "Dining Room": [
+    { id: "obj-table", label: "Solid Oak 6-Seater Table", category: "Dining", confidence: 0.98, box: [26, 46, 50, 38] },
+    { id: "obj-chairs", label: "Sculptural Cream Chairs", category: "Seating", confidence: 0.96, box: [20, 48, 62, 34] },
+    { id: "obj-pendant", label: "Fluted Pendant Luminaire", category: "Lighting", confidence: 0.95, box: [42, 12, 18, 24] },
   ],
-};
-
-const REALESTATE16_OBJECTS: DetectedObject[] = [
-  { id: "obj-16-sofa", label: "Designer Bouclé Modular Lounge", category: "Seating", confidence: 0.98, box: [56, 44, 38, 42] },
-  { id: "obj-16-table", label: "Pietra Travertine Plinth Coffee Table", category: "Table", confidence: 0.96, box: [48, 62, 26, 22] },
-  { id: "obj-16-rug", label: "Textured Ribbed Wool Area Rug", category: "Textile", confidence: 0.97, box: [36, 54, 56, 38] },
-  { id: "obj-16-art", label: "Framed Minimalist Abstract Art", category: "Decor", confidence: 0.95, box: [70, 24, 22, 28] },
-  { id: "obj-16-window", label: "Garden Panorama Window Opening", category: "Architecture", confidence: 0.99, box: [38, 36, 18, 36] },
-  { id: "obj-16-tree", label: "Potted Olive Tree", category: "Botanical", confidence: 0.94, box: [58, 40, 12, 38] },
-];
-
-const REALESTATE16_INVENTORY: StagingItem[] = [
-  { id: "inv-16-sofa", name: "Custom Bouclé Modular Lounge", category: "Seating", material: "Textured Cream Bouclé & Solid Oak", estimatedPrice: 3200, dimensions: "260cm W x 100cm D" },
-  { id: "inv-16-table", name: "Pietra Honed Travertine Plinth", category: "Table", material: "Italian Honed Travertine", estimatedPrice: 1250, dimensions: "120cm W x 60cm D" },
-  { id: "inv-16-rug", name: "Ribbed Wool Area Rug", category: "Textile", material: "100% Pure New Zealand Wool", estimatedPrice: 890, dimensions: "320cm x 240cm" },
-  { id: "inv-16-art", name: "Gallery Framed Abstract Art", category: "Decor", material: "Textured Canvas & Solid Oak Frame", estimatedPrice: 450, dimensions: "120cm x 90cm" },
-  { id: "inv-16-tree", name: "Architectural Olive Tree in Ceramic Planter", category: "Botanical", material: "Glazed Handmade Ceramic", estimatedPrice: 280, dimensions: "180cm H" },
-];
-
-const REALESTATE17_OBJECTS: DetectedObject[] = [
-  { id: "obj-17-sofa", label: "Cognac Leather Lounge", category: "Seating", confidence: 0.98, box: [64, 48, 34, 38] },
-  { id: "obj-17-table", label: "Travertine Plinth Coffee Table", category: "Table", confidence: 0.96, box: [56, 62, 24, 20] },
-  { id: "obj-17-rug", label: "Ribbed Wool Area Rug", category: "Textile", confidence: 0.95, box: [48, 54, 48, 36] },
-  { id: "obj-17-art", label: "Minimalist Framed Wall Art", category: "Decor", confidence: 0.95, box: [72, 26, 22, 28] },
-  { id: "obj-17-stools", label: "Sculptural Oak Counter Stools", category: "Seating", confidence: 0.94, box: [36, 52, 16, 24] },
-  { id: "obj-17-plant", label: "Potted Ficus in Planter", category: "Botanical", confidence: 0.93, box: [60, 42, 10, 24] },
-];
-
-const REALESTATE11_OBJECTS: DetectedObject[] = [
-  { id: "obj-11-patio", label: "Honed Roman Travertine Terrace", category: "Hardscape", confidence: 0.99, box: [18, 54, 72, 42] },
-  { id: "obj-11-lounge", label: "Teak & Sunbrella Outdoor Lounge Suite", category: "Outdoor Living", confidence: 0.98, box: [28, 52, 44, 34] },
-  { id: "obj-11-table", label: "Travertine Low Plinth Coffee Table", category: "Outdoor Furniture", confidence: 0.96, box: [46, 68, 24, 18] },
-  { id: "obj-11-dining", label: "Architectural Teak 6-Seater Outdoor Dining", category: "Dining", confidence: 0.95, box: [64, 46, 26, 32] },
-  { id: "obj-11-garden", label: "Manicured Turf & Boxwood Planting Border", category: "Landscape", confidence: 0.96, box: [10, 62, 28, 28] },
-];
-
-const REALESTATE11_INVENTORY: StagingItem[] = [
-  { id: "inv-11-lounge", name: "Grade-A Teak Outdoor Lounge & Deep Seating Suite", category: "Outdoor Living", material: "Solid Teak & Charcoal Sunbrella Fabric", estimatedPrice: 4200, dimensions: "4-Piece Modular Suite" },
-  { id: "inv-11-patio", name: "Honed Roman Travertine Paved Terrace", category: "Hardscape", material: "Natural Honed Travertine Slabs", estimatedPrice: 6500, dimensions: "38m² Area" },
-  { id: "inv-11-table", name: "Pietra Outdoor Travertine Plinth", category: "Table", material: "Sealed Weatherproof Travertine", estimatedPrice: 1100, dimensions: "120cm W x 60cm D" },
-  { id: "inv-11-dining", name: "Scandinavian Teak Outdoor Dining & Armchairs", category: "Dining", material: "FSC Certified Teak & Powdercoated Aluminium", estimatedPrice: 2800, dimensions: "200cm Table + 6 Chairs" },
-  { id: "inv-11-lighting", name: "Architectural Low-Voltage Path & Festoon Lights", category: "Lighting", material: "Solid Brass & Warm LED", estimatedPrice: 850, dimensions: "Full Garden Zone" },
-];
-
-const REALESTATE1_OBJECTS: DetectedObject[] = [
-  { id: "obj-1-island", label: "Calacatta Gold Marble Kitchen Island", category: "Kitchen", confidence: 0.99, box: [22, 55, 48, 38] },
-  { id: "obj-1-cabinetry", label: "Custom Fluted Natural Oak Cabinetry", category: "Cabinetry", confidence: 0.98, box: [58, 48, 40, 46] },
-  { id: "obj-1-cooktop", label: "Miele Induction Cooktop & Integrated Rangehood", category: "Appliance", confidence: 0.97, box: [64, 52, 28, 22] },
-  { id: "obj-1-tapware", label: "Brushed Brass Gooseneck Mixer Tap", category: "Fixtures", confidence: 0.96, box: [78, 42, 12, 18] },
-  { id: "obj-1-pendant", label: "Minimalist Brass Linear Pendant Lights", category: "Lighting", confidence: 0.95, box: [35, 18, 32, 16] },
-  { id: "obj-1-stools", label: "Scandinavian Oak & Leather Bar Stools", category: "Seating", confidence: 0.96, box: [18, 62, 26, 32] },
-];
-
-const REALESTATE1_INVENTORY: StagingItem[] = [
-  { id: "inv-1-island", name: "Bespoke Calacatta Marble Kitchen Island", category: "Kitchen", material: "Italian Calacatta Marble & Fluted Oak", estimatedPrice: 5800, dimensions: "240cm W x 95cm D" },
-  { id: "inv-1-cabinetry", name: "Custom Floor-to-Ceiling Oak Joinery", category: "Cabinetry", material: "Natural Tasmanian Oak with Soft-Close Hardware", estimatedPrice: 7200, dimensions: "Full Kitchen Run" },
-  { id: "inv-1-appliances", name: "Integrated Miele Induction & Pyrolytic Oven Suite", category: "Appliance", material: "Matte Black Ceramic Glass & Stainless Steel", estimatedPrice: 4600, dimensions: "90cm Induction + 60cm Oven" },
-  { id: "inv-1-tapware", name: "Brodware Brushed Brass Pull-Out Kitchen Mixer", category: "Fixtures", material: "PVD Brushed Brass & Ceramic Disc", estimatedPrice: 780, dimensions: "42cm Height" },
-  { id: "inv-1-stools", name: "Nordic Minimalist Oak Counter Stools (Trio)", category: "Seating", material: "Solid American Oak & Aniline Cognac Leather", estimatedPrice: 1150, dimensions: "65cm Seat Height" },
-  { id: "inv-1-pendant", name: "Architectural Slimline Brass LED Linear Pendant", category: "Lighting", material: "Hand-finished Brass & Warm 2700K LED", estimatedPrice: 620, dimensions: "160cm Length" },
-];
-
-const STAGING_ROOM_TEMPLATES: Record<string, string> = {
-  "Living Room": "/images/kinkead-realestate16-staged.jpg",
-  "Lobby": "/images/kinkead-realestate16-staged.jpg",
-  "Bedroom": "/images/kinkead-bed1-staged.jpg",
-  "Dining Room": "/images/kinkead-dining-staged.jpg",
-  "Kitchen": "/images/kinkead-realestate1-staged.jpg",
-  "Bathroom": "/images/bathroom-after.jpg",
-  "Home Office": "/images/staged-room.jpg",
-  "Patio": "/images/kinkead-realestate11-staged.jpg",
-};
-
-/**
- * Intelligent Client-Side Virtual Stager:
- * Composites high-end perspective furniture directly onto the user's uploaded room photo.
- * This guarantees the user's walls, windows, floors, lighting, and camera angle are 100% preserved.
- */
-const compositeVirtualStaging = (
-  originalUrl: string,
-  roomType: string,
-  _style: string
-): Promise<string> => {
-  return new Promise((resolve) => {
-    const baseImg = new Image();
-    baseImg.crossOrigin = "anonymous";
-    baseImg.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        const w = baseImg.naturalWidth || baseImg.width || 1200;
-        const h = baseImg.naturalHeight || baseImg.height || 800;
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(originalUrl);
-          return;
-        }
-
-        // 1. Draw user's actual photo at full resolution
-        ctx.drawImage(baseImg, 0, 0, w, h);
-
-        // 2. Select appropriate furniture layer matching the space
-        let layerUrl = "/images/layers/layer-living.png";
-        if (roomType === "Bedroom") {
-          layerUrl = "/images/layers/layer-bedroom.png";
-        } else if (roomType === "Patio" || roomType === "Garden") {
-          layerUrl = "/images/layers/layer-patio.png";
-        } else if (roomType === "Kitchen") {
-          layerUrl = "/images/layers/layer-kitchen.png";
-        } else if (roomType === "Dining Room") {
-          layerUrl = "/images/layers/layer-dining.png";
-        } else if (roomType === "Bathroom") {
-          layerUrl = "/images/layers/layer-bathroom.png";
-        }
-
-        const layerImg = new Image();
-        layerImg.crossOrigin = "anonymous";
-        layerImg.onload = () => {
-          ctx.save();
-          // Draw furniture overlay onto user's photo with soft perspective overlay
-          ctx.drawImage(layerImg, 0, 0, w, h);
-          ctx.restore();
-          resolve(canvas.toDataURL("image/jpeg", 0.95));
-        };
-        layerImg.onerror = () => {
-          resolve(originalUrl);
-        };
-        layerImg.src = layerUrl;
-      } catch (err) {
-        console.warn("Canvas compositing fallback error:", err);
-        resolve(originalUrl);
-      }
-    };
-    baseImg.onerror = () => resolve(originalUrl);
-    baseImg.src = originalUrl;
-  });
 };
 
 export const VirtualStagingPage: React.FC = () => {
@@ -303,173 +250,67 @@ export const VirtualStagingPage: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Photos queue starts empty; populates only when the user uploads photos or loads demo
   const [photos, setPhotos] = useState<StagingPhoto[]>([]);
   const [activePhotoId, setActivePhotoId] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("Modern Luxury");
   const [stagingTier, setStagingTier] = useState<string>("Full Staging Suite");
+  const [preserveArchitecture, setPreserveArchitecture] = useState<boolean>(true);
+  const [additionalInstructions, setAdditionalInstructions] = useState<string>("");
   const [viewMode, setViewMode] = useState<"slider" | "side" | "staged" | "empty">("slider");
   const [showTags, setShowTags] = useState<boolean>(true);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [isStagingActive, setIsStagingActive] = useState<boolean>(false);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [showApiModal, setShowApiModal] = useState<boolean>(false);
   const [customApiKey, setCustomApiKey] = useState<string>(() => localStorage.getItem("formaspace_custom_api_key") || "");
   const [customProvider, setCustomProvider] = useState<string>(() => localStorage.getItem("formaspace_custom_provider") || "gemini");
   const [keySavedToast, setKeySavedToast] = useState<boolean>(false);
+  const [stagingError, setStagingError] = useState<string | null>(null);
 
   const activePhoto = photos.find((p) => p.id === activePhotoId) || (photos.length > 0 ? photos[0] : null);
 
-  // Intelligent visual space analyzer (purely visual analysis, no fragile filename numbers)
-  const analyzeImageContent = (img: HTMLImageElement, filename: string): string => {
-    const s = filename.toLowerCase();
-
-    // 1. Natural language keywords if the user intentionally named their file
-    if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("lawn") || s.includes("backyard") || s.includes("exterior") || s.includes("driveway")) {
-      return "Patio";
-    }
-    if (s.includes("bath") || s.includes("toilet") || s.includes("washroom") || s.includes("shower") || s.includes("ensuite") || s.includes("powder") || s.includes("restroom")) {
-      return "Bathroom";
-    }
-    if (s.includes("bed") || s.includes("bedroom") || s.includes("master")) {
-      return "Bedroom";
-    }
-    if (s.includes("kitchen") || s.includes("cook")) {
-      return "Kitchen";
-    }
-    if (s.includes("dining") || s.includes("dine")) {
-      return "Dining Room";
-    }
-    if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) {
-      return "Home Office";
-    }
-    if (s.includes("lobby") || s.includes("hall") || s.includes("foyer") || s.includes("corridor")) {
-      return "Lobby";
-    }
-
-    // 2. Visual analysis of pixel characteristics across image quadrants
+  // Quick Direct Key Saver
+  const handleSaveApiKey = async (newKey?: string) => {
+    const keyToSave = (newKey !== undefined ? newKey : customApiKey).trim();
+    if (!keyToSave) return;
+    setCustomApiKey(keyToSave);
+    localStorage.setItem("formaspace_custom_api_key", keyToSave);
+    localStorage.setItem("formaspace_custom_provider", customProvider);
+    setKeySavedToast(true);
+    setTimeout(() => setKeySavedToast(false), 3000);
     try {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return "Living Room";
-      const w = 120;
-      const h = 80;
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(img, 0, 0, w, h);
-      const data = ctx.getImageData(0, 0, w, h).data;
-      
-      let skyPixels = 0;
-      let upperFoliagePixels = 0;
-      let lowerGroundPixels = 0;
-      let whiteTilePixels = 0;
-      const topArea = w * Math.floor(h * 0.45);
-      const bottomArea = w * Math.floor(h * 0.55);
-      const totalPixels = w * h;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const idx = i / 4;
-        const y = Math.floor(idx / w);
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-
-        // Upper quadrant: sky, outdoor daylight, tree canopy
-        if (y < h * 0.45) {
-          if ((b > 115 && b > r * 1.15) || (r > 190 && g > 200 && b > 210)) {
-            skyPixels++;
-          }
-          if (g > 65 && g > r * 1.08 && g > b) {
-            upperFoliagePixels++;
-          }
-        } else {
-          // Lower quadrant: ground plane (lawn, grass, outdoor turf, driveway, pavers)
-          if ((g > 60 && g > r * 1.05 && g > b) || (g > 75 && r < 165 && b < 125)) {
-            lowerGroundPixels++;
-          }
-        }
-
-        // White sanitary tile or ceramic surfaces
-        if (r > 215 && g > 215 && b > 215 && Math.abs(r - g) < 15 && Math.abs(g - b) < 15) {
-          whiteTilePixels++;
-        }
-      }
-
-      // Strong outdoor presence: Sky or tree canopy above AND lawn/turf/ground below
-      const outdoorSkyRatio = (skyPixels + upperFoliagePixels) / topArea;
-      const outdoorGroundRatio = lowerGroundPixels / bottomArea;
-      if (outdoorSkyRatio > 0.20 || (outdoorSkyRatio > 0.10 && outdoorGroundRatio > 0.15)) {
-        return "Patio";
-      }
-
-      // Bathroom detection: >35% reflective white sanitary tiles
-      if (whiteTilePixels / totalPixels > 0.35) {
-        return "Bathroom";
-      }
-
-      // Default indoor vacant room: Living Room (user can toggle Bedroom, Kitchen, etc.)
-      return "Living Room";
+      await api.post("/api/studio/configure-ai", {
+        provider: customProvider,
+        api_key: keyToSave,
+        model: customProvider === "gemini" ? "gemini-2.0-flash-exp" : "gpt-image-1",
+      });
     } catch {
-      return "Living Room";
+      // ignore
     }
   };
 
-  // Guess room type from filename
-  const inferRoomType = (filename: string): string => {
-    const s = filename.toLowerCase();
-    if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("balcony") || s.includes("alfresco") || s.includes("lawn") || s.includes("backyard") || s.includes("exterior") || s.includes("driveway")) return "Patio";
-    if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("restroom") || s.includes("wc")) return "Bathroom";
-    if (s.includes("bed") || s.includes("bedroom") || s.includes("master") || s.includes("sleep")) return "Bedroom";
-    if (s.includes("dine") || s.includes("dining")) return "Dining Room";
-    if (s.includes("kitchen") || s.includes("cook")) return "Kitchen";
-    if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) return "Home Office";
-    if (s.includes("lobby") || s.includes("hall") || s.includes("entry") || s.includes("foyer") || s.includes("corridor")) return "Lobby";
-    // General empty rooms default to Living Room
-    return "Living Room";
-  };
-
-  // Handle Multi-File Upload with visual content analysis
-  const handleBatchUpload = (fileList: FileList | null) => {
+  // Handle Multi-File Upload with Automatic Universal Space Detection
+  const handleBatchUpload = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
+    setStagingError(null);
+    const files = Array.from(fileList);
     const newItems: StagingPhoto[] = [];
 
-    Array.from(fileList).forEach((file, idx) => {
-      const initialRoomType = inferRoomType(file.name);
-      const url = URL.createObjectURL(file);
+    files.forEach((file, idx) => {
+      const localUrl = URL.createObjectURL(file);
       const id = `upload-${Date.now()}-${idx}`;
-
-      // Visual Content Analysis via HTML5 Image & Canvas
-      const img = new Image();
-      img.onload = () => {
-        const visualRoomType = analyzeImageContent(img, file.name);
-        if (visualRoomType !== initialRoomType) {
-          setPhotos((prev) =>
-            prev.map((p) =>
-              p.id === id
-                ? {
-                  ...p,
-                  roomType: visualRoomType,
-                  inventory: ROOM_INVENTORIES[visualRoomType] || ROOM_INVENTORIES["Living Room"],
-                  detectedObjects: DEFAULT_OBJECTS[visualRoomType] || DEFAULT_OBJECTS["Living Room"],
-                }
-                : p
-            )
-          );
-        }
-      };
-      img.src = url;
-
       newItems.push({
         id,
         file,
         name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-        originalUrl: url,
-        roomType: initialRoomType,
+        originalUrl: localUrl,
+        roomType: "Analyzing Space...",
         style: selectedStyle,
         status: "ready",
         stagedUrl: undefined,
-        detectedObjects: DEFAULT_OBJECTS[initialRoomType] || DEFAULT_OBJECTS["Living Room"],
-        inventory: ROOM_INVENTORIES[initialRoomType] || ROOM_INVENTORIES["Living Room"],
+        detectedObjects: [],
+        inventory: [],
       });
     });
 
@@ -477,13 +318,73 @@ export const VirtualStagingPage: React.FC = () => {
     if (newItems.length > 0) {
       setActivePhotoId(newItems[0].id);
     }
+
+    // Run Universal Space Detection for each uploaded photo
+    setIsAnalyzing(true);
+    for (const item of newItems) {
+      if (!item.file) continue;
+      try {
+        const uploadRes = await api.uploadFile(item.file);
+        const analysis = await api.post<any>("/api/studio/analyze-space", {
+          image_url: uploadRes.url,
+          custom_api_key: customApiKey || undefined,
+          custom_provider: customProvider || "gemini",
+        });
+
+        const detectedType = analysis.space_type || "Living Room";
+        const inventory: StagingItem[] =
+          analysis.recommended_furniture && analysis.recommended_furniture.length > 0
+            ? analysis.recommended_furniture.map((f: any, i: number) => ({
+              id: `rec-${i}`,
+              name: f.name || f.item || "Architectural Furnishing",
+              category: f.category || "Furniture",
+              material: f.material || "Natural Materials",
+              estimatedPrice: f.estimatedPrice || 1200,
+              dimensions: f.dimensions || "Proportional Scale",
+            }))
+            : UNIVERSAL_INVENTORIES[detectedType] || UNIVERSAL_INVENTORIES["Living Room"];
+
+        setPhotos((prev) =>
+          prev.map((p) =>
+            p.id === item.id
+              ? {
+                ...p,
+                originalUrl: uploadRes.url,
+                roomType: detectedType,
+                environment: analysis.environment || "indoor",
+                confidence: analysis.confidence || 0.95,
+                architecturalFeatures: analysis.architectural_features,
+                inventory,
+                detectedObjects: DEFAULT_OBJECTS[detectedType] || DEFAULT_OBJECTS["Living Room"],
+              }
+              : p
+          )
+        );
+      } catch (err) {
+        console.warn("Space analysis completed with default classification:", err);
+        setPhotos((prev) =>
+          prev.map((p) =>
+            p.id === item.id
+              ? {
+                ...p,
+                roomType: "Living Room",
+                inventory: UNIVERSAL_INVENTORIES["Living Room"],
+                detectedObjects: DEFAULT_OBJECTS["Living Room"],
+              }
+              : p
+          )
+        );
+      }
+    }
+    setIsAnalyzing(false);
   };
 
-  // Stage a specific photo
+  // Stage a specific photo with True Image-to-Image AI
   const handleStagePhoto = async (photoId: string) => {
     const target = photos.find((p) => p.id === photoId);
     if (!target) return;
 
+    setStagingError(null);
     setIsStagingActive(true);
     setPhotos((prev) =>
       prev.map((p) => (p.id === photoId ? { ...p, status: "staging" } : p))
@@ -491,57 +392,44 @@ export const VirtualStagingPage: React.FC = () => {
 
     try {
       let finalStagedUrl = "";
-      let customObjects = DEFAULT_OBJECTS[target.roomType] || DEFAULT_OBJECTS["Living Room"];
-      let customInventory = ROOM_INVENTORIES[target.roomType] || ROOM_INVENTORIES["Living Room"];
+      const customInventory = target.inventory.length > 0 ? target.inventory : (UNIVERSAL_INVENTORIES[target.roomType] || UNIVERSAL_INVENTORIES["Living Room"]);
+      const customObjects = target.detectedObjects.length > 0 ? target.detectedObjects : (DEFAULT_OBJECTS[target.roomType] || DEFAULT_OBJECTS["Living Room"]);
 
-      // 1. If user uploaded a photo: Stage furniture directly into THEIR photo!
-      if (target.file) {
-        let liveGenerated = false;
-
-        // Try backend / external AI generation if available
-        try {
-          const uploadRes = await api.uploadFile(target.file);
-          const genRes = await api.post<any>("/api/studio/generate", {
-            original_image_url: uploadRes.url,
-            feature_type: "virtual_staging",
-            category: target.roomType,
-            room_type: target.roomType,
-            style: selectedStyle,
-            intervention_level: "Medium",
-            prompt: `Virtually stage this vacant ${target.roomType} in ${selectedStyle} aesthetic with cohesive high-end furniture while locking room geometry.`,
-            variations_count: 1,
-            settings: { 
-              staging_package: stagingTier,
-              custom_api_key: customApiKey || undefined,
-              custom_provider: customProvider || undefined,
-            },
-          });
-
-          if (genRes.generated_image_url) {
-            finalStagedUrl = genRes.generated_image_url;
-            liveGenerated = true;
-          }
-        } catch {
-          // Live AI offline or quota exhausted: fall through to client-side perspective stager
-        }
-
-        // Perspective Staging Engine directly onto user's uploaded image
-        // (preserves the user's walls, windows, trees, driveway, and floors 100%)
-        if (!liveGenerated) {
-          finalStagedUrl = await compositeVirtualStaging(
-            target.originalUrl,
-            target.roomType,
-            selectedStyle
-          );
-        }
-      } else {
-        // Pre-curated demo listing showcase
-        finalStagedUrl = target.stagedUrl || STAGING_ROOM_TEMPLATES[target.roomType] || target.originalUrl;
+      // 1. Ensure file is uploaded to storage
+      let serverImageUrl = target.originalUrl;
+      if (target.file && (!serverImageUrl.startsWith("/storage/") && !serverImageUrl.startsWith("http"))) {
+        const uploadRes = await api.uploadFile(target.file);
+        serverImageUrl = uploadRes.url;
       }
 
-      // 3. Fallback to curated photorealistic room template
-      if (!finalStagedUrl) {
-        finalStagedUrl = STAGING_ROOM_TEMPLATES[target.roomType] || "/images/kinkead-realestate16-staged.jpg";
+      // 2. Call real AI virtual staging endpoint
+      const promptText =
+        additionalInstructions.trim() ||
+        `Virtually stage this vacant ${target.roomType} in ${selectedStyle} interior design aesthetic while strictly locking room geometry, camera perspective, wall boundaries, and windows.`;
+
+      const genRes = await api.post<any>("/api/studio/generate", {
+        original_image_url: serverImageUrl,
+        feature_type: "virtual_staging",
+        category: target.roomType,
+        room_type: target.roomType,
+        style: selectedStyle,
+        intervention_level: stagingTier === "Light Staging" ? "Low" : (stagingTier === "Full Staging Suite" ? "High" : "Medium"),
+        prompt: promptText,
+        variations_count: 1,
+        settings: {
+          staging_intensity: stagingTier,
+          preserve_furniture: preserveArchitecture,
+          custom_api_key: customApiKey || undefined,
+          custom_provider: customProvider || "gemini",
+          space_type: target.roomType,
+          additional_instructions: additionalInstructions,
+        },
+      });
+
+      if (genRes.generated_image_url) {
+        finalStagedUrl = genRes.generated_image_url;
+      } else {
+        throw new Error("No image was returned by the AI provider.");
       }
 
       setPhotos((prev) =>
@@ -549,6 +437,7 @@ export const VirtualStagingPage: React.FC = () => {
           p.id === photoId
             ? {
               ...p,
+              originalUrl: serverImageUrl,
               status: "staged",
               stagedUrl: finalStagedUrl,
               style: selectedStyle,
@@ -558,17 +447,22 @@ export const VirtualStagingPage: React.FC = () => {
             : p
         )
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error("Virtual staging failed:", e);
+      const errMsg = e.message || "Failed to generate virtual staging.";
+      setStagingError(errMsg);
       setPhotos((prev) =>
         prev.map((p) => (p.id === photoId ? { ...p, status: "error" } : p))
       );
+      if (errMsg.toLowerCase().includes("key") || !customApiKey) {
+        setShowApiModal(true);
+      }
     } finally {
       setIsStagingActive(false);
     }
   };
 
-  // Stage All Unstaged Photos in queue
+  // Stage All Photos in queue
   const handleStageAll = async () => {
     const unstaged = photos.filter((p) => p.status === "ready");
     for (const p of unstaged) {
@@ -576,7 +470,7 @@ export const VirtualStagingPage: React.FC = () => {
     }
   };
 
-  // Load 23 Kinkead St, ACT Showcase
+  // Load Kinkead Showcase Demo
   const loadKinkeadListing = () => {
     const kinkeadRooms: StagingPhoto[] = KINKEAD_PROPERTY_SHOWCASE.rooms.map((r) => ({
       id: `kinkead-${r.id}`,
@@ -587,7 +481,7 @@ export const VirtualStagingPage: React.FC = () => {
       status: "staged",
       stagedUrl: r.stagedImage,
       detectedObjects: r.stagedObjects,
-      inventory: ROOM_INVENTORIES[r.roomType] || ROOM_INVENTORIES["Living Room"],
+      inventory: UNIVERSAL_INVENTORIES[r.roomType] || UNIVERSAL_INVENTORIES["Living Room"],
     }));
 
     setPhotos(kinkeadRooms);
@@ -603,6 +497,21 @@ export const VirtualStagingPage: React.FC = () => {
       }
       return filtered;
     });
+  };
+
+  const updatePhotoRoomType = (photoId: string, newType: string) => {
+    setPhotos((prev) =>
+      prev.map((p) =>
+        p.id === photoId
+          ? {
+            ...p,
+            roomType: newType,
+            inventory: UNIVERSAL_INVENTORIES[newType] || UNIVERSAL_INVENTORIES["Living Room"],
+            detectedObjects: DEFAULT_OBJECTS[newType] || DEFAULT_OBJECTS["Living Room"],
+          }
+          : p
+      )
+    );
   };
 
   const totalInventoryCost = activePhoto?.inventory?.reduce((acc, it) => acc + it.estimatedPrice, 0) || 0;
@@ -628,7 +537,7 @@ export const VirtualStagingPage: React.FC = () => {
                 Virtual Staging Studio
               </span>
               <span className="rounded-full bg-[#C87960] px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
-                Multi-Room Batch
+                Universal AI Staging
               </span>
             </div>
           </div>
@@ -640,37 +549,109 @@ export const VirtualStagingPage: React.FC = () => {
               className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-[#172B3A]/20 bg-[#172B3A]/5 px-3 py-1.5 text-xs font-semibold text-[#172B3A] hover:bg-[#172B3A] hover:text-white transition"
             >
               <Building className="h-3.5 w-3.5" />
-              <span>23 Kinkead St, ACT (4 Rooms)</span>
+              <span>23 Kinkead St Demo</span>
             </button>
             <button
               type="button"
               onClick={() => setShowApiModal(true)}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
-                customApiKey
-                  ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                  : "border-[#C87960]/30 bg-[#C87960]/10 text-[#C87960] hover:bg-[#C87960] hover:text-white"
-              }`}
+              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${customApiKey
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                : "border-[#C87960]/40 bg-[#C87960]/10 text-[#C87960] hover:bg-[#C87960] hover:text-white"
+                }`}
             >
               <Key className="h-3.5 w-3.5" />
-              <span>{customApiKey ? "Live AI Key: Active" : "Connect AI Key"}</span>
+              <span>{customApiKey ? "Gemini Key: Connected" : "Connect Gemini Key"}</span>
             </button>
             <a
-              href="https://www.realestate.com.au/property/23-kinkead-st-evatt-act-2617/"
+              href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-[#252B2E]/70 hover:text-[#C87960] transition"
+              className="hidden md:inline-flex items-center gap-1 text-xs text-[#252B2E]/70 hover:text-[#C87960] transition"
             >
-              <span>MLS Listing</span>
+              <span>Get Free Key</span>
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main Studio Grid */}
-      <div className="mx-auto max-w-[1600px] px-4 pt-6 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-12">
+      {/* Main Studio Workspace */}
+      <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-8 space-y-4">
 
+        {/* Gemini API Key Connection Banner */}
+        {!customApiKey ? (
+          <div className="rounded-2xl border-2 border-[#C87960]/30 bg-gradient-to-r from-[#C87960]/10 via-[#F7F4ED] to-[#9BAE9A]/15 p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-[#C87960] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                <Key className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#172B3A] flex items-center gap-2">
+                  <span>Connect Google Gemini API Key for Universal Virtual Staging</span>
+                  <span className="rounded-full bg-emerald-100 text-emerald-800 text-[9px] px-2 py-0.5 font-bold">Free Tier (15 RPM)</span>
+                </div>
+                <p className="text-[11px] text-[#252B2E]/75 mt-0.5">
+                  Universal AI space detection (25+ indoor/outdoor spaces) & live image-to-image virtual staging require your Gemini API Key.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="password"
+                placeholder="Paste Gemini Key (AIzaSy...)"
+                value={customApiKey}
+                onChange={(e) => setCustomApiKey(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveApiKey()}
+                className="rounded-xl border border-[#DCCBB5] bg-white px-3 py-1.5 text-xs font-mono text-[#172B3A] focus:border-[#C87960] focus:outline-none w-full md:w-64 shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveApiKey()}
+                className="btn-primary py-1.5 px-4 text-xs font-bold whitespace-nowrap shadow-sm"
+              >
+                Connect Key
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-xl bg-emerald-50/80 border border-emerald-200 px-4 py-2 text-xs text-emerald-900">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <span>
+                <strong>Google Gemini Active:</strong> Universal space detection and live image-to-image virtual staging are ready.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowApiModal(true)}
+              className="text-[11px] font-semibold text-emerald-700 hover:underline"
+            >
+              Change Key
+            </button>
+          </div>
+        )}
+
+        {/* Staging Error Alert */}
+        {stagingError && (
+          <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-xs text-red-900 flex items-start justify-between gap-3 shadow-sm">
+            <div className="flex items-start gap-2.5">
+              <span className="text-base">⚠️</span>
+              <div>
+                <strong className="font-bold">Virtual Staging Error:</strong>
+                <p className="mt-0.5 text-[11px] text-red-800">{stagingError}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowApiModal(true)}
+              className="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition flex-shrink-0"
+            >
+              Configure API Key
+            </button>
+          </div>
+        )}
+
+        <div className="grid gap-6 lg:grid-cols-12">
           {/* =================================================================
               LEFT SIDEBAR: BATCH PROPERTY PHOTOS & STAGING QUEUE (4 Cols)
           ================================================================== */}
@@ -683,7 +664,7 @@ export const VirtualStagingPage: React.FC = () => {
                     Upload Property Photos
                   </h2>
                   <p className="text-[11px] text-[#252B2E]/65">
-                    Select multiple vacant rooms at once
+                    Upload any indoor or outdoor space photo
                   </p>
                 </div>
                 <span className="rounded-full bg-[#9BAE9A]/20 px-2.5 py-0.5 text-[10px] font-bold text-[#172B3A]">
@@ -722,13 +703,13 @@ export const VirtualStagingPage: React.FC = () => {
                     <UploadCloud className="h-5 w-5" />
                   </div>
                   <div className="text-xs font-semibold text-[#172B3A]">
-                    Upload Multiple Room Photos
+                    {isAnalyzing ? "Analyzing Space Photos..." : "Upload Multiple Space Photos"}
                   </div>
                   <p className="mt-1 text-[11px] text-[#252B2E]/65">
                     Drag & drop 1 to 30 photos or click to browse
                   </p>
                   <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-[#DCCBB5] bg-white px-2.5 py-0.5 text-[10px] font-semibold text-[#C87960]">
-                    Select multiple files · JPG, PNG, WebP
+                    Universal Space AI · Bedroom, Living, Bath, Backyard, Garden, etc.
                   </span>
                 </div>
               </div>
@@ -738,7 +719,7 @@ export const VirtualStagingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleStageAll}
-                  disabled={isStagingActive || !photos.some((p) => p.status === "ready")}
+                  disabled={isStagingActive || isAnalyzing || !photos.some((p) => p.status === "ready")}
                   className="btn-primary flex-1 justify-center py-2 text-xs font-semibold disabled:opacity-50"
                 >
                   <Wand2 className="h-3.5 w-3.5" />
@@ -762,13 +743,13 @@ export const VirtualStagingPage: React.FC = () => {
                   Property Photo Queue ({photos.length})
                 </span>
                 <span className="text-[11px] text-[#252B2E]/60">
-                  Click any photo to stage
+                  Select photo to configure & stage
                 </span>
               </div>
 
               {photos.length === 0 ? (
                 <div className="py-8 text-center text-xs text-[#252B2E]/60">
-                  No property photos uploaded yet. Drag & drop photos above or click the button below.
+                  No property photos uploaded yet. Drag & drop photos above to begin.
                   <button
                     type="button"
                     onClick={loadKinkeadListing}
@@ -819,41 +800,24 @@ export const VirtualStagingPage: React.FC = () => {
                             </button>
                           </div>
 
-                          {/* Room Type Selector */}
+                          {/* Space Category Dropdown with Universal Spaces */}
                           <div className="mt-1 flex items-center gap-1.5">
                             <select
                               value={item.roomType}
                               onClick={(e) => e.stopPropagation()}
-                              onChange={async (e) => {
-                                const newType = e.target.value;
-                                let newStagedUrl = item.stagedUrl;
-                                if (item.status === "staged" && item.file) {
-                                  newStagedUrl = await compositeVirtualStaging(item.originalUrl, newType, selectedStyle);
-                                }
-                                setPhotos((prev) =>
-                                  prev.map((p) =>
-                                    p.id === item.id
-                                      ? {
-                                        ...p,
-                                        roomType: newType,
-                                        stagedUrl: newStagedUrl,
-                                        inventory: ROOM_INVENTORIES[newType] || ROOM_INVENTORIES["Living Room"],
-                                        detectedObjects: DEFAULT_OBJECTS[newType] || DEFAULT_OBJECTS["Living Room"],
-                                      }
-                                      : p
-                                  )
-                                );
-                              }}
-                              className="rounded-md border border-[#DCCBB5] bg-[#F7F4ED] px-1.5 py-0.5 text-[10px] font-medium text-[#172B3A]"
+                              onChange={(e) => updatePhotoRoomType(item.id, e.target.value)}
+                              className="rounded-md border border-[#DCCBB5] bg-[#F7F4ED] px-1.5 py-0.5 text-[10px] font-medium text-[#172B3A] max-w-[140px] truncate"
                             >
-                              <option value="Living Room">Living Room</option>
-                              <option value="Lobby">Lobby & Hallway</option>
-                              <option value="Bedroom">Bedroom</option>
-                              <option value="Dining Room">Dining Room</option>
-                              <option value="Kitchen">Kitchen</option>
-                              <option value="Bathroom">Bathroom & Ensuite</option>
-                              <option value="Home Office">Home Office</option>
-                              <option value="Patio">Patio & Alfresco</option>
+                              <optgroup label="Indoor Spaces">
+                                {UNIVERSAL_SPACE_CATEGORIES.indoor.map((c) => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Outdoor Spaces">
+                                {UNIVERSAL_SPACE_CATEGORIES.outdoor.map((c) => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </optgroup>
                             </select>
 
                             {/* Status Indicator */}
@@ -884,75 +848,132 @@ export const VirtualStagingPage: React.FC = () => {
               RIGHT CANVAS: ACTIVE ROOM VIRTUAL STAGING & INVENTORY (8 Cols)
           ================================================================== */}
           <main className="space-y-4 lg:col-span-8">
-            {/* Top Toolbar: Style & Staging Controls */}
-            <div className="editorial-card p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Top Toolbar: Space Selection & Generation Controls */}
+            <div className="editorial-card p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCCBB5]/50 pb-3">
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C87960]">
-                    Active Space Configuration
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C87960]">
+                      Active Space Configuration
+                    </span>
+                    {activePhoto?.environment && (
+                      <span className="rounded-full bg-[#172B3A]/10 px-2 py-0.5 text-[9px] font-bold text-[#172B3A] uppercase">
+                        {activePhoto.environment}
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-editorial text-xl font-semibold text-[#172B3A]">
-                    {activePhoto?.name || "Selected Vacant Space"}
+                    {activePhoto?.name || "Select a Space to Stage"}
                   </h3>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {/* Style Select */}
-                  <div>
-                    <label className="block text-[10px] font-medium text-[#252B2E]/70 mb-0.5">
-                      Staging Style
-                    </label>
-                    <select
-                      value={selectedStyle}
-                      onChange={(e) => setSelectedStyle(e.target.value)}
-                      className="rounded-xl border border-[#DCCBB5] bg-white px-3 py-1.5 text-xs font-semibold text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
-                    >
-                      {DESIGN_STYLES.map((st) => (
-                        <option key={st.name} value={st.name}>
-                          {st.name}
-                        </option>
+                {/* Staging Button */}
+                <button
+                  type="button"
+                  onClick={() => activePhoto && handleStagePhoto(activePhoto.id)}
+                  disabled={isStagingActive || isAnalyzing || !activePhoto}
+                  className="btn-primary py-2 px-6 text-xs font-bold shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isStagingActive ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Generating Staging...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4" />
+                      <span>Stage This Space</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Generation Controls Grid */}
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 pt-1">
+                {/* 1. Space Category Dropdown (Universal) */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#252B2E]/70 mb-1">
+                    Space Category
+                  </label>
+                  <select
+                    value={activePhoto?.roomType || "Living Room"}
+                    disabled={!activePhoto}
+                    onChange={(e) => activePhoto && updatePhotoRoomType(activePhoto.id, e.target.value)}
+                    className="w-full rounded-xl border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
+                  >
+                    <optgroup label="Indoor Spaces">
+                      {UNIVERSAL_SPACE_CATEGORIES.indoor.map((c) => (
+                        <option key={c} value={c}>{c}</option>
                       ))}
-                    </select>
-                  </div>
-
-                  {/* Staging Package */}
-                  <div>
-                    <label className="block text-[10px] font-medium text-[#252B2E]/70 mb-0.5">
-                      Furniture Tier
-                    </label>
-                    <select
-                      value={stagingTier}
-                      onChange={(e) => setStagingTier(e.target.value)}
-                      className="rounded-xl border border-[#DCCBB5] bg-white px-3 py-1.5 text-xs font-semibold text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
-                    >
-                      <option value="Full Staging Suite">Full Staging Suite</option>
-                      <option value="Minimalist Focus">Minimalist Focus</option>
-                      <option value="Executive Luxury">Executive Luxury</option>
-                    </select>
-                  </div>
-
-                  {/* Stage Button */}
-                  <div className="pt-3 sm:pt-4">
-                    <button
-                      type="button"
-                      onClick={() => activePhoto && handleStagePhoto(activePhoto.id)}
-                      disabled={isStagingActive || !activePhoto}
-                      className="btn-primary py-2 px-5 text-xs font-bold shadow-md disabled:opacity-50"
-                    >
-                      {isStagingActive ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Staging Space...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="h-4 w-4" />
-                          <span>Stage This Space</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                    </optgroup>
+                    <optgroup label="Outdoor Spaces">
+                      {UNIVERSAL_SPACE_CATEGORIES.outdoor.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
+
+                {/* 2. Design Style */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#252B2E]/70 mb-1">
+                    Design Style
+                  </label>
+                  <select
+                    value={selectedStyle}
+                    onChange={(e) => setSelectedStyle(e.target.value)}
+                    className="w-full rounded-xl border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
+                  >
+                    {DESIGN_STYLES.map((st) => (
+                      <option key={st.name} value={st.name}>
+                        {st.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 3. Staging Intensity */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#252B2E]/70 mb-1">
+                    Staging Intensity
+                  </label>
+                  <select
+                    value={stagingTier}
+                    onChange={(e) => setStagingTier(e.target.value)}
+                    className="w-full rounded-xl border border-[#DCCBB5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#172B3A] shadow-sm focus:border-[#C87960] focus:outline-none"
+                  >
+                    <option value="Light Staging">Light Staging (Essential)</option>
+                    <option value="Balanced Staging">Balanced Staging (Curated)</option>
+                    <option value="Full Staging Suite">Full Staging Suite (Complete)</option>
+                  </select>
+                </div>
+
+                {/* 4. Strict Architecture Lock Toggle */}
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#252B2E]/70 mb-1">
+                    Architecture Protection
+                  </label>
+                  <label className="flex items-center gap-2 rounded-xl border border-[#DCCBB5] bg-white px-3 py-1.5 text-xs font-medium text-[#172B3A] cursor-pointer shadow-sm">
+                    <input
+                      type="checkbox"
+                      checked={preserveArchitecture}
+                      onChange={(e) => setPreserveArchitecture(e.target.checked)}
+                      className="rounded border-[#DCCBB5] text-[#C87960] focus:ring-[#C87960]"
+                    />
+                    <span className="text-[11px] font-semibold truncate">Lock Architecture</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Additional Custom Prompt Input */}
+              <div className="pt-1">
+                <input
+                  type="text"
+                  placeholder="Optional staging instructions (e.g., 'Place king platform bed, oak nightstands, and linen drapes')"
+                  value={additionalInstructions}
+                  onChange={(e) => setAdditionalInstructions(e.target.value)}
+                  className="w-full rounded-xl border border-[#DCCBB5] bg-white px-3 py-1.5 text-xs text-[#172B3A] placeholder:text-[#252B2E]/50 focus:border-[#C87960] focus:outline-none"
+                />
               </div>
             </div>
 
@@ -1020,7 +1041,7 @@ export const VirtualStagingPage: React.FC = () => {
                   {activePhoto?.stagedUrl && (
                     <a
                       href={activePhoto.stagedUrl}
-                      download={`staged-${activePhoto.name}.jpg`}
+                      download={`staged-${activePhoto.name}.png`}
                       className="inline-flex items-center gap-1 rounded-lg border border-[#DCCBB5] bg-white px-2.5 py-1 text-xs font-semibold text-[#172B3A] hover:border-[#C87960] transition"
                     >
                       <Download className="h-3 w-3" />
@@ -1123,7 +1144,7 @@ export const VirtualStagingPage: React.FC = () => {
                           Ready for Virtual Staging
                         </h4>
                         <p className="mt-1 text-xs text-[#252B2E]/70 leading-relaxed">
-                          This vacant {activePhoto.roomType} space is ready. Select your desired architectural style and click the button below to stage.
+                          Detected: <strong>{activePhoto.roomType}</strong> ({activePhoto.environment || "indoor"}). Choose your desired style and click below to stage.
                         </p>
                         <button
                           type="button"
@@ -1147,7 +1168,7 @@ export const VirtualStagingPage: React.FC = () => {
                       No Room Photos Uploaded Yet
                     </h3>
                     <p className="mt-1.5 max-w-md text-xs text-[#252B2E]/70 leading-relaxed">
-                      Upload your room photos using the upload panel on the left (or click below) to detect room types, furniture zones, and stage vacant spaces.
+                      Upload your room photos using the panel on the left to detect room types and virtually stage any space.
                     </p>
                     <button
                       type="button"
@@ -1155,7 +1176,7 @@ export const VirtualStagingPage: React.FC = () => {
                       className="btn-primary mt-4 px-5 py-2 text-xs font-semibold"
                     >
                       <UploadCloud className="h-4 w-4" />
-                      <span>Upload Vacant Room Photos</span>
+                      <span>Upload Vacant Space Photos</span>
                     </button>
                   </div>
                 )}
@@ -1166,14 +1187,14 @@ export const VirtualStagingPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-[#9BAE9A]" />
                   <span>
-                    <strong>Strict Layout-Lock:</strong> Camera perspective, window openings, and wall boundaries are 100% mathematically preserved.
+                    <strong>Strict Layout-Lock:</strong> Camera perspective, window openings, wall boundaries, and floor boundaries are 100% mathematically preserved.
                   </span>
                 </div>
                 <span className="font-semibold text-[#C87960]">MLS Real Estate Certified</span>
               </div>
             </div>
 
-            {/* Staging Inventory & Furniture Bill of Materials */}
+            {/* Staging Inventory & Furniture Specifications */}
             {activePhoto?.inventory && activePhoto.inventory.length > 0 && (
               <div className="editorial-card p-5 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1185,7 +1206,7 @@ export const VirtualStagingPage: React.FC = () => {
                       </h4>
                     </div>
                     <p className="text-xs text-[#252B2E]/70">
-                      Curated furnishings placed in this {activePhoto.roomType} ({activePhoto.style})
+                      Curated furnishings for this {activePhoto.roomType} ({activePhoto.style})
                     </p>
                   </div>
 
@@ -1252,7 +1273,7 @@ export const VirtualStagingPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-editorial text-base font-bold text-[#172B3A]">AI Engine Configuration</h3>
-                  <p className="text-[11px] text-[#252B2E]/70">Connect Live AI for on-the-fly photo transformations</p>
+                  <p className="text-[11px] text-[#252B2E]/70">Connect Google Gemini for Universal Staging</p>
                 </div>
               </div>
               <button
@@ -1271,11 +1292,10 @@ export const VirtualStagingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setCustomProvider("gemini")}
-                    className={`rounded-xl border p-2.5 text-left transition ${
-                      customProvider === "gemini"
-                        ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
-                        : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
-                    }`}
+                    className={`rounded-xl border p-2.5 text-left transition ${customProvider === "gemini"
+                      ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
+                      : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
+                      }`}
                   >
                     <div className="text-xs font-bold">Google Gemini</div>
                     <div className="text-[10px] text-emerald-700 font-semibold">Free Tier (15 RPM)</div>
@@ -1283,11 +1303,10 @@ export const VirtualStagingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setCustomProvider("openai")}
-                    className={`rounded-xl border p-2.5 text-left transition ${
-                      customProvider === "openai"
-                        ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
-                        : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
-                    }`}
+                    className={`rounded-xl border p-2.5 text-left transition ${customProvider === "openai"
+                      ? "border-[#C87960] bg-[#C87960]/10 text-[#172B3A] font-bold"
+                      : "border-[#DCCBB5] bg-[#F7F4ED] text-[#252B2E]/70"
+                      }`}
                   >
                     <div className="text-xs font-bold">OpenAI</div>
                     <div className="text-[10px] text-[#252B2E]/60">DALL-E 3 & GPT-4o</div>
@@ -1297,7 +1316,7 @@ export const VirtualStagingPage: React.FC = () => {
 
               <div>
                 <label className="block font-semibold text-[#172B3A] mb-1">
-                  {customProvider === "gemini" ? "Gemini API Key" : "OpenAI API Key"}
+                  {customProvider === "gemini" ? "Google Gemini API Key" : "OpenAI API Key"}
                 </label>
                 <input
                   type="password"
@@ -1352,15 +1371,7 @@ export const VirtualStagingPage: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  localStorage.setItem("formaspace_custom_api_key", customApiKey.trim());
-                  localStorage.setItem("formaspace_custom_provider", customProvider);
-                  setKeySavedToast(true);
-                  setTimeout(() => {
-                    setKeySavedToast(false);
-                    setShowApiModal(false);
-                  }, 900);
-                }}
+                onClick={() => handleSaveApiKey()}
                 className="btn-primary py-1.5 px-4 text-xs font-bold shadow-sm"
               >
                 Save Settings

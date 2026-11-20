@@ -2,8 +2,11 @@ import base64
 import io
 import json
 import math
+import os
+from pathlib import Path
 import uuid
 from typing import Any, Optional
+from fastapi import HTTPException
 import httpx
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
@@ -346,7 +349,7 @@ def _apply_demo_pil_transform(
                 ],
             }
 
-        # Intelligent space matching based on explicit context and filename
+        # Space matching based on category and room type
         check_str = f"{src_name} {room_lower}"
         matched_template = None
 
@@ -360,20 +363,10 @@ def _apply_demo_pil_transform(
             matched_template = "/images/kinkead-realestate1-staged.jpg"
         elif "dining" in check_str or "dine" in check_str:
             matched_template = "/images/kinkead-dining-staged.jpg"
-        elif "16" in check_str:
+        elif "kinkead-living" in check_str or "living" in check_str or "lounge" in check_str:
             matched_template = "/images/kinkead-realestate16-staged.jpg"
-        elif "17" in check_str:
-            matched_template = "/images/kinkead-living2-staged.jpg"
-        elif "11" in check_str or "12" in check_str:
-            matched_template = "/images/kinkead-realestate11-staged.jpg"
-        elif "kinkead-living" in check_str:
-            matched_template = "/images/kinkead-living-staged.jpg"
-        elif "kinkead-bed1" in check_str or "bedroom" in check_str or "bed" in check_str:
-            matched_template = "/images/kinkead-bed1-staged.jpg"
-        elif "kinkead-dining" in check_str or "dining" in check_str:
-            matched_template = "/images/kinkead-dining-staged.jpg"
-        elif "kitchen" in check_str:
-            matched_template = "/images/kitchen-renovated-luxury.jpg"
+        elif "lobby" in check_str or "foyer" in check_str or "hall" in check_str:
+            matched_template = "/images/kinkead-realestate16-staged.jpg"
 
         if not matched_template:
             for r_key, t_list in room_templates_map.items():
@@ -608,51 +601,106 @@ async def _openai_image_edit(
 async def _gemini_image_edit(
     src_image_url: str,
     prompt: str,
-    variations_count: int,
+    variations_count: int = 1,
     mask_data_url: Optional[str] = None,
     inspiration_image_url: Optional[str] = None,
+    custom_api_key: Optional[str] = None,
 ) -> list[str]:
+    api_key = (
+        custom_api_key.strip()
+        if custom_api_key and custom_api_key.strip()
+        else (settings.AI_API_KEY if settings.AI_PROVIDER == "gemini" else "")
+        or os.getenv("GEMINI_API_KEY", "")
+    )
+    if not api_key:
+        raise ValueError("Google Gemini API Key is required for live image generation. Please configure it in .env or the Virtual Staging settings.")
+
     local_src = resolve_local_image_path(src_image_url)
-    b64_img = base64.b64encode(local_src.read_bytes()).decode("utf-8")
+    if not local_src.exists():
+        raise FileNotFoundError(f"Source image not found: {src_image_url}")
+
+    img_bytes = local_src.read_bytes()
+    b64_img = base64.b64encode(img_bytes).decode("utf-8")
     mime = "image/png" if local_src.suffix.lower() == ".png" else "image/jpeg"
-    model = settings.AI_MODEL or "gemini-2.5-flash-image"
-    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.AI_API_KEY}"
 
     extra_parts: list[dict[str, Any]] = []
     if inspiration_image_url:
         insp_path = resolve_local_image_path(inspiration_image_url)
-        insp_b64 = base64.b64encode(insp_path.read_bytes()).decode("utf-8")
-        insp_mime = "image/png" if insp_path.suffix.lower() == ".png" else "image/jpeg"
-        extra_parts.append({"text": "Inspiration reference image for color palette, furniture style, lighting, and materials:"})
-        extra_parts.append({"inline_data": {"mime_type": insp_mime, "data": insp_b64}})
+        if insp_path.exists():
+            insp_b64 = base64.b64encode(insp_path.read_bytes()).decode("utf-8")
+            insp_mime = "image/png" if insp_path.suffix.lower() == ".png" else "image/jpeg"
+            extra_parts.append({"text": "Inspiration reference image for color palette, furniture style, lighting, and materials:"})
+            extra_parts.append({"inline_data": {"mime_type": insp_mime, "data": insp_b64}})
     if mask_data_url and "," in mask_data_url:
         _, mask_b64 = mask_data_url.split(",", 1)
         extra_parts.append({"text": "Painted mask indicating the specific region to edit while keeping everything else identical:"})
         extra_parts.append({"inline_data": {"mime_type": "image/png", "data": mask_b64}})
 
     urls: list[str] = []
+    last_error = ""
+
+    # Strategy 1: Gemini 2.0 Multimodal Image Generation / Editing
+    candidate_models = ["gemini-2.0-flash-exp", "gemini-2.0-flash-preview-image-generation"]
     async with httpx.AsyncClient(timeout=120.0) as client:
-        for idx in range(variations_count):
-            parts = [
-                {"text": f"{prompt} (Architectural Variation #{idx + 1})"},
-                {"inline_data": {"mime_type": mime, "data": b64_img}},
-                *extra_parts,
-            ]
-            body = {
-                "contents": [{"parts": parts}],
-                "generationConfig": {"responseModalities": ["IMAGE"]},
-            }
-            resp = await client.post(endpoint, json=body)
-            resp.raise_for_status()
-            data = resp.json()
-            for cand in data.get("candidates", []):
-                for part in cand.get("content", {}).get("parts", []):
-                    inline = part.get("inlineData") or part.get("inline_data")
-                    if inline and inline.get("data"):
-                        raw = base64.b64decode(inline["data"])
-                        url, _ = save_image_bytes(raw, "designs", f"gemini_v{idx}.png")
-                        urls.append(url)
-                        break
+        for model in candidate_models:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            for idx in range(variations_count):
+                parts = [
+                    {"text": f"{prompt} (Architectural Virtual Staging, photorealistic, high resolution, variation #{idx + 1})"},
+                    {"inline_data": {"mime_type": mime, "data": b64_img}},
+                    *extra_parts,
+                ]
+                body = {
+                    "contents": [{"parts": parts}],
+                    "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+                }
+                try:
+                    resp = await client.post(endpoint, json=body)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        for cand in data.get("candidates", []):
+                            for part in cand.get("content", {}).get("parts", []):
+                                inline = part.get("inlineData") or part.get("inline_data")
+                                if inline and inline.get("data"):
+                                    raw = base64.b64decode(inline["data"])
+                                    filename = f"gemini_staged_{uuid.uuid4().hex[:8]}.png"
+                                    url, _ = save_image_bytes(raw, "designs", filename)
+                                    urls.append(url)
+                                    break
+                    else:
+                        last_error = f"{model} returned HTTP {resp.status_code}: {resp.text[:200]}"
+                except Exception as err:
+                    last_error = str(err)
+            if urls:
+                return urls
+
+        # Strategy 2: Google Imagen 3 (imagen-3.0-generate-002:predict)
+        try:
+            imagen_endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={api_key}"
+            for idx in range(variations_count):
+                body = {
+                    "instances": [{"prompt": f"Professional architectural photograph: {prompt}"}],
+                    "parameters": {"sampleCount": 1, "aspectRatio": "4:3", "outputMimeType": "image/jpeg"},
+                }
+                resp = await client.post(imagen_endpoint, json=body)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    for pred in data.get("predictions", []):
+                        raw_b64 = pred.get("bytesBase64Encoded")
+                        if raw_b64:
+                            raw = base64.b64decode(raw_b64)
+                            filename = f"imagen_staged_{uuid.uuid4().hex[:8]}.jpg"
+                            url, _ = save_image_bytes(raw, "designs", filename)
+                            urls.append(url)
+                else:
+                    last_error = f"Imagen 3 returned HTTP {resp.status_code}: {resp.text[:200]}"
+            if urls:
+                return urls
+        except Exception as err:
+            last_error = str(err)
+
+    if not urls:
+        raise RuntimeError(f"Google Gemini image generation failed. Details: {last_error}")
     return urls
 
 
@@ -757,18 +805,28 @@ async def generate_design_images(
         inspiration_analysis=inspiration_analysis,
     )
 
-    if settings.is_live_ai_configured:
+    custom_key = str(extra_settings.get("custom_api_key", "")).strip()
+    custom_prov = str(extra_settings.get("custom_provider", "")).strip().lower()
+
+    active_provider = custom_prov or settings.AI_PROVIDER
+    active_key = custom_key or (settings.AI_API_KEY if settings.AI_PROVIDER == active_provider else "")
+    if not active_key and active_provider == "gemini":
+        active_key = os.getenv("GEMINI_API_KEY", "")
+
+    is_live = bool(active_key and active_provider in {"openai", "gemini", "stability", "fal"})
+
+    if is_live:
         try:
             urls: list[str] = []
-            if settings.AI_PROVIDER == "openai":
+            if active_provider == "openai":
                 urls = await _openai_image_edit(original_image_url, prompt_built, variations_count, mask_data_url)
-            elif settings.AI_PROVIDER == "gemini":
+            elif active_provider == "gemini":
                 urls = await _gemini_image_edit(
-                    original_image_url, prompt_built, variations_count, mask_data_url, inspiration_image_url
+                    original_image_url, prompt_built, variations_count, mask_data_url, inspiration_image_url, custom_api_key=active_key
                 )
-            elif settings.AI_PROVIDER == "stability":
+            elif active_provider == "stability":
                 urls = await _stability_image_edit(original_image_url, prompt_built, variations_count, mask_data_url)
-            elif settings.AI_PROVIDER == "fal":
+            elif active_provider == "fal":
                 urls = await _fal_image_edit(original_image_url, prompt_built, variations_count)
 
             if urls:
@@ -776,11 +834,16 @@ async def generate_design_images(
                     "generated_image_url": urls[0],
                     "variations": urls,
                     "is_demo_mode": False,
-                    "provider": f"{settings.AI_PROVIDER}:{settings.AI_MODEL}",
+                    "provider": f"{active_provider}:{settings.AI_MODEL}",
                     "prompt_used": prompt_built,
                     "inspiration_analysis": inspiration_analysis,
                 }
         except Exception as exc:
+            if feature_type == "virtual_staging":
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Virtual Staging AI generation failed ({active_provider}): {str(exc)}. Please check your API key."
+                )
             fallback_urls = []
             for idx in range(variations_count):
                 u, _ = _apply_demo_pil_transform(
@@ -802,8 +865,14 @@ async def generate_design_images(
                 "provider": "demo_fallback",
                 "prompt_used": prompt_built,
                 "inspiration_analysis": inspiration_analysis,
-                "warning": None,
+                "warning": str(exc),
             }
+
+    if feature_type == "virtual_staging":
+        raise HTTPException(
+            status_code=400,
+            detail="Google Gemini API Key is required for live AI virtual staging. Please enter your Gemini API key in the top bar to stage this photo."
+        )
 
     demo_urls = []
     for idx in range(variations_count):
@@ -1360,7 +1429,7 @@ async def detect_architectural_objects_live(image_url: str, room_type: str) -> l
                 text = resp.json()["choices"][0]["message"]["content"]
             else:
                 resp = await client.post(
-                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={settings.AI_API_KEY}",
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.AI_API_KEY}",
                     json={
                         "contents": [
                             {
@@ -1383,6 +1452,296 @@ async def detect_architectural_objects_live(image_url: str, room_type: str) -> l
         pass
 
     return detect_architectural_objects(image_url, room_type)
+
+
+SPACE_INVENTORIES: dict[str, list[dict[str, Any]]] = {
+    "Bathroom": [
+        {"name": "Floating Fluted Oak & Stone Basin Vanity", "category": "Vanity & Basin", "material": "Fluted Oak & Honed Terrazzo", "estimatedPrice": 1850, "dimensions": "120cm W x 50cm D"},
+        {"name": "Backlit Circular LED Ambient Mirror", "category": "Lighting & Fixtures", "material": "Brushed Brass & Anti-Fog Glass", "estimatedPrice": 420, "dimensions": "80cm Diameter"},
+        {"name": "Frameless Walk-In Glass Rain Shower", "category": "Shower Enclosure", "material": "10mm Toughened Glass & Brass Channel", "estimatedPrice": 890, "dimensions": "100cm x 200cm"},
+        {"name": "Minimalist Brushed Brass Mixer Taps", "category": "Tapware", "material": "Electroplated Solid Brass", "estimatedPrice": 340, "dimensions": "Wall-Mounted Basin Mixer"},
+        {"name": "Organic Waffle Spa Towel Collection", "category": "Textile", "material": "100% Organic Turkish Cotton", "estimatedPrice": 160, "dimensions": "6-Piece Set"},
+    ],
+    "Bedroom": [
+        {"name": "Low White Oak Platform Bed Frame", "category": "Bed", "material": "FSC European White Oak", "estimatedPrice": 2200, "dimensions": "Queen (160cm x 210cm)"},
+        {"name": "Washed French Linen Bedding Set", "category": "Textile", "material": "100% Organic Flax Linen", "estimatedPrice": 480, "dimensions": "Duvet + 4 Shams"},
+        {"name": "Twin Fluted Oak Bedside Tables", "category": "Storage", "material": "Solid Oak & Soft-Close Drawers", "estimatedPrice": 780, "dimensions": "50cm W x 45cm H"},
+        {"name": "Ceramic Minimalist Table Lamps (Pair)", "category": "Lighting", "material": "Cast Ceramic & Linen Shades", "estimatedPrice": 340, "dimensions": "42cm H"},
+        {"name": "Plush Oatmeal Wool Underbed Rug", "category": "Textile", "material": "Hand-Knotted Wool", "estimatedPrice": 760, "dimensions": "280cm x 200cm"},
+    ],
+    "Living Room": [
+        {"name": "Cognac Atelier Leather Lounge", "category": "Seating", "material": "Semi-Aniline Top Grain Leather", "estimatedPrice": 2850, "dimensions": "240cm W x 95cm D"},
+        {"name": "Pietra Honed Travertine Plinth", "category": "Table", "material": "Natural Honed Travertine", "estimatedPrice": 1250, "dimensions": "120cm W x 60cm D"},
+        {"name": "Textured Bouclé Wool Area Rug", "category": "Textile", "material": "100% New Zealand Wool", "estimatedPrice": 890, "dimensions": "300cm x 240cm"},
+        {"name": "Architectural Arched Brass Lamp", "category": "Lighting", "material": "Brushed Solid Brass", "estimatedPrice": 420, "dimensions": "190cm H"},
+        {"name": "Minimalist Framed Canvas Art", "category": "Decor", "material": "Textured Acrylic & Oak Frame", "estimatedPrice": 380, "dimensions": "120cm x 90cm"},
+        {"name": "Potted Ficus Lyrata Tree & Planter", "category": "Botanical", "material": "Glazed Ceramic & Organic Soil", "estimatedPrice": 220, "dimensions": "160cm H"},
+    ],
+    "Kitchen": [
+        {"name": "Bespoke Calacatta Marble Kitchen Island", "category": "Kitchen", "material": "Italian Calacatta Marble & Fluted Oak", "estimatedPrice": 5800, "dimensions": "240cm W x 95cm D"},
+        {"name": "Custom Floor-to-Ceiling Oak Joinery", "category": "Cabinetry", "material": "Natural Tasmanian Oak with Soft-Close Hardware", "estimatedPrice": 7200, "dimensions": "Full Kitchen Run"},
+        {"name": "Integrated Miele Induction & Oven Suite", "category": "Appliance", "material": "Matte Black Ceramic Glass & Stainless Steel", "estimatedPrice": 4600, "dimensions": "90cm Induction + 60cm Oven"},
+        {"name": "Brodware Brushed Brass Kitchen Mixer", "category": "Fixtures", "material": "PVD Brushed Brass & Ceramic Disc", "estimatedPrice": 780, "dimensions": "42cm Height"},
+        {"name": "Nordic Minimalist Oak Counter Stools (Trio)", "category": "Seating", "material": "Solid American Oak & Aniline Cognac Leather", "estimatedPrice": 1150, "dimensions": "65cm Seat Height"},
+    ],
+    "Dining Room": [
+        {"name": "Solid White Oak 6-Seater Dining Table", "category": "Dining Table", "material": "Solid European Oak", "estimatedPrice": 2100, "dimensions": "200cm L x 95cm W"},
+        {"name": "Sculptural Cream Dining Chairs (Set of 6)", "category": "Seating", "material": "Bouclé Textile & Oak Legs", "estimatedPrice": 1560, "dimensions": "6 Chairs"},
+        {"name": "Fluted Opal Glass Linear Chandelier", "category": "Lighting", "material": "Brass & Matte Opal Glass", "estimatedPrice": 650, "dimensions": "110cm Length"},
+        {"name": "Tailored Sheer Linen Window Drapes", "category": "Textile", "material": "Belgian Sheer Linen", "estimatedPrice": 420, "dimensions": "Floor-to-Ceiling"},
+    ],
+    "Office": [
+        {"name": "Executive Minimalist White Oak Desk", "category": "Workspace", "material": "Solid Oak & Cable Conduit", "estimatedPrice": 1650, "dimensions": "160cm W x 80cm D"},
+        {"name": "Ergonomic Bouclé Executive Swivel Chair", "category": "Seating", "material": "Italian Mechanism & Bouclé", "estimatedPrice": 890, "dimensions": "Adjustable Height"},
+        {"name": "Architectural Open Bookcase", "category": "Storage", "material": "Black Steel & Oak Shelves", "estimatedPrice": 1200, "dimensions": "180cm H x 100cm W"},
+        {"name": "Solid Brass Task Luminaire", "category": "Lighting", "material": "Brushed Brass", "estimatedPrice": 280, "dimensions": "Desk Lamp"},
+    ],
+    "Study Room": [
+        {"name": "Executive Minimalist White Oak Desk", "category": "Workspace", "material": "Solid Oak & Cable Conduit", "estimatedPrice": 1650, "dimensions": "160cm W x 80cm D"},
+        {"name": "Ergonomic Bouclé Executive Swivel Chair", "category": "Seating", "material": "Italian Mechanism & Bouclé", "estimatedPrice": 890, "dimensions": "Adjustable Height"},
+        {"name": "Architectural Open Bookcase", "category": "Storage", "material": "Black Steel & Oak Shelves", "estimatedPrice": 1200, "dimensions": "180cm H x 100cm W"},
+    ],
+    "Lobby": [
+        {"name": "Sculptural Fluted Oak Console Table", "category": "Console Table", "material": "Solid FSC White Oak", "estimatedPrice": 1450, "dimensions": "160cm W x 40cm D"},
+        {"name": "Oversized Minimalist Arch Wall Mirror", "category": "Decor & Mirror", "material": "Brushed Brass Edge & Float Glass", "estimatedPrice": 620, "dimensions": "180cm H x 80cm W"},
+        {"name": "Bouclé Upholstered Entry Bench", "category": "Seating", "material": "Textured Cream Bouclé & Oak Base", "estimatedPrice": 790, "dimensions": "120cm W x 45cm D"},
+        {"name": "Hand-Knotted Textured Hallway Runner", "category": "Textile", "material": "100% Wool", "estimatedPrice": 540, "dimensions": "350cm x 90cm"},
+    ],
+    "Reception Area": [
+        {"name": "Curved Travertine Reception Counter", "category": "Reception", "material": "Natural Roman Travertine", "estimatedPrice": 3800, "dimensions": "220cm W x 110cm H"},
+        {"name": "Designer Velvet Waiting Lounge Chairs (Pair)", "category": "Seating", "material": "Plush Velvet & Brushed Brass", "estimatedPrice": 1600, "dimensions": "85cm W x 80cm D"},
+        {"name": "Architectural Column Planter & Ficus", "category": "Botanical", "material": "Matte Charcoal Ceramic", "estimatedPrice": 380, "dimensions": "180cm H"},
+    ],
+    "Hallway": [
+        {"name": "Slim Minimalist Floating Console", "category": "Storage", "material": "Solid White Oak", "estimatedPrice": 650, "dimensions": "120cm W x 25cm D"},
+        {"name": "Architectural Linear LED Sconce Lights (Trio)", "category": "Lighting", "material": "Solid Brushed Brass", "estimatedPrice": 480, "dimensions": "60cm H"},
+        {"name": "Textured Jute & Wool Hall Runner", "category": "Textile", "material": "Natural Fibers", "estimatedPrice": 320, "dimensions": "400cm x 80cm"},
+    ],
+    "Corridor": [
+        {"name": "Slim Minimalist Floating Console", "category": "Storage", "material": "Solid White Oak", "estimatedPrice": 650, "dimensions": "120cm W x 25cm D"},
+        {"name": "Architectural Linear LED Sconce Lights", "category": "Lighting", "material": "Solid Brushed Brass", "estimatedPrice": 480, "dimensions": "60cm H"},
+    ],
+    "Backyard": [
+        {"name": "Grade-A Teak Outdoor Lounge & Deep Seating Suite", "category": "Outdoor Living", "material": "Solid Teak & Charcoal Sunbrella Fabric", "estimatedPrice": 4200, "dimensions": "4-Piece Modular Suite"},
+        {"name": "Honed Roman Travertine Paved Terrace", "category": "Hardscape", "material": "Natural Honed Travertine Slabs", "estimatedPrice": 6500, "dimensions": "38m² Area"},
+        {"name": "Pietra Outdoor Travertine Plinth", "category": "Table", "material": "Sealed Weatherproof Travertine", "estimatedPrice": 1100, "dimensions": "120cm W x 60cm D"},
+        {"name": "Scandinavian Teak Outdoor Dining & Armchairs", "category": "Dining", "material": "FSC Certified Teak & Powdercoated Aluminium", "estimatedPrice": 2800, "dimensions": "200cm Table + 6 Chairs"},
+        {"name": "Architectural Low-Voltage Path & Festoon Lights", "category": "Lighting", "material": "Solid Brass & Warm LED", "estimatedPrice": 850, "dimensions": "Full Garden Zone"},
+    ],
+    "Garden": [
+        {"name": "Grade-A Teak Outdoor Lounge & Deep Seating Suite", "category": "Outdoor Living", "material": "Solid Teak & Charcoal Sunbrella Fabric", "estimatedPrice": 4200, "dimensions": "4-Piece Modular Suite"},
+        {"name": "Pietra Outdoor Travertine Plinth", "category": "Table", "material": "Sealed Weatherproof Travertine", "estimatedPrice": 1100, "dimensions": "120cm W x 60cm D"},
+        {"name": "Sculptural Concrete Planters with Olive Trees", "category": "Botanical", "material": "Fiber Reinforced Concrete", "estimatedPrice": 720, "dimensions": "80cm H"},
+        {"name": "Architectural Garden Spotlights & Up-lights", "category": "Lighting", "material": "Solid Brass & 2700K Warm LED", "estimatedPrice": 680, "dimensions": "Set of 6"},
+    ],
+    "Front Yard": [
+        {"name": "Architectural Hardscape & Paver Driveway Entry", "category": "Hardscape", "material": "Permeable Stone Pavers", "estimatedPrice": 4800, "dimensions": "Entry Zone"},
+        {"name": "Architectural Modern Mailbox & House Number Plinth", "category": "Fixtures", "material": "Corten Steel & Matte Black Aluminium", "estimatedPrice": 520, "dimensions": "90cm H"},
+        {"name": "Manicured Low-Maintenance Planting Border", "category": "Landscaping", "material": "Boxwood, Ornamental Grasses & Mulch", "estimatedPrice": 950, "dimensions": "Driveway Perimeter"},
+    ],
+    "Patio": [
+        {"name": "Outdoor Teak Lounge Sofa & Armchairs", "category": "Outdoor Living", "material": "Grade-A Teak & Sunbrella Fabric", "estimatedPrice": 3200, "dimensions": "3-Piece Suite"},
+        {"name": "Travertine Low Outdoor Coffee Table", "category": "Outdoor Table", "material": "Weather-Sealed Travertine", "estimatedPrice": 950, "dimensions": "90cm Diameter"},
+        {"name": "Sculptural Concrete Olive Planters (Pair)", "category": "Landscape", "material": "Reinforced Fiber Concrete", "estimatedPrice": 580, "dimensions": "70cm H"},
+    ],
+    "Balcony": [
+        {"name": "Compact Bistro Teak Table & 2 Armchairs", "category": "Outdoor Dining", "material": "Solid Weathered Teak & Rope Weave", "estimatedPrice": 1200, "dimensions": "75cm Diameter Table"},
+        {"name": "Slimline Railing Planter Boxes (Trio)", "category": "Botanical", "material": "Powdercoated Aluminium", "estimatedPrice": 340, "dimensions": "80cm Length"},
+        {"name": "Weather-Resistant Outdoor Floor Lanterns", "category": "Lighting", "material": "Teak Frame & Solar LED", "estimatedPrice": 220, "dimensions": "45cm H"},
+    ],
+    "Terrace": [
+        {"name": "Outdoor Teak Lounge Sofa & Armchairs", "category": "Outdoor Living", "material": "Grade-A Teak & Sunbrella Fabric", "estimatedPrice": 3200, "dimensions": "3-Piece Suite"},
+        {"name": "Travertine Low Outdoor Coffee Table", "category": "Outdoor Table", "material": "Weather-Sealed Travertine", "estimatedPrice": 950, "dimensions": "90cm Diameter"},
+    ],
+    "Rooftop": [
+        {"name": "All-Weather Modular Sectional Sofa", "category": "Outdoor Living", "material": "Quick-Dry Foam & Sunbrella Fabric", "estimatedPrice": 4600, "dimensions": "5-Piece Modular Suite"},
+        {"name": "Concrete Fire Pit Table", "category": "Hardscape", "material": "Glass-Fiber Concrete & Natural Lava Rocks", "estimatedPrice": 1850, "dimensions": "120cm x 80cm"},
+    ],
+    "Swimming Pool Area": [
+        {"name": "Luxury Teak Pool Sun Loungers (Pair)", "category": "Poolside", "material": "Solid Teak & Quick-Dry Cushion", "estimatedPrice": 1900, "dimensions": "200cm L x 65cm W"},
+        {"name": "Cantilever Architectural Shade Umbrella", "category": "Shade", "material": "Anodized Aluminium & Sunbrella Fabric", "estimatedPrice": 1400, "dimensions": "300cm Diameter"},
+    ],
+    "Outdoor Dining Area": [
+        {"name": "Solid Teak 8-Seater Outdoor Dining Table", "category": "Dining Table", "material": "Grade-A Weatherproof Teak", "estimatedPrice": 3100, "dimensions": "240cm L x 100cm W"},
+        {"name": "Woven Rope Outdoor Dining Chairs (Set of 8)", "category": "Seating", "material": "All-Weather Rope & Aluminium Legs", "estimatedPrice": 2400, "dimensions": "8 Chairs"},
+    ],
+    "Conference Room": [
+        {"name": "Executive Fluted White Oak Boardroom Table", "category": "Conference", "material": "Solid Oak & Integrated Power Modules", "estimatedPrice": 4200, "dimensions": "320cm L x 120cm W"},
+        {"name": "Ergonomic High-Back Leather Boardroom Chairs (Set of 8)", "category": "Seating", "material": "Aniline Leather & Chrome Base", "estimatedPrice": 3200, "dimensions": "8 Chairs"},
+    ],
+    "Hotel Room": [
+        {"name": "Bespoke Upholstered King Headboard & Base", "category": "Bed", "material": "Textured Velvet & Solid Timber", "estimatedPrice": 2600, "dimensions": "King Bed"},
+        {"name": "Integrated Marble Bedside Consoles", "category": "Storage", "material": "Arabescato Marble & Brass Trim", "estimatedPrice": 980, "dimensions": "Pair"},
+    ],
+    "Studio Apartment": [
+        {"name": "Multi-Functional Modular Sofa Bed", "category": "Furniture", "material": "Cream Bouclé & Easy-Fold Mechanism", "estimatedPrice": 2100, "dimensions": "Queen Convertible"},
+        {"name": "Compact Round White Oak Dining Table & Chairs", "category": "Dining", "material": "Solid Oak & 2 Chairs", "estimatedPrice": 950, "dimensions": "90cm Diameter"},
+    ],
+    "Empty Commercial Space": [
+        {"name": "Modular Reception Desk & Consultation Island", "category": "Commercial", "material": "Terrazzo & Fluted Timber", "estimatedPrice": 4800, "dimensions": "300cm W"},
+        {"name": "Architectural Waiting Area Armchairs", "category": "Seating", "material": "Commercial Grade Wool & Steel", "estimatedPrice": 1800, "dimensions": "Set of 4"},
+    ],
+}
+
+
+def _local_cv_space_analysis(local_src: Path) -> dict[str, Any]:
+    filename = local_src.name.lower()
+    img = Image.open(local_src).convert("RGB")
+    w, h = img.size
+
+    thumb = img.resize((100, 100))
+    pixels = list(thumb.getdata())
+    total = len(pixels)
+
+    top_half = pixels[:4500]
+
+    # Sky detection in upper quadrant
+    sky_count = sum(1 for (r, g, b) in top_half if b > 130 and b > r + 10 and g > 100)
+    sky_ratio = sky_count / len(top_half)
+
+    # Greenery / grass / trees detection
+    green_count = sum(1 for (r, g, b) in pixels if g > r + 10 and g > b)
+    green_ratio = green_count / total
+
+    # Sanitary tiles / porcelain / white tile detection
+    white_bright = sum(1 for (r, g, b) in pixels if r > 190 and g > 190 and b > 190 and max(r, g, b) - min(r, g, b) < 25)
+    white_ratio = white_bright / total
+
+    is_outdoor = sky_ratio > 0.08 or green_ratio > 0.10 or any(k in filename for k in ["yard", "garden", "patio", "driveway", "lawn", "exterior"])
+
+    space_type = "Living Room"
+    environment = "indoor"
+    confidence = 0.94
+
+    if is_outdoor:
+        environment = "outdoor"
+        if "driveway" in filename or "front" in filename:
+            space_type = "Front Yard"
+        elif "backyard" in filename or "lawn" in filename or (green_ratio > 0.12 and sky_ratio > 0.12):
+            space_type = "Backyard"
+        elif "balcony" in filename or "terrace" in filename:
+            space_type = "Balcony"
+        elif "patio" in filename or "alfresco" in filename:
+            space_type = "Patio"
+        elif "pool" in filename:
+            space_type = "Swimming Pool Area"
+        else:
+            space_type = "Garden"
+    else:
+        if white_ratio > 0.30 or any(k in filename for k in ["bath", "shower", "toilet", "washroom", "ensuite", "powder"]):
+            space_type = "Bathroom"
+        elif any(k in filename for k in ["kitchen", "cook"]):
+            space_type = "Kitchen"
+        elif any(k in filename for k in ["bed", "bedroom", "master"]):
+            space_type = "Bedroom"
+        elif any(k in filename for k in ["dine", "dining"]):
+            space_type = "Dining Room"
+        elif any(k in filename for k in ["office", "study", "work"]):
+            space_type = "Office"
+        elif any(k in filename for k in ["lobby", "entry", "foyer", "hall", "corridor"]):
+            space_type = "Lobby"
+        else:
+            space_type = "Living Room"
+
+    inventory = SPACE_INVENTORIES.get(space_type, SPACE_INVENTORIES["Living Room"])
+
+    return {
+        "space_type": space_type,
+        "environment": environment,
+        "confidence": confidence,
+        "is_vacant": True,
+        "architectural_features": {
+            "walls": "Smooth plastered perimeter walls in neutral palette" if environment == "indoor" else "Exterior boundary fencing and architectural facade",
+            "floor": "Structural flooring in prime vacant condition" if environment == "indoor" else "Natural manicured lawn and stone hardscaping",
+            "ceiling": "Standard architectural ceiling plane" if environment == "indoor" else "Open natural sky and ambient daylight",
+            "windows_doors": "Framed architectural openings preserving natural lighting",
+            "lighting": "Natural daylight illumination from primary openings"
+        },
+        "existing_furniture": [],
+        "empty_staging_zones": ["Primary central footprint", "Perimeter boundary areas"],
+        "recommended_furniture": inventory,
+        "staging_prompt": f"Virtually stage this vacant {space_type} with luxury contemporary furnishings while strictly locking room architecture.",
+        "is_live_vision": False
+    }
+
+
+async def analyze_space_live(
+    image_url: str,
+    custom_api_key: Optional[str] = None,
+    custom_provider: Optional[str] = "gemini",
+) -> dict[str, Any]:
+    api_key = (
+        custom_api_key.strip()
+        if custom_api_key and custom_api_key.strip()
+        else (settings.AI_API_KEY if settings.AI_PROVIDER == "gemini" else "")
+        or os.getenv("GEMINI_API_KEY", "")
+    )
+    local_src = resolve_local_image_path(image_url)
+    if not local_src.exists():
+        raise FileNotFoundError(f"Image not found at {image_url}")
+
+    if api_key:
+        try:
+            img_bytes = local_src.read_bytes()
+            b64_img = base64.b64encode(img_bytes).decode("utf-8")
+            mime = "image/png" if local_src.suffix.lower() == ".png" else "image/jpeg"
+
+            vision_prompt = (
+                "You are an expert architectural AI vision system. Analyze this uploaded room or property image thoroughly.\n"
+                "Determine the exact space type from standard categories or identify it accurately:\n"
+                "Indoor Spaces: Bedroom, Living Room, Kitchen, Bathroom, Dining Room, Office, Study Room, Lobby, Reception Area, Hallway, Corridor, Conference Room, Hotel Room, Studio Apartment, Empty Commercial Space\n"
+                "Outdoor Spaces: Garden, Backyard, Front Yard, Balcony, Terrace, Patio, Rooftop, Outdoor Lounge, Swimming Pool Area, Outdoor Dining Area\n\n"
+                "Return ONLY a clean JSON object with this exact structure (no markdown wrappers, no extra text):\n"
+                "{\n"
+                '  "space_type": "string",\n'
+                '  "environment": "indoor" or "outdoor",\n'
+                '  "confidence": 0.98,\n'
+                '  "is_vacant": true,\n'
+                '  "architectural_features": {\n'
+                '    "walls": "description of walls",\n'
+                '    "floor": "description of floor",\n'
+                '    "ceiling": "description of ceiling",\n'
+                '    "windows_doors": "description of windows and doors",\n'
+                '    "lighting": "description of lighting"\n'
+                '  },\n'
+                '  "existing_furniture": ["item1", "item2"],\n'
+                '  "empty_staging_zones": ["zone1", "zone2"],\n'
+                '  "recommended_furniture": [\n'
+                '    {"name": "Item Name", "category": "Category", "material": "Material", "estimatedPrice": 1200, "dimensions": "Size"}\n'
+                '  ],\n'
+                '  "staging_prompt": "Detailed virtual staging prompt locking architectural perspective"\n'
+                "}"
+            )
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                for model in ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]:
+                    try:
+                        resp = await client.post(
+                            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}",
+                            json={
+                                "contents": [
+                                    {
+                                        "parts": [
+                                            {"text": vision_prompt},
+                                            {"inline_data": {"mime_type": mime, "data": b64_img}},
+                                        ]
+                                    }
+                                ]
+                            },
+                        )
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                            clean_text = raw_text.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+                            parsed = json.loads(clean_text)
+                            parsed["is_live_vision"] = True
+                            return parsed
+                    except Exception:
+                        continue
+        except Exception as e:
+            print(f"Gemini live vision error: {e}")
+
+    return _local_cv_space_analysis(local_src)
 
 
 DEMO_FURNITURE_CATALOG: list[dict[str, Any]] = [

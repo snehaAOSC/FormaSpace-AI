@@ -74,8 +74,10 @@ class Settings:
             self.AI_MODEL = model.strip()
         elif self.AI_PROVIDER == "openai":
             self.AI_MODEL = "gpt-image-1"
+            self.AI_VISION_MODEL = "gpt-4o-mini"
         elif self.AI_PROVIDER == "gemini":
-            self.AI_MODEL = "gemini-2.5-flash-image"
+            self.AI_MODEL = "gemini-2.0-flash-exp"
+            self.AI_VISION_MODEL = "gemini-1.5-flash"
         elif self.AI_PROVIDER == "stability":
             self.AI_MODEL = "sd3.5-large"
         elif self.AI_PROVIDER == "fal":

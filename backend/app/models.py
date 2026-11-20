@@ -53,6 +53,12 @@ class DetectObjectsRequest(BaseModel):
     room_type: str = "Living Room"
 
 
+class AnalyzeSpaceRequest(BaseModel):
+    image_url: str
+    custom_api_key: Optional[str] = None
+    custom_provider: Optional[str] = "gemini"
+
+
 class SaveDesignRequest(BaseModel):
     is_saved: bool = True
     project_id: Optional[str] = None
