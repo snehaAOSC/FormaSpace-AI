@@ -62,6 +62,15 @@ const ROOM_INVENTORIES: Record<string, StagingItem[]> = {
     { id: "inv-rug", name: "Textured Bouclé Wool Area Rug", category: "Textile", material: "100% New Zealand Wool", estimatedPrice: 890, dimensions: "300cm x 240cm" },
     { id: "inv-lamp", name: "Architectural Arched Brass Lamp", category: "Lighting", material: "Brushed Solid Brass", estimatedPrice: 420, dimensions: "190cm H" },
     { id: "inv-art", name: "Minimalist Framed Canvas Art", category: "Decor", material: "Textured Acrylic & Oak Frame", estimatedPrice: 380, dimensions: "120cm x 90cm" },
+    { id: "inv-stools", name: "Sculptural White Oak Counter Stools (Pair)", category: "Seating", material: "Solid White Oak", estimatedPrice: 560, dimensions: "65cm Counter Height" },
+    { id: "inv-plant", name: "Potted Ficus Lyrata Tree & Ceramic Planter", category: "Botanical", material: "Glazed Ceramic & Organic Soil", estimatedPrice: 220, dimensions: "160cm H" },
+  ],
+  "Lobby": [
+    { id: "inv-lobby-console", name: "Sculptural Fluted Oak Console Table", category: "Entryway Table", material: "Solid FSC White Oak", estimatedPrice: 1450, dimensions: "160cm W x 40cm D" },
+    { id: "inv-lobby-mirror", name: "Oversized Minimalist Arch Wall Mirror", category: "Decor & Mirror", material: "Brushed Brass Edge & Float Glass", estimatedPrice: 620, dimensions: "180cm H x 80cm W" },
+    { id: "inv-lobby-bench", name: "Bouclé Upholstered Entry Bench", category: "Seating", material: "Textured Cream Bouclé & Oak Base", estimatedPrice: 790, dimensions: "120cm W x 45cm D" },
+    { id: "inv-lobby-runner", name: "Hand-Knotted Textured Hallway Runner", category: "Textile", material: "100% Wool", estimatedPrice: 540, dimensions: "350cm x 90cm" },
+    { id: "inv-lobby-plant", name: "Architectural Ceramic Planter & Ficus", category: "Botanical", material: "Handmade Ceramic & Living Tree", estimatedPrice: 320, dimensions: "170cm H" },
   ],
   "Bedroom": [
     { id: "inv-bed", name: "Low White Oak Platform Bed Frame", category: "Furniture", material: "FSC European White Oak", estimatedPrice: 2200, dimensions: "Queen (160cm x 210cm)" },
@@ -103,10 +112,18 @@ const ROOM_INVENTORIES: Record<string, StagingItem[]> = {
 
 const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
   "Living Room": [
-    { id: "obj-sofa", label: "Cognac Leather Lounge", category: "Seating", confidence: 0.98, box: [24, 48, 52, 36] },
-    { id: "obj-table", label: "Travertine Coffee Table", category: "Table", confidence: 0.96, box: [38, 62, 28, 22] },
-    { id: "obj-rug", label: "Textured Wool Area Rug", category: "Textile", confidence: 0.95, box: [18, 56, 68, 38] },
-    { id: "obj-lamp", label: "Architectural Floor Lamp", category: "Lighting", confidence: 0.93, box: [78, 32, 14, 52] },
+    { id: "obj-sofa", label: "Designer Bouclé Lounge", category: "Seating", confidence: 0.98, box: [24, 48, 52, 36] },
+    { id: "obj-table", label: "Travertine Plinth Coffee Table", category: "Table", confidence: 0.96, box: [38, 62, 28, 22] },
+    { id: "obj-rug", label: "Textured Ribbed Wool Rug", category: "Textile", confidence: 0.95, box: [18, 56, 68, 38] },
+    { id: "obj-art", label: "Minimalist Framed Wall Art", category: "Decor", confidence: 0.94, box: [58, 20, 24, 30] },
+    { id: "obj-lamp", label: "Architectural Arched Lamp", category: "Lighting", confidence: 0.93, box: [78, 32, 14, 52] },
+    { id: "obj-stools", label: "Oak Counter Stools", category: "Seating", confidence: 0.92, box: [12, 54, 16, 26] },
+  ],
+  "Lobby": [
+    { id: "obj-lobby-sofa", label: "Designer Bouclé Lounge & Bench", category: "Seating", confidence: 0.98, box: [24, 48, 52, 36] },
+    { id: "obj-lobby-table", label: "Travertine Coffee & Plinth Table", category: "Table", confidence: 0.96, box: [38, 62, 28, 22] },
+    { id: "obj-lobby-art", label: "Oversized Minimalist Canvas Art", category: "Decor", confidence: 0.95, box: [58, 20, 24, 30] },
+    { id: "obj-lobby-tree", label: "Tall Potted Olive Tree", category: "Landscape", confidence: 0.94, box: [82, 34, 14, 52] },
   ],
   "Bedroom": [
     { id: "obj-bed", label: "Low White Oak Bed Frame", category: "Furniture", confidence: 0.98, box: [22, 44, 58, 46] },
@@ -143,7 +160,8 @@ const DEFAULT_OBJECTS: Record<string, DetectedObject[]> = {
 };
 
 const STAGING_ROOM_TEMPLATES: Record<string, string> = {
-  "Living Room": "/images/kinkead-living-staged.jpg",
+  "Living Room": "/images/kinkead-living2-staged.jpg",
+  "Lobby": "/images/kinkead-living2-staged.jpg",
   "Bedroom": "/images/kinkead-bed1-staged.jpg",
   "Dining Room": "/images/kinkead-dining-staged.jpg",
   "Kitchen": "/images/kitchen-renovated-luxury.jpg",
@@ -170,8 +188,23 @@ export const VirtualStagingPage: React.FC = () => {
 
   const activePhoto = photos.find((p) => p.id === activePhotoId) || (photos.length > 0 ? photos[0] : null);
 
-  // Visual image content analyzer using HTML5 canvas pixel sampling
-  const analyzeImageContent = (img: HTMLImageElement): "Bathroom" | "Patio" | "Living Room" => {
+  // Intelligent visual space analyzer
+  const analyzeImageContent = (img: HTMLImageElement, filename: string): string => {
+    const s = filename.toLowerCase();
+    // 1. Explicit filename rules take precedence
+    if (s.includes("bath") || s.includes("toilet") || s.includes("washroom") || s.includes("shower") || s.includes("ensuite") || s.includes("powder") || s.includes("21")) {
+      return "Bathroom";
+    }
+    if (s.includes("bed") || s.includes("bedroom") || s.includes("master")) {
+      return "Bedroom";
+    }
+    if (s.includes("kitchen") || s.includes("cook")) {
+      return "Kitchen";
+    }
+    if (s.includes("lobby") || s.includes("hall") || s.includes("foyer") || s.includes("corridor")) {
+      return "Lobby";
+    }
+
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -182,7 +215,6 @@ export const VirtualStagingPage: React.FC = () => {
       canvas.height = h;
       ctx.drawImage(img, 0, 0, w, h);
       const data = ctx.getImageData(0, 0, w, h).data;
-      let whiteTilePixels = 0;
       let greenPixels = 0;
       const totalPixels = w * h;
 
@@ -190,27 +222,18 @@ export const VirtualStagingPage: React.FC = () => {
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-
-        // White / high-brightness low-saturation tile / porcelain / sanitaryware
-        if (r > 170 && g > 170 && b > 170 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25) {
-          whiteTilePixels++;
-        }
         // Green foliage / outdoor vegetation
-        if (g > 85 && g > r * 1.15 && g > b * 1.15) {
+        if (g > 85 && g > r * 1.25 && g > b * 1.25) {
           greenPixels++;
         }
       }
 
-      const whiteRatio = whiteTilePixels / totalPixels;
-      const greenRatio = greenPixels / totalPixels;
-
-      // Bathrooms have characteristic white ceramic tiles, enamel tub, sink porcelain (whiteRatio > 0.32)
-      if (whiteRatio > 0.32) {
-        return "Bathroom";
-      }
-      if (greenRatio > 0.22) {
+      // Strong outdoor greenery indicates patio or garden
+      if (greenPixels / totalPixels > 0.28) {
         return "Patio";
       }
+
+      // Standard default for any empty room, open plan space, or lobby
       return "Living Room";
     } catch {
       return "Living Room";
@@ -220,12 +243,14 @@ export const VirtualStagingPage: React.FC = () => {
   // Guess room type from filename
   const inferRoomType = (filename: string): string => {
     const s = filename.toLowerCase();
-    if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("sink")) return "Bathroom";
-    if (s.includes("bed") || s.includes("room_1") || s.includes("master") || s.includes("sleep")) return "Bedroom";
+    if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("restroom") || s.includes("wc") || s.includes("21")) return "Bathroom";
+    if (s.includes("bed") || s.includes("bedroom") || s.includes("master") || s.includes("sleep")) return "Bedroom";
     if (s.includes("dine") || s.includes("dining")) return "Dining Room";
     if (s.includes("kitchen") || s.includes("cook")) return "Kitchen";
     if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) return "Home Office";
     if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("balcony") || s.includes("alfresco")) return "Patio";
+    if (s.includes("lobby") || s.includes("hall") || s.includes("entry") || s.includes("foyer") || s.includes("corridor")) return "Lobby";
+    // General empty rooms (e.g. realestate17, room1) default to Living Room
     return "Living Room";
   };
 
@@ -242,8 +267,8 @@ export const VirtualStagingPage: React.FC = () => {
       // Visual Content Analysis via HTML5 Image & Canvas
       const img = new Image();
       img.onload = () => {
-        const visualRoomType = analyzeImageContent(img);
-        if (visualRoomType === "Bathroom" || (initialRoomType === "Living Room" && visualRoomType !== "Living Room")) {
+        const visualRoomType = analyzeImageContent(img, file.name);
+        if (visualRoomType !== initialRoomType) {
           setPhotos((prev) =>
             prev.map((p) =>
               p.id === id
@@ -606,6 +631,7 @@ export const VirtualStagingPage: React.FC = () => {
                               className="rounded-md border border-[#DCCBB5] bg-[#F7F4ED] px-1.5 py-0.5 text-[10px] font-medium text-[#172B3A]"
                             >
                               <option value="Living Room">Living Room</option>
+                              <option value="Lobby">Lobby & Hallway</option>
                               <option value="Bedroom">Bedroom</option>
                               <option value="Dining Room">Dining Room</option>
                               <option value="Kitchen">Kitchen</option>

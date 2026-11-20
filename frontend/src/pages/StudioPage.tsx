@@ -516,13 +516,8 @@ export const StudioPage: React.FC = () => {
                 greenPixels++;
               }
             }
-            const whiteRatio = whiteTilePixels / total;
             const greenRatio = greenPixels / total;
-            if (whiteRatio > 0.32 && (!hasExplicitKeyword || detected !== "Kitchen")) {
-              detected = "Bathroom";
-              setRoomType("Bathroom");
-              setCategory("Bathroom");
-            } else if (greenRatio > 0.22 && !hasExplicitKeyword) {
+            if (greenRatio > 0.28 && !hasExplicitKeyword) {
               detected = "Garden";
               setRoomType("Garden");
               setCategory("Garden");
