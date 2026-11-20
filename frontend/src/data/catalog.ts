@@ -78,6 +78,25 @@ export const KINKEAD_PROPERTY_SHOWCASE = {
   photoCount: 27,
   rooms: [
     {
+      id: "backyard-alfresco",
+      name: "Suburban Backyard & Alfresco (Photo 11)",
+      roomType: "Patio",
+      emptyImage: "/images/kinkead-realestate11-empty.jpg",
+      stagedImage: "/images/kinkead-realestate11-staged.jpg",
+      thumb: "/images/kinkead-realestate11-staged.jpg",
+      description: "Australian suburban backyard lawn transformed into a luxury Roman travertine terrace with teak outdoor lounge and dining suite.",
+      emptyObjects: [
+        { id: "obj-11-lawn", label: "Spacious Grass Lawn", category: "Landscape", confidence: 0.98, box: [10, 50, 80, 48] as [number, number, number, number] },
+        { id: "obj-11-house", label: "Red Brick Australian Home", category: "Architecture", confidence: 0.99, box: [60, 40, 36, 40] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-11-patio", label: "Honed Roman Travertine Terrace", category: "Hardscape", confidence: 0.99, box: [18, 54, 72, 42] as [number, number, number, number] },
+        { id: "obj-11-lounge", label: "Teak & Sunbrella Outdoor Lounge Suite", category: "Outdoor Living", confidence: 0.98, box: [28, 52, 44, 34] as [number, number, number, number] },
+        { id: "obj-11-table", label: "Travertine Low Plinth Coffee Table", category: "Outdoor Furniture", confidence: 0.96, box: [46, 68, 24, 18] as [number, number, number, number] },
+        { id: "obj-11-dining", label: "Architectural Teak 6-Seater Outdoor Dining", category: "Dining", confidence: 0.95, box: [64, 46, 26, 32] as [number, number, number, number] },
+      ],
+    },
+    {
       id: "living-garden-view",
       name: "Sunlit Garden View Lounge (Photo 16)",
       roomType: "Living Room",

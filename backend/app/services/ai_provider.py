@@ -352,6 +352,8 @@ def _apply_demo_pil_transform(
 
         if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
             matched_template = "/images/bathroom-after.jpg"
+        elif "11" in check_str or "patio" in check_str or "garden" in check_str or "yard" in check_str or "lawn" in check_str or "backyard" in check_str:
+            matched_template = "/images/kinkead-realestate11-staged.jpg"
         elif "16" in check_str:
             matched_template = "/images/kinkead-realestate16-staged.jpg"
         elif "17" in check_str:
@@ -364,8 +366,6 @@ def _apply_demo_pil_transform(
             matched_template = "/images/kinkead-dining-staged.jpg"
         elif "kitchen" in check_str:
             matched_template = "/images/kitchen-renovated-luxury.jpg"
-        elif "patio" in check_str or "garden" in check_str:
-            matched_template = "/images/garden-after.jpg"
 
         if not matched_template:
             for r_key, t_list in room_templates_map.items():
@@ -1200,6 +1200,31 @@ def detect_architectural_objects(image_url: str, room_type: str) -> list[dict[st
             {"id": "obj-stands", "label": "Twin Oak Nightstands", "category": "Storage", "confidence": 0.95, "box": [12, 54, 18, 26]},
             {"id": "obj-art", "label": "Minimalist Canvas Art", "category": "Decor", "confidence": 0.94, "box": [38, 16, 26, 22]},
             {"id": "obj-rug", "label": "Plush Wool Area Rug", "category": "Textile", "confidence": 0.92, "box": [16, 68, 68, 28]},
+        ]
+
+    if "realestate11" in img_lower or "kinkead-realestate11" in img_lower:
+        return [
+            {"id": "obj-11-patio", "label": "Honed Roman Travertine Terrace", "category": "Hardscape", "confidence": 0.99, "box": [18, 54, 72, 42]},
+            {"id": "obj-11-lounge", "label": "Teak & Sunbrella Outdoor Lounge Suite", "category": "Outdoor Living", "confidence": 0.98, "box": [28, 52, 44, 34]},
+            {"id": "obj-11-table", "label": "Travertine Low Plinth Coffee Table", "category": "Outdoor Furniture", "confidence": 0.96, "box": [46, 68, 24, 18]},
+            {"id": "obj-11-dining", "label": "Architectural Teak 6-Seater Outdoor Dining", "category": "Dining", "confidence": 0.95, "box": [64, 46, 26, 32]},
+        ]
+
+    if "realestate16" in img_lower or "kinkead-realestate16" in img_lower:
+        return [
+            {"id": "obj-16-sofa", "label": "Designer Bouclé Modular Lounge", "category": "Seating", "confidence": 0.98, "box": [56, 44, 38, 42]},
+            {"id": "obj-16-table", "label": "Pietra Travertine Plinth Coffee Table", "category": "Table", "confidence": 0.96, "box": [48, 62, 26, 22]},
+            {"id": "obj-16-rug", "label": "Textured Ribbed Wool Area Rug", "category": "Textile", "confidence": 0.97, "box": [36, 54, 56, 38]},
+            {"id": "obj-16-art", "label": "Framed Minimalist Abstract Art", "category": "Decor", "confidence": 0.95, "box": [70, 24, 22, 28]},
+            {"id": "obj-16-window", "label": "Garden Panorama Window Opening", "category": "Architecture", "confidence": 0.99, "box": [38, 36, 18, 36]},
+        ]
+
+    if "realestate17" in img_lower or "kinkead-living2" in img_lower:
+        return [
+            {"id": "obj-17-sofa", "label": "Cognac Leather Lounge", "category": "Seating", "confidence": 0.98, "box": [64, 48, 34, 38]},
+            {"id": "obj-17-table", "label": "Travertine Plinth Coffee Table", "category": "Table", "confidence": 0.96, "box": [56, 62, 24, 20]},
+            {"id": "obj-17-rug", "label": "Ribbed Wool Area Rug", "category": "Textile", "confidence": 0.95, "box": [48, 54, 48, 36]},
+            {"id": "obj-17-stools", "label": "Sculptural Oak Counter Stools", "category": "Seating", "confidence": 0.94, "box": [36, 52, 16, 24]},
         ]
 
     if "kinkead-dining-empty" in img_lower:

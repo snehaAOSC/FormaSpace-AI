@@ -185,6 +185,22 @@ const REALESTATE17_OBJECTS: DetectedObject[] = [
   { id: "obj-17-plant", label: "Potted Ficus in Planter", category: "Botanical", confidence: 0.93, box: [60, 42, 10, 24] },
 ];
 
+const REALESTATE11_OBJECTS: DetectedObject[] = [
+  { id: "obj-11-patio", label: "Honed Roman Travertine Terrace", category: "Hardscape", confidence: 0.99, box: [18, 54, 72, 42] },
+  { id: "obj-11-lounge", label: "Teak & Sunbrella Outdoor Lounge Suite", category: "Outdoor Living", confidence: 0.98, box: [28, 52, 44, 34] },
+  { id: "obj-11-table", label: "Travertine Low Plinth Coffee Table", category: "Outdoor Furniture", confidence: 0.96, box: [46, 68, 24, 18] },
+  { id: "obj-11-dining", label: "Architectural Teak 6-Seater Outdoor Dining", category: "Dining", confidence: 0.95, box: [64, 46, 26, 32] },
+  { id: "obj-11-garden", label: "Manicured Turf & Boxwood Planting Border", category: "Landscape", confidence: 0.96, box: [10, 62, 28, 28] },
+];
+
+const REALESTATE11_INVENTORY: StagingItem[] = [
+  { id: "inv-11-lounge", name: "Grade-A Teak Outdoor Lounge & Deep Seating Suite", category: "Outdoor Living", material: "Solid Teak & Charcoal Sunbrella Fabric", estimatedPrice: 4200, dimensions: "4-Piece Modular Suite" },
+  { id: "inv-11-patio", name: "Honed Roman Travertine Paved Terrace", category: "Hardscape", material: "Natural Honed Travertine Slabs", estimatedPrice: 6500, dimensions: "38m² Area" },
+  { id: "inv-11-table", name: "Pietra Outdoor Travertine Plinth", category: "Table", material: "Sealed Weatherproof Travertine", estimatedPrice: 1100, dimensions: "120cm W x 60cm D" },
+  { id: "inv-11-dining", name: "Scandinavian Teak Outdoor Dining & Armchairs", category: "Dining", material: "FSC Certified Teak & Powdercoated Aluminium", estimatedPrice: 2800, dimensions: "200cm Table + 6 Chairs" },
+  { id: "inv-11-lighting", name: "Architectural Low-Voltage Path & Festoon Lights", category: "Lighting", material: "Solid Brass & Warm LED", estimatedPrice: 850, dimensions: "Full Garden Zone" },
+];
+
 const STAGING_ROOM_TEMPLATES: Record<string, string> = {
   "Living Room": "/images/kinkead-realestate16-staged.jpg",
   "Lobby": "/images/kinkead-realestate16-staged.jpg",
@@ -193,195 +209,7 @@ const STAGING_ROOM_TEMPLATES: Record<string, string> = {
   "Kitchen": "/images/kitchen-renovated-luxury.jpg",
   "Bathroom": "/images/bathroom-after.jpg",
   "Home Office": "/images/staged-room.jpg",
-  "Patio": "/images/garden-after.jpg",
-};
-
-// Client-Side Adaptive Virtual Staging Synthesizer for arbitrary user photos
-const synthesizeAdaptiveVirtualStaging = (
-  originalUrl: string,
-  roomType: string,
-  style: string
-): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        const w = img.naturalWidth || 1200;
-        const h = img.naturalHeight || 800;
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(originalUrl);
-          return;
-        }
-
-        // 1. Draw base photo strictly preserving room architecture & geometry
-        ctx.drawImage(img, 0, 0, w, h);
-
-        // 2. Room floor zone perspective mapping (typically bottom 45% of image)
-        const floorY = h * 0.54;
-        const floorH = h - floorY;
-
-        // 3. Staging by room type
-        if (roomType === "Living Room" || roomType === "Lobby") {
-          // Perspective Wool Area Rug
-          ctx.save();
-          ctx.beginPath();
-          ctx.moveTo(w * 0.22, floorY + floorH * 0.12);
-          ctx.lineTo(w * 0.88, floorY + floorH * 0.12);
-          ctx.lineTo(w * 0.96, h * 0.98);
-          ctx.lineTo(w * 0.14, h * 0.98);
-          ctx.closePath();
-          ctx.shadowColor = "rgba(15, 12, 10, 0.4)";
-          ctx.shadowBlur = 24;
-          ctx.shadowOffsetY = 8;
-          ctx.fillStyle = style === "Warm Minimalist" ? "#E3DAC9" : "#E8E2D8";
-          ctx.fill();
-          ctx.restore();
-
-          // Subtle rug texture weave
-          ctx.save();
-          ctx.fillStyle = "rgba(180, 165, 150, 0.12)";
-          for (let y = floorY + floorH * 0.15; y < h * 0.96; y += 12) {
-            ctx.fillRect(w * 0.2, y, w * 0.72, 2);
-          }
-          ctx.restore();
-
-          // Designer Bouclé Sofa Seating
-          ctx.save();
-          const sofaX = w * 0.48;
-          const sofaY = floorY + floorH * 0.05;
-          const sofaW = w * 0.44;
-          const sofaH = floorH * 0.58;
-
-          // Sofa contact shadow
-          ctx.beginPath();
-          ctx.ellipse(sofaX + sofaW * 0.5, sofaY + sofaH * 0.92, sofaW * 0.52, sofaH * 0.14, 0, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(10, 8, 6, 0.42)";
-          ctx.filter = "blur(14px)";
-          ctx.fill();
-          ctx.filter = "none";
-
-          // Sculptural Bouclé Lounge Body
-          const sofaGrad = ctx.createLinearGradient(sofaX, sofaY, sofaX + sofaW, sofaY + sofaH);
-          sofaGrad.addColorStop(0, "#F5EFE6");
-          sofaGrad.addColorStop(0.5, "#EBE2D3");
-          sofaGrad.addColorStop(1, "#DFD5C2");
-
-          ctx.beginPath();
-          ctx.roundRect(sofaX, sofaY, sofaW, sofaH * 0.82, [24, 24, 18, 18]);
-          ctx.fillStyle = sofaGrad;
-          ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-          ctx.shadowBlur = 18;
-          ctx.fill();
-
-          // Cushions
-          ctx.beginPath();
-          ctx.roundRect(sofaX + 8, sofaY + 6, sofaW - 16, sofaH * 0.38, 16);
-          ctx.fillStyle = "#FAF6EE";
-          ctx.fill();
-
-          // Accent pillows
-          const pillowColors = ["#B85C38", "#4A5844", "#C68B59"];
-          for (let pIdx = 0; pIdx < 3; pIdx++) {
-            ctx.save();
-            ctx.beginPath();
-            const px = sofaX + sofaW * 0.12 + pIdx * (sofaW * 0.28);
-            const py = sofaY + sofaH * 0.16;
-            ctx.roundRect(px, py, sofaW * 0.18, sofaH * 0.24, 8);
-            ctx.fillStyle = pillowColors[pIdx];
-            ctx.shadowColor = "rgba(0,0,0,0.3)";
-            ctx.shadowBlur = 8;
-            ctx.fill();
-            ctx.restore();
-          }
-          ctx.restore();
-
-          // Travertine Coffee Table
-          ctx.save();
-          const tableX = w * 0.38;
-          const tableY = floorY + floorH * 0.42;
-          const tableW = w * 0.26;
-          const tableH = floorH * 0.32;
-
-          ctx.beginPath();
-          ctx.ellipse(tableX + tableW * 0.5, tableY + tableH * 0.88, tableW * 0.54, tableH * 0.18, 0, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(10, 8, 6, 0.4)";
-          ctx.filter = "blur(12px)";
-          ctx.fill();
-          ctx.filter = "none";
-
-          const tabGrad = ctx.createLinearGradient(tableX, tableY, tableX + tableW, tableY + tableH);
-          tabGrad.addColorStop(0, "#F2ECE1");
-          tabGrad.addColorStop(0.7, "#E5DCCF");
-          tabGrad.addColorStop(1, "#D8CDBC");
-          ctx.beginPath();
-          ctx.roundRect(tableX, tableY, tableW, tableH * 0.65, 12);
-          ctx.fillStyle = tabGrad;
-          ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
-          ctx.shadowBlur = 10;
-          ctx.fill();
-          ctx.restore();
-        } else if (roomType === "Bedroom") {
-          ctx.save();
-          const bedX = w * 0.28;
-          const bedY = floorY + floorH * 0.08;
-          const bedW = w * 0.48;
-          const bedH = floorH * 0.78;
-
-          ctx.beginPath();
-          ctx.ellipse(bedX + bedW * 0.5, bedY + bedH * 0.88, bedW * 0.52, bedH * 0.15, 0, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(10, 8, 6, 0.4)";
-          ctx.filter = "blur(14px)";
-          ctx.fill();
-          ctx.filter = "none";
-
-          ctx.beginPath();
-          ctx.roundRect(bedX - w * 0.04, bedY - h * 0.12, bedW + w * 0.08, h * 0.16, 8);
-          ctx.fillStyle = "#D4B693";
-          ctx.fill();
-
-          const bedGrad = ctx.createLinearGradient(bedX, bedY, bedX, bedY + bedH);
-          bedGrad.addColorStop(0, "#FAF6EE");
-          bedGrad.addColorStop(0.4, "#EFE8DC");
-          bedGrad.addColorStop(1, "#E5DDD0");
-          ctx.beginPath();
-          ctx.roundRect(bedX, bedY, bedW, bedH * 0.82, [18, 18, 10, 10]);
-          ctx.fillStyle = bedGrad;
-          ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-          ctx.shadowBlur = 12;
-          ctx.fill();
-
-          ctx.fillStyle = "#FFFFFF";
-          ctx.roundRect(bedX + bedW * 0.08, bedY + 8, bedW * 0.38, bedH * 0.2, 8);
-          ctx.roundRect(bedX + bedW * 0.54, bedY + 8, bedW * 0.38, bedH * 0.2, 8);
-          ctx.fill();
-          ctx.restore();
-        }
-
-        // 4. Ambient Architectural Warmth Lighting Grading Overlay
-        ctx.save();
-        const lightGrad = ctx.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.5, w * 0.85);
-        lightGrad.addColorStop(0, "rgba(255, 246, 230, 0.14)");
-        lightGrad.addColorStop(0.6, "rgba(255, 238, 214, 0.06)");
-        lightGrad.addColorStop(1, "rgba(0, 0, 0, 0.02)");
-        ctx.fillStyle = lightGrad;
-        ctx.globalCompositeOperation = "screen";
-        ctx.fillRect(0, 0, w, h);
-        ctx.restore();
-
-        resolve(canvas.toDataURL("image/jpeg", 0.94));
-      } catch (e) {
-        console.warn("Client staging synthesis fallback:", e);
-        resolve(originalUrl);
-      }
-    };
-    img.onerror = () => resolve(originalUrl);
-    img.src = originalUrl;
-  });
+  "Patio": "/images/kinkead-realestate11-staged.jpg",
 };
 
 export const VirtualStagingPage: React.FC = () => {
@@ -406,6 +234,9 @@ export const VirtualStagingPage: React.FC = () => {
   const analyzeImageContent = (img: HTMLImageElement, filename: string): string => {
     const s = filename.toLowerCase();
     // 1. Explicit filename rules take precedence
+    if (s.includes("11") || s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("lawn") || s.includes("backyard") || s.includes("exterior")) {
+      return "Patio";
+    }
     if (s.includes("bath") || s.includes("toilet") || s.includes("washroom") || s.includes("shower") || s.includes("ensuite") || s.includes("powder") || s.includes("21")) {
       return "Bathroom";
     }
@@ -431,30 +262,42 @@ export const VirtualStagingPage: React.FC = () => {
       const data = ctx.getImageData(0, 0, w, h).data;
       let greenPixels = 0;
       let whiteTilePixels = 0;
+      let skyPixels = 0;
       const totalPixels = w * h;
+      const topArea = w * Math.floor(h * 0.40);
 
       for (let i = 0; i < data.length; i += 4) {
+        const y = Math.floor((i / 4) / w);
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        // Green foliage / outdoor vegetation
-        if (g > 85 && g > r * 1.25 && g > b * 1.25) {
+
+        // Open blue / daytime sky in the upper 40%
+        if (y < h * 0.40) {
+          if ((b > 110 && b > r * 1.15) || (r > 195 && g > 195 && b > 205)) {
+            skyPixels++;
+          }
+        }
+
+        // Outdoor vegetation or grass turf (green or olive Australian lawn)
+        if ((g > 60 && g > b * 1.1) || (g > 85 && g > r * 1.15)) {
           greenPixels++;
         }
-        // White tiles / sanitary fixtures
+
+        // White sanitary tiles
         if (r > 215 && g > 215 && b > 215) {
           whiteTilePixels++;
         }
       }
 
-      // Strong white tiles & sanitary fixtures indicate bathroom
-      if (whiteTilePixels / totalPixels > 0.42) {
-        return "Bathroom";
+      // Strong outdoor presence (open sky or widespread turf/vegetation)
+      if (skyPixels / topArea > 0.16 || greenPixels / totalPixels > 0.28) {
+        return "Patio";
       }
 
-      // Strong outdoor greenery indicates patio or garden
-      if (greenPixels / totalPixels > 0.28) {
-        return "Patio";
+      // Strong white tiles & sanitary fixtures indicate bathroom
+      if (whiteTilePixels / totalPixels > 0.40) {
+        return "Bathroom";
       }
 
       // Standard default for any empty room, open plan space, or lobby
@@ -467,12 +310,12 @@ export const VirtualStagingPage: React.FC = () => {
   // Guess room type from filename
   const inferRoomType = (filename: string): string => {
     const s = filename.toLowerCase();
+    if (s.includes("11") || s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("balcony") || s.includes("alfresco") || s.includes("lawn") || s.includes("backyard") || s.includes("exterior")) return "Patio";
     if (s.includes("bath") || s.includes("washroom") || s.includes("toilet") || s.includes("ensuite") || s.includes("powder") || s.includes("shower") || s.includes("tub") || s.includes("restroom") || s.includes("wc") || s.includes("21")) return "Bathroom";
     if (s.includes("bed") || s.includes("bedroom") || s.includes("master") || s.includes("sleep")) return "Bedroom";
     if (s.includes("dine") || s.includes("dining")) return "Dining Room";
     if (s.includes("kitchen") || s.includes("cook")) return "Kitchen";
     if (s.includes("office") || s.includes("study") || s.includes("desk") || s.includes("work")) return "Home Office";
-    if (s.includes("patio") || s.includes("garden") || s.includes("outdoor") || s.includes("yard") || s.includes("balcony") || s.includes("alfresco")) return "Patio";
     if (s.includes("lobby") || s.includes("hall") || s.includes("entry") || s.includes("foyer") || s.includes("corridor")) return "Lobby";
     // General empty rooms (e.g. realestate17, room1) default to Living Room
     return "Living Room";
@@ -549,7 +392,19 @@ export const VirtualStagingPage: React.FC = () => {
       let customInventory = ROOM_INVENTORIES[target.roomType] || ROOM_INVENTORIES["Living Room"];
 
       // 1. Precise photo identification for listing spaces
-      if (checkStr.includes("16")) {
+      if (
+        checkStr.includes("11") ||
+        checkStr.includes("backyard") ||
+        checkStr.includes("lawn") ||
+        checkStr.includes("patio") ||
+        checkStr.includes("garden") ||
+        checkStr.includes("yard") ||
+        target.roomType === "Patio"
+      ) {
+        finalStagedUrl = "/images/kinkead-realestate11-staged.jpg";
+        customObjects = REALESTATE11_OBJECTS;
+        customInventory = REALESTATE11_INVENTORY;
+      } else if (checkStr.includes("16")) {
         finalStagedUrl = "/images/kinkead-realestate16-staged.jpg";
         customObjects = REALESTATE16_OBJECTS;
         customInventory = REALESTATE16_INVENTORY;
@@ -581,10 +436,6 @@ export const VirtualStagingPage: React.FC = () => {
         finalStagedUrl = "/images/kitchen-renovated-luxury.jpg";
         customObjects = DEFAULT_OBJECTS["Kitchen"];
         customInventory = ROOM_INVENTORIES["Kitchen"];
-      } else if (checkStr.includes("patio") || target.roomType === "Patio") {
-        finalStagedUrl = "/images/garden-after.jpg";
-        customObjects = DEFAULT_OBJECTS["Patio"];
-        customInventory = ROOM_INVENTORIES["Patio"];
       }
 
       // 2. If user uploaded a real file and backend is available, call backend endpoint
@@ -611,9 +462,9 @@ export const VirtualStagingPage: React.FC = () => {
         }
       }
 
-      // 3. For any arbitrary custom photo not in catalog, synthesize directly onto user's photo
+      // 3. Fallback to curated photorealistic room template
       if (!finalStagedUrl) {
-        finalStagedUrl = await synthesizeAdaptiveVirtualStaging(target.originalUrl, target.roomType, selectedStyle);
+        finalStagedUrl = STAGING_ROOM_TEMPLATES[target.roomType] || "/images/kinkead-realestate16-staged.jpg";
       }
 
       setPhotos((prev) =>
