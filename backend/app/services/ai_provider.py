@@ -348,23 +348,37 @@ def _apply_demo_pil_transform(
 
         # Intelligent space matching based on explicit context and filename
         check_str = f"{src_name} {room_lower}"
-        if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
-            room_lower = "bath"
-        elif "17" in check_str or "living" in check_str or "lounge" in check_str or "hall" in check_str or "lobby" in check_str:
-            room_lower = "living"
-
         matched_template = None
-        for r_key, t_list in room_templates_map.items():
-            if r_key in room_lower:
-                if r_key == "bed" and style == "Japandi":
-                    matched_template = "/images/bedroom-after-japandi.jpg"
-                else:
-                    matched_template = t_list[variation_index % len(t_list)]
-                break
 
-        # Default fallback for any empty room/lobby/lounge
-        if not matched_template:
+        if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
+            matched_template = "/images/bathroom-after.jpg"
+        elif "16" in check_str:
+            matched_template = "/images/kinkead-realestate16-staged.jpg"
+        elif "17" in check_str:
             matched_template = "/images/kinkead-living2-staged.jpg"
+        elif "kinkead-living" in check_str:
+            matched_template = "/images/kinkead-living-staged.jpg"
+        elif "kinkead-bed1" in check_str or "bedroom" in check_str or "bed" in check_str:
+            matched_template = "/images/kinkead-bed1-staged.jpg"
+        elif "kinkead-dining" in check_str or "dining" in check_str:
+            matched_template = "/images/kinkead-dining-staged.jpg"
+        elif "kitchen" in check_str:
+            matched_template = "/images/kitchen-renovated-luxury.jpg"
+        elif "patio" in check_str or "garden" in check_str:
+            matched_template = "/images/garden-after.jpg"
+
+        if not matched_template:
+            for r_key, t_list in room_templates_map.items():
+                if r_key in room_lower:
+                    if r_key == "bed" and style == "Japandi":
+                        matched_template = "/images/bedroom-after-japandi.jpg"
+                    else:
+                        matched_template = t_list[variation_index % len(t_list)]
+                    break
+
+        # Fallback for open rooms
+        if not matched_template:
+            matched_template = "/images/kinkead-realestate16-staged.jpg"
 
         if matched_template:
             t_path = resolve_local_image_path(matched_template)
@@ -833,7 +847,7 @@ def detect_objects_cv_robust(image_path: str, room_type: str = "bedroom") -> lis
         check_str = f"{image_path.lower()} {r_lower}"
         if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
             r_lower = "bath"
-        elif "17" in check_str or "living" in check_str or "lounge" in check_str or "hall" in check_str or "lobby" in check_str:
+        elif "16" in check_str or "17" in check_str or "living" in check_str or "lounge" in check_str or "hall" in check_str or "lobby" in check_str:
             r_lower = "living"
 
         is_kitchen = "kitchen" in r_lower

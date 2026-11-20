@@ -78,6 +78,44 @@ export const KINKEAD_PROPERTY_SHOWCASE = {
   photoCount: 27,
   rooms: [
     {
+      id: "living-garden-view",
+      name: "Sunlit Garden View Lounge (Photo 16)",
+      roomType: "Living Room",
+      emptyImage: "/images/kinkead-realestate16-empty.jpg",
+      stagedImage: "/images/kinkead-realestate16-staged.jpg",
+      thumb: "/images/kinkead-realestate16-staged.jpg",
+      description: "Sunlit open living space with garden panorama window virtually staged with cream bouclé modular sofa & travertine coffee plinth.",
+      emptyObjects: [
+        { id: "obj-16-win", label: "Garden Window Opening", category: "Architecture", confidence: 0.99, box: [38, 36, 18, 36] as [number, number, number, number] },
+        { id: "obj-16-fl", label: "Stone Floor Tiles", category: "Flooring", confidence: 0.97, box: [10, 56, 85, 42] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-16-sofa", label: "Designer Bouclé Modular Lounge", category: "Seating", confidence: 0.98, box: [56, 44, 38, 42] as [number, number, number, number] },
+        { id: "obj-16-table", label: "Pietra Travertine Plinth Coffee Table", category: "Table", confidence: 0.96, box: [48, 62, 26, 22] as [number, number, number, number] },
+        { id: "obj-16-rug", label: "Textured Ribbed Wool Area Rug", category: "Textile", confidence: 0.97, box: [36, 54, 56, 38] as [number, number, number, number] },
+        { id: "obj-16-art", label: "Framed Minimalist Abstract Art", category: "Decor", confidence: 0.95, box: [70, 24, 22, 28] as [number, number, number, number] },
+        { id: "obj-16-tree", label: "Potted Olive Tree", category: "Botanical", confidence: 0.94, box: [58, 40, 12, 38] as [number, number, number, number] },
+      ],
+    },
+    {
+      id: "living-kitchen-pass",
+      name: "Kitchen Pass & Living Suite (Photo 17)",
+      roomType: "Living Room",
+      emptyImage: "/images/kinkead-realestate17-empty.jpg",
+      stagedImage: "/images/kinkead-living2-staged.jpg",
+      thumb: "/images/kinkead-living2-staged.jpg",
+      description: "Vacant open-plan living with kitchen breakfast bar staged with bouclé lounge, oak counter stools, and bespoke art.",
+      emptyObjects: [
+        { id: "obj-17-bar", label: "Kitchen Breakfast Bar", category: "Architecture", confidence: 0.98, box: [36, 52, 16, 24] as [number, number, number, number] },
+      ],
+      stagedObjects: [
+        { id: "obj-17-sofa", label: "Designer Bouclé Lounge", category: "Seating", confidence: 0.98, box: [64, 48, 34, 38] as [number, number, number, number] },
+        { id: "obj-17-table", label: "Travertine Plinth Coffee Table", category: "Table", confidence: 0.96, box: [56, 62, 24, 20] as [number, number, number, number] },
+        { id: "obj-17-rug", label: "Ribbed Wool Area Rug", category: "Textile", confidence: 0.95, box: [48, 54, 48, 36] as [number, number, number, number] },
+        { id: "obj-17-stools", label: "Sculptural Oak Counter Stools", category: "Seating", confidence: 0.94, box: [36, 52, 16, 24] as [number, number, number, number] },
+      ],
+    },
+    {
       id: "living",
       name: "Main Living & Lounge",
       roomType: "Living Room",
