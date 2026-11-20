@@ -350,16 +350,22 @@ def _apply_demo_pil_transform(
         check_str = f"{src_name} {room_lower}"
         matched_template = None
 
-        if "21" in check_str or "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
+        if "bath" in check_str or "toilet" in check_str or "washroom" in check_str or "powder" in check_str:
             matched_template = "/images/bathroom-after.jpg"
-        elif "realestate1" in check_str or "kinkead-realestate1" in check_str or ("kitchen" in check_str and "11" not in check_str and "16" not in check_str and "17" not in check_str):
-            matched_template = "/images/kinkead-realestate1-staged.jpg"
-        elif "11" in check_str or "patio" in check_str or "garden" in check_str or "yard" in check_str or "lawn" in check_str or "backyard" in check_str:
+        elif "patio" in check_str or "garden" in check_str or "yard" in check_str or "lawn" in check_str or "backyard" in check_str or "driveway" in check_str or "exterior" in check_str:
             matched_template = "/images/kinkead-realestate11-staged.jpg"
+        elif "bed" in check_str or "bedroom" in check_str:
+            matched_template = "/images/kinkead-bed1-staged.jpg"
+        elif "kitchen" in check_str or "cook" in check_str:
+            matched_template = "/images/kinkead-realestate1-staged.jpg"
+        elif "dining" in check_str or "dine" in check_str:
+            matched_template = "/images/kinkead-dining-staged.jpg"
         elif "16" in check_str:
             matched_template = "/images/kinkead-realestate16-staged.jpg"
         elif "17" in check_str:
             matched_template = "/images/kinkead-living2-staged.jpg"
+        elif "11" in check_str or "12" in check_str:
+            matched_template = "/images/kinkead-realestate11-staged.jpg"
         elif "kinkead-living" in check_str:
             matched_template = "/images/kinkead-living-staged.jpg"
         elif "kinkead-bed1" in check_str or "bedroom" in check_str or "bed" in check_str:
